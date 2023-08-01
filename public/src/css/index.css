@@ -1,0 +1,464 @@
+@font-face {
+    font-family: Vazir;
+    src: url("../fonts/Vazir.eot");
+    src: url("../fonts/Vazir.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Vazir.woff2") format("woff2"),
+    url("../fonts/Vazir.woff") format("woff"),
+    url("../fonts/Vazir.ttf") format("truetype");
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: Vazir;
+    src: url("../fonts/Vazir-Bold.eot");
+    src: url("../fonts/Vazir-Bold.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Vazir-Bold.woff2") format("woff2"),
+    url("../fonts/Vazir-Bold.woff") format("woff"),
+    url("../fonts/Vazir-Bold.ttf") format("truetype");
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: Vazir;
+    src: url("../fonts/Vazir-Light.eot");
+    src: url("../fonts/Vazir-Light.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Vazir-Light.woff2") format("woff2"),
+    url("../fonts/Vazir-Light.woff") format("woff"),
+    url("../fonts/Vazir-Light.ttf") format("truetype");
+    font-weight: 300;
+}
+
+@font-face {
+    font-family: Vazir;
+    src: url("../fonts/Vazir-Medium.eot");
+    src: url("../fonts/Vazir-Medium.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Vazir-Medium.woff2") format("woff2"),
+    url("../fonts/Vazir-Medium.woff") format("woff"),
+    url("../fonts/Vazir-Medium.ttf") format("truetype");
+    font-weight: 500;
+}
+
+@font-face {
+    font-family: Vazir;
+    src: url("../fonts/Vazir-Thin.eot");
+    src: url("../fonts/Vazir-Thin.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Vazir-Thin.woff2") format("woff2"),
+    url("../fonts/Vazir-Thin.woff") format("woff"),
+    url("../fonts/Vazir-Thin.ttf") format("truetype");
+    font-weight: 100;
+}
+
+@font-face {
+    font-family: Vazir;
+    src: url("../fonts/Vazir-Black.eot");
+    src: url("../fonts/Vazir-Black.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Vazir-Black.woff2") format("woff2"),
+    url("../fonts/Vazir-Black.woff") format("woff"),
+    url("../fonts/Vazir-Black.ttf") format("truetype");
+    font-weight: 900;
+}
+
+/*---------------------------------- End of fonts ---------------------------------- */
+* {
+    direction: rtl;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    text-decoration: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+body {
+    font-family: "Vazir", sans-serif !important;
+}
+
+.baner-header {
+    background-color: rgba(0, 0, 0, 0.3);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    height: 100vh;
+}
+
+.baner-header h1 {
+    padding-top: 114px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 40px;
+}
+
+.cover-title {
+    background-color: rgba(0, 0, 0, 0.5);
+    height: 500px;
+}
+.cover-box {
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 10px;
+}
+.baner-header h2 {
+    padding-left: -19px;
+}
+
+.brands {
+    border: 1px solid rgb(36, 35, 35);
+    box-shadow: 0px 0px 10px 0 rgb(76, 74, 74);
+    padding: 10px;
+}
+
+.brands img {
+    width: 100%;
+    height: 200px;
+}
+
+.content-imag-adv {
+    margin-top: 180px;
+}
+
+.content-imag-adv h3 {
+    margin-bottom: 50px;
+    opacity: 1;
+}
+
+.content-imag-adv p {
+    text-align: justify;
+}
+
+.btn-more {
+    float: left;
+}
+
+@media screen and (max-width: 700px) {
+    .content-imag-adv {
+        margin-top: 80px;
+    }
+}
+
+.bge {
+    /*background-image: linear-gradient(to top, #9890e3 0%, #b1f4cf 100%);*/
+    /*background: url("../img/png/03.png");*/
+    background-color: #330033;
+    background-attachment: fixed;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='334' height='334' viewBox='0 0 800 800'%3E%3Cg fill='none' stroke='%23404' stroke-width='2.4'%3E%3Cpath d='M769 229L1037 260.9M927 880L731 737 520 660 309 538 40 599 295 764 126.5 879.5 40 599-197 493 102 382-31 229 126.5 79.5-69-63'/%3E%3Cpath d='M-31 229L237 261 390 382 603 493 308.5 537.5 101.5 381.5M370 905L295 764'/%3E%3Cpath d='M520 660L578 842 731 737 840 599 603 493 520 660 295 764 309 538 390 382 539 269 769 229 577.5 41.5 370 105 295 -36 126.5 79.5 237 261 102 382 40 599 -69 737 127 880'/%3E%3Cpath d='M520-140L578.5 42.5 731-63M603 493L539 269 237 261 370 105M902 382L539 269M390 382L102 382'/%3E%3Cpath d='M-222 42L126.5 79.5 370 105 539 269 577.5 41.5 927 80 769 229 902 382 603 493 731 737M295-36L577.5 41.5M578 842L295 764M40-201L127 80M102 382L-261 269'/%3E%3C/g%3E%3Cg fill='%23505'%3E%3Ccircle cx='769' cy='229' r='7'/%3E%3Ccircle cx='539' cy='269' r='7'/%3E%3Ccircle cx='603' cy='493' r='7'/%3E%3Ccircle cx='731' cy='737' r='7'/%3E%3Ccircle cx='520' cy='660' r='7'/%3E%3Ccircle cx='309' cy='538' r='7'/%3E%3Ccircle cx='295' cy='764' r='7'/%3E%3Ccircle cx='40' cy='599' r='7'/%3E%3Ccircle cx='102' cy='382' r='7'/%3E%3Ccircle cx='127' cy='80' r='7'/%3E%3Ccircle cx='370' cy='105' r='7'/%3E%3Ccircle cx='578' cy='42' r='7'/%3E%3Ccircle cx='237' cy='261' r='7'/%3E%3Ccircle cx='390' cy='382' r='7'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.bge2 {
+    background-color: #330055;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 1000'%3E%3Cg %3E%3Ccircle fill='%23330055' cx='50' cy='0' r='50'/%3E%3Cg fill='%233a015d' %3E%3Ccircle cx='0' cy='50' r='50'/%3E%3Ccircle cx='100' cy='50' r='50'/%3E%3C/g%3E%3Ccircle fill='%23410165' cx='50' cy='100' r='50'/%3E%3Cg fill='%2348026e' %3E%3Ccircle cx='0' cy='150' r='50'/%3E%3Ccircle cx='100' cy='150' r='50'/%3E%3C/g%3E%3Ccircle fill='%23500376' cx='50' cy='200' r='50'/%3E%3Cg fill='%2357047e' %3E%3Ccircle cx='0' cy='250' r='50'/%3E%3Ccircle cx='100' cy='250' r='50'/%3E%3C/g%3E%3Ccircle fill='%235f0587' cx='50' cy='300' r='50'/%3E%3Cg fill='%2367068f' %3E%3Ccircle cx='0' cy='350' r='50'/%3E%3Ccircle cx='100' cy='350' r='50'/%3E%3C/g%3E%3Ccircle fill='%236f0798' cx='50' cy='400' r='50'/%3E%3Cg fill='%237707a0' %3E%3Ccircle cx='0' cy='450' r='50'/%3E%3Ccircle cx='100' cy='450' r='50'/%3E%3C/g%3E%3Ccircle fill='%238008a9' cx='50' cy='500' r='50'/%3E%3Cg fill='%238909b1' %3E%3Ccircle cx='0' cy='550' r='50'/%3E%3Ccircle cx='100' cy='550' r='50'/%3E%3C/g%3E%3Ccircle fill='%239109ba' cx='50' cy='600' r='50'/%3E%3Cg fill='%239a09c3' %3E%3Ccircle cx='0' cy='650' r='50'/%3E%3Ccircle cx='100' cy='650' r='50'/%3E%3C/g%3E%3Ccircle fill='%23a309cb' cx='50' cy='700' r='50'/%3E%3Cg fill='%23ad09d4' %3E%3Ccircle cx='0' cy='750' r='50'/%3E%3Ccircle cx='100' cy='750' r='50'/%3E%3C/g%3E%3Ccircle fill='%23b608dc' cx='50' cy='800' r='50'/%3E%3Cg fill='%23c007e5' %3E%3Ccircle cx='0' cy='850' r='50'/%3E%3Ccircle cx='100' cy='850' r='50'/%3E%3C/g%3E%3Ccircle fill='%23c905ee' cx='50' cy='900' r='50'/%3E%3Cg fill='%23d303f6' %3E%3Ccircle cx='0' cy='950' r='50'/%3E%3Ccircle cx='100' cy='950' r='50'/%3E%3C/g%3E%3Ccircle fill='%23D0F' cx='50' cy='1000' r='50'/%3E%3C/g%3E%3C/svg%3E");
+    background-attachment: fixed;
+    background-size: contain;
+}
+
+.img {
+    overflow: hidden;
+    border-radius: 15px;
+}
+
+.img img {
+    height: 180px;
+    object-fit: cover;
+}
+
+.img img:hover {
+    transition: all 0.5s ease-in-out;
+    transform: scale(1.07);
+}
+
+.parent {
+    padding: 10px;
+    background-color: #fff;
+    margin-top: 10px;
+    border-radius: 15px;
+}
+
+.caption-item {
+    /* height: 200px; */
+    border-radius: 15px;
+    background-color: #fff;
+    margin-top: -23px;
+    position: relative;
+}
+
+.title {
+    padding: 20px;
+}
+
+.title a {
+    color: #333;
+    text-decoration: none;
+    opacity: 0.7;
+    font-size: 15px;
+}
+
+.title a:hover {
+    color: #8e6cc2;
+}
+
+.caption p {
+    font-size: 14px;
+    margin-top: 0px;
+    text-align: justify;
+}
+
+.btn-more-courses {
+    float: left;
+    margin-top: 20px;
+}
+
+#img1 {
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 550px;
+    background-attachment: fixed;
+}
+
+#img2 {
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 550px;
+    background-attachment: fixed;
+}
+
+#img3 {
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 550px;
+    background-attachment: fixed;
+}
+
+.text-info-img {
+    margin-top: 201px;
+    padding: 1px;
+}
+
+.text-info-img h2,
+h3 {
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.img-info-grapi {
+    padding: 20px;
+    /*border-radius: 15px;*/
+}
+
+/*//// footer*/
+.ul-footer {
+    list-style-type: none;
+}
+
+.text-footer {
+    line-height: 40px;
+}
+
+.size {
+    font-size: 17px;
+}
+
+.footer2 {
+    background-color: #1abc9c;
+    padding: 20px;
+}
+
+.accordion {
+    background-color: #eee;
+    color: #444;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+    transition: all 0.4s;
+}
+
+.active,
+.accordion:hover {
+    background-color: #ccc;
+}
+
+.panel {
+    padding: 0 18px;
+    display: none;
+    background-color: white;
+    overflow: hidden;
+    transition: all 0.4s;
+}
+
+.img-brands {
+    box-shadow: 0px 0px 10px 0px black;
+    border-radius: 1rem;
+    width: 50%;
+    height: 200px;
+}
+.bg-info-box{
+    background-color: #2f3967;
+}
+.bg-info-form{
+    background-color: #ee3131;
+}
+
+#ostan {
+    display: none;
+}
+
+.justi {
+    text-align: justify;
+}
+
+.size-img-city {
+    width: 100%;
+    height: 400px;
+}
+
+.box-content-cities {
+    border: 1px solid rgb(208, 191, 191);
+    box-shadow: 0 0 10px #000;
+}
+
+p {
+    text-align: justify;
+}
+
+.content-cities {
+    background-image: url("../img/87.jpg");
+    background-size: 100% 100%;
+    height: 400px;
+}
+
+.box-city {
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.body {
+    margin: 0;
+    padding: 0;
+    padding: 30px;
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.form {
+    display: inline;
+    margin-right: -80;
+}
+
+.search-container {
+    background: rgb(255, 250, 250);
+    height: 50px;
+    border-radius: 30px;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.8s;
+    box-shadow: 4px 4px 6px 0 rgba(255, 255, 255, 0.3),
+    -4px -4px 6px 0 rgba(116, 125, 136, 0.2),
+    inset -4px -4px 6px 0 rgba(255, 255, 255, 0.2),
+    inset 4px 4px 6px 0 rgba(0, 0, 0, 0.2);
+    width: 400px;
+}
+
+.search-btn {
+    background-color: white;
+    outline: none;
+    border-radius: 50%;
+    padding: 8px;
+}
+
+.seraches {
+    margin-top: 30px;
+}
+
+.logo-header {
+    margin-top: -0.5rem !important;
+}
+
+.search-container .search-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 650px;
+    font-weight: 500;
+    font-size: 16px;
+    transition: 0.8s;
+}
+
+.search-container {
+    width: 650px;
+}
+
+.search-container .search-btn .fas {
+    color: #5cbdbb;
+}
+
+.justi {
+    text-align: justify;
+}
+
+.size-img-city {
+    width: 100%;
+    height: 400px;
+}
+
+.box-content-cities {
+    border: 1px solid rgb(208, 191, 191);
+    box-shadow: 0 0 10px #000;
+}
+.img-res-brand{
+    display: block;
+    align-items: center;
+    border: 1px solid rgb(76, 74, 74);
+    margin-top: 10px;
+    box-shadow: 1px 1px 5px 0 rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    width: 322px;
+    height: 162px;
+}
+.text-info-brand{
+    line-height: 35px;
+}
+@keyframes hoverShake {
+    0% {
+        transform: skew(0deg, 0deg);
+    }
+    25% {
+        transform: skew(5deg, 5deg);
+    }
+    75% {
+        transform: skew(-5deg, -5deg);
+    }
+    100% {
+        transform: skew(0deg, 0deg);
+    }
+}
+
+p {
+    text-align: justify;
+}
+
+.search-container:hover {
+    animation: hoverShake 0.15s linear 3;
+}
+
+.search-modal {
+    border-radius: 20px;
+    margin-top: -31px;
+}
+
+.footer-background {
+    background-size: 100% 100%;
+    padding: 20px;
+}
+.slider {
+    height: 10rem;
+  }

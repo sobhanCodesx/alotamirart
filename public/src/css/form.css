@@ -1,0 +1,378 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: 0;
+}
+@font-face {
+  font-family: "iransans";
+  src: url("fonts/IRANSansWeb.ttf") format("truetype"),
+    url("fonts/IRANSansWeb.woff") format("woff");
+}
+body {
+  direction: rtl;
+  font-size: 14px;
+  text-align: right;
+  color: #303030;
+  line-height: 30px;
+  font-family: "iransans";
+  /*background: #FBFBFB;*/
+}
+a {
+  transition: all 0.2s ease-in-out;
+}
+.full-width {
+  width: 100% !important;
+}
+.top-menu {
+  width: 100%;
+  float: right;
+}
+.container {
+  max-width: 1300px;
+  margin: auto;
+}
+.top-menu .topbar-right {
+  float: right;
+  width: 50%;
+  color: #fff;
+}
+.topbar-right ul li {
+  float: right;
+  list-style: none;
+  margin-left: 30px;
+  line-height: 40px;
+  font-size: 12.5px;
+}
+.topbar-right ul li i {
+  margin-left: 7px;
+  font-size: 17px;
+}
+
+.top-menu .topbar-left {
+  float: left;
+  width: 50%;
+  color: #fff;
+}
+.topbar-left li {
+  float: left;
+  list-style: none;
+}
+.topbar-left li i {
+  font-size: 18px;
+  padding: 10px 15px;
+}
+
+/*********شروع استای های هدر*********/
+.header {
+  width: 100%;
+  background: #fff;
+  box-shadow: 0 1px 6px #e6e6e6;
+  height: 104px;
+}
+.header .logo {
+  float: right;
+  margin-top: -15px;
+}
+.header .logo img {
+  max-width: 86px;
+}
+
+/********start menu*********/
+.main-menu {
+  float: right;
+}
+.main-menu > ul > li {
+  float: right;
+  list-style: none;
+  position: relative;
+}
+.main-menu ul li a {
+  padding: 26px 22px;
+  display: inline-block;
+  font-size: 15px;
+  text-decoration: none;
+  color: #454647;
+  font-weight: bold;
+}
+.main-menu ul li a i {
+  margin-right: 5px;
+}
+.main-menu ul li ul {
+  position: absolute;
+  width: 250px;
+  background: #fff;
+  top: 115px;
+  right: 0;
+  box-shadow: 0 1px 6px #e6e6e6;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease-in-out;
+  z-index: 999;
+}
+.main-menu ul li ul li {
+  list-style: none;
+}
+.main-menu ul li ul li a {
+  padding: 9px 15px;
+  display: block;
+  font-weight: normal;
+}
+.main-menu ul li ul li a:hover {
+  background: #5caf21;
+  color: #fff;
+}
+.main-menu > ul > li:hover ul {
+  opacity: 1;
+  visibility: visible;
+  top: 83px;
+}
+/***********باکس سرچ***********/
+.searchbox input[type="text"] {
+  width: 28%;
+  background: #fff;
+  height: 50px;
+  position: absolute;
+  top: 12px;
+  font-size: 18px;
+  /*margin-right: 46%;*/
+  border: 1px solid #cccccc;
+  padding-right: 25px;
+  font-family: "iransans";
+  border-radius: 20px;
+  display: none;
+}
+.searchbox i {
+  display: none;
+}
+.header .signmobile a i {
+  display: none;
+}
+.sign {
+  float: left;
+  padding: 15px 0;
+}
+.sign a {
+  text-decoration: none;
+  background: #ff0063;
+  color: #fff;
+  padding: 9px 18px;
+  display: inline-block;
+  border-radius: 5px;
+}
+.sign a i {
+  font-size: 18px;
+  margin-left: 7px;
+}
+.sign a:hover {
+  background: #7f8c8d;
+}
+.box-slider {
+  float: right;
+  width: 100%;
+  direction: ltr;
+  margin-top: 4px;
+}
+
+.line {
+  width: 1151px;
+  height: 35px;
+  margin: 35px auto;
+  border-bottom: 1px solid #eee;
+  display: flex;
+}
+
+.box-banner img {
+  width: 100%;
+}
+/*************منو همبری****************/
+#hamberger {
+  float: left;
+  cursor: pointer;
+  display: none;
+}
+#hamberger i {
+  font-size: 26px;
+  padding: 20px;
+}
+
+.navigation {
+  background: #fff;
+  box-shadow: 0 9px 65px -5px rgb(61 130 179);
+  width: 300px;
+  position: fixed;
+  right: 0;
+  z-index: 99999;
+  top: 0;
+  height: 100%;
+  padding: 20px 0;
+  border-radius: 4px 0 0 40px;
+  overflow: scroll;
+  display: none;
+}
+.navigation ul {
+}
+.navigation ul li {
+  position: relative;
+
+  display: block;
+  margin: 15px 18px 15px 14px;
+}
+.navigation ul li i {
+  float: left;
+  color: #3ba0d1 !important;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 5px;
+  position: absolute;
+  top: 7px;
+  left: 11px;
+}
+.navigation ul li a {
+  color: #535353;
+  width: 100%;
+  height: 100%;
+  display: block;
+  padding: 6px 16px;
+  margin: -3px -5px;
+  background: #5222d007 !important;
+  border-radius: 12px;
+  text-decoration: none;
+}
+
+.navigation ul li ul {
+  background: #3ba0d1;
+  padding: 3px 0;
+  margin-top: 10px;
+  display: none;
+  border-radius: 20px;
+}
+.navigation ul li ul li {
+  margin: 10px 0;
+  padding: 0px 15px;
+}
+
+.navigation ul li ul li a {
+  color: #fff;
+  padding: 0 12px;
+  display: block;
+  font-size: 14px;
+}
+.box-banner {
+  margin-bottom: 50px;
+}
+.pro h2 {
+  margin-right: 40px;
+  color: navy;
+  display: inline;
+  border: 1px solid #dddd;
+  padding: 6px 20px;
+  border-radius: 15px;
+  box-shadow: 0 0 15px #dddddd;
+}
+/*****************box style*********************/
+/****************start footer*******************/
+/*  */
+
+/*************single*************/
+
+/**************کدهای رسپانسیو***************/
+
+@media screen and (max-width: 992px) {
+  .top-menu .topbar-left {
+    width: 20%;
+  }
+  .top-menu .topbar-right {
+    width: 80%;
+  }
+  .topbar-right ul li {
+    margin-left: 17px;
+    font-size: 11.5px;
+  }
+  .main-menu,
+  .sign {
+    display: none;
+  }
+  #hamberger {
+    display: block;
+  }
+  .navigation .sign {
+    display: block;
+    float: right;
+    width: 100%;
+  }
+  .navigation .sign a {
+    text-align: center;
+    width: 100%;
+  }
+  .box {
+    width: 27%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .box {
+    width: 42%;
+  }
+  .top-menu .topbar-left ul.menu,
+  .adv .left-adv {
+    display: none;
+  }
+
+}
+@media screen and (max-width: 610px) {
+  .topbar-left li i {
+    font-size: 18px;
+    padding: 29px 15px;
+  }
+
+}
+@media screen and (max-width: 567px) {
+  .top-menu .topbar-left {
+    width: 30%;
+  }
+  .top-menu .topbar-right {
+    width: 70%;
+  }
+
+  .topbar-right ul li span {
+    display: none;
+  }
+  .topbar-left li i {
+    padding: 10px;
+  }
+}
+@media screen and (max-width: 700px) {
+  .baner-header {
+    width: 100%;
+    height: 300px;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    position: relative;
+  }
+  .cover-title{
+    background-color: rgba(0,0,0,0.5);
+    height: 300px;
+  }
+  .baner-header h1 {
+    padding-top: 21px;
+    padding-left: 18px;
+    padding-right: 33px;
+    font-size: 20px;
+  }
+
+  .baner-header h2{
+    font-size: 15px;
+  }
+  .icons{
+    display: none;
+  }
+  .search-container {
+    width: 270px;
+  }
+  .btn-s {
+    width: 80px;
+    height: 86px;
+    font-size: 10px;
+  }
+}
