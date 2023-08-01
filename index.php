@@ -44,7 +44,6 @@ function vd($argument)
     echo "<pre>";
     var_dump($argument);
 }
-
 function get_pag($current_page, $path, $total_pages)
 {
     global $page;
@@ -64,7 +63,16 @@ function get_pag($current_page, $path, $total_pages)
     }
     return $links;
 }
+function checkValue($var,$index)
+{
+    if (!empty($var[$index]))
+    {
+        return $var[$index];
 
+    }else{
+        return "";
+    }
+}
 function get_pag_cat($current_page, $link, $where, $total_pages)
 {
     global $page;
@@ -87,8 +95,7 @@ function get_pag_cat($current_page, $link, $where, $total_pages)
 
 function protocol()
 {
-    return stripos($_SERVER['SERVER_PROTOCOL'], 'https') === true ? 'https://' : 'https://';
-    // $SERVER[SERVER_PROTOCOL] return http or https ///   
+    return isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
 }
 
 function currentdomain()

@@ -44,7 +44,7 @@ class Auth
             $this->redirectBack();
         } else {
             $user = $db->new_select('email', 'users', 'email', $req['email']);
-            $userName = $db->new_select('email', 'users', 'user_name', $req['user_name']);
+            $userName = $db->new_select('user_name', 'users', 'user_name', $req['user_name']);
             if(!empty($userName))
             {
                 flash('msg', 'نام کاربری در سیستم موجود است لطفا نام کاربری دیگری وارد کنید');

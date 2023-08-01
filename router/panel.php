@@ -2,6 +2,7 @@
 
 
 uri('panelcp','Panel','indexPanel');
+uri('update/profile/{id}','Panel','updateUser','POST');
 
 /////////////////////////////////////////////////////
 uri('user/post/{page}','PostUser','index');

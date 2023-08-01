@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>پنل مدیریت | داشبورد <?= getByUser('name') ?></title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <?php include BASE_PATH . '/them/admin/layout/head.php' ?>
 </head>
 <body class="hold-transition sidebar-mini">
@@ -98,6 +99,10 @@
                         </div>
                     </div>
                     <!-- ./col -->
+                    <div class="container">
+                        <?php include BASE_PATH . "/them/panel/dashbord.php"; ?>
+
+                    </div>
                 </div>
                 <!-- /.row -->
                 <!-- Main row -->

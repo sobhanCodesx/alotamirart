@@ -6,9 +6,9 @@ class Hom
     {
         $db = new DataBase();
         unsetUsers();
-       $dataSeo = $db->getLastInsert('seo');
-$dataHeader = $db->getLastInsert('header');
-$dataFooter = $db->getLastInsert('footer');
+        $dataSeo = $db->getLastInsert('seo');
+        $dataHeader = $db->getLastInsert('header');
+        $dataFooter = $db->getLastInsert('footer');
         $menu = $db->select('SELECT * FROM menu WHERE NOT id = 5 ORDER BY sort')->fetchAll();
         $brand = $db->select('SELECT * FROM items_brands')->fetchAll();
         $post = $db->select('SELECT * FROM posts WHERE status = 1 ORDER BY created_at DESC LIMIT 0,8')->fetchAll();
@@ -17,12 +17,12 @@ $dataFooter = $db->getLastInsert('footer');
         require_once BASE_PATH . '/them/app/index.php';
     }
 
-    public function search($req,$page)
+    public function search($req, $page)
     {
         $db = new DataBase();
-       $dataSeo = $db->getLastInsert('seo');
-$dataHeader = $db->getLastInsert('header');
-$dataFooter = $db->getLastInsert('footer');
+        $dataSeo = $db->getLastInsert('seo');
+        $dataHeader = $db->getLastInsert('header');
+        $dataFooter = $db->getLastInsert('footer');
         $err = null;
         $menu = $db->select('SELECT * FROM menu WHERE NOT id = 5 ORDER BY sort')->fetchAll();
         $result = $req['search'];
