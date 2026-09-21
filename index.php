@@ -3,10 +3,13 @@ session_start();
 define('BASE_PATH', __DIR__);
 define("CURRENT_DOMAIN", currentdomain() . "/");
 define('DISPLAY_ERROR', true);
-define('DB_HOST', 'localhost');
-define('BD_NAME', 'mbziliwc_danesh');
-define('DB_USERNAME', 'mbziliwc_danesh');
-define('DB_PASSWORD', 'fV7+Qjy[RU5S');
+$dbConfig = require __DIR__ . '/config/database.php';
+define('DB_HOST', $dbConfig['host']);
+define('DB_NAME', $dbConfig['name']);
+define('BD_NAME', $dbConfig['name']); // Backward compatibility for the old typo.
+define('DB_USERNAME', $dbConfig['username']);
+define('DB_PASSWORD', $dbConfig['password']);
+unset($dbConfig);
 
 /// reqir
 require_once './database/DataBase.php';
