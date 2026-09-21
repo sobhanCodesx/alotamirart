@@ -1,6 +1,6 @@
 <?php
-$brandName = isset($item['name']) ? strip_tags((string)$item['name']) : 'برند';
-$brandDescription = isset($item['des']) ? strip_tags((string)$item['des']) : '';
+$brandName = isset($item['name']) ? clean_display_text($item['name']) : 'برند';
+$brandDescription = isset($item['des']) ? clean_display_text($item['des']) : '';
 $currentPage = isset($page) ? max(1,(int)$page) : 1;
 $totalPages = isset($pages) ? max(1,(int)$pages) : 1;
 ?>
@@ -23,8 +23,8 @@ $totalPages = isset($pages) ? max(1,(int)$pages) : 1;
 <div class="section-head"><div><span class="site-eyebrow">مطالب برند</span><h2 class="site-title">آخرین مطالب <?= htmlspecialchars($brandName,ENT_QUOTES,'UTF-8') ?></h2></div></div>
 <?php if(!empty($brands)&&is_array($brands)): ?><div class="content-grid">
 <?php foreach($brands as $b): ?><?php $url=assets((isset($b['slug'])?$b['slug']:'').'/'.(int)$b['id']); ?><article class="content-card">
-<a class="content-card__media" href="<?= $url ?>"><img src="<?= assets($b['img']) ?>" alt="<?= htmlspecialchars(isset($b['title'])?strip_tags($b['title']):'',ENT_QUOTES,'UTF-8') ?>" width="640" height="400" loading="lazy" decoding="async"></a>
-<div class="content-card__body"><div class="content-card__meta"><?= htmlspecialchars($brandName,ENT_QUOTES,'UTF-8') ?></div><h3><a href="<?= $url ?>"><?= htmlspecialchars(isset($b['title'])?strip_tags($b['title']):'',ENT_QUOTES,'UTF-8') ?></a></h3><p><?= htmlspecialchars(limit_words(strip_tags(isset($b['content'])?$b['content']:''),25),ENT_QUOTES,'UTF-8') ?></p><a class="content-card__action" href="<?= $url ?>">مشاهده مطلب ←</a></div>
+<a class="content-card__media" href="<?= $url ?>"><img src="<?= assets($b['img']) ?>" alt="<?= htmlspecialchars(clean_display_text(isset($b['title'])?$b['title']:''),ENT_QUOTES,'UTF-8') ?>" width="640" height="400" loading="lazy" decoding="async"></a>
+<div class="content-card__body"><div class="content-card__meta"><?= htmlspecialchars($brandName,ENT_QUOTES,'UTF-8') ?></div><h3><a href="<?= $url ?>"><?= htmlspecialchars(clean_display_text(isset($b['title'])?$b['title']:''),ENT_QUOTES,'UTF-8') ?></a></h3><p><?= htmlspecialchars(excerpt_text(isset($b['content'])?$b['content']:'',25),ENT_QUOTES,'UTF-8') ?></p><a class="content-card__action" href="<?= $url ?>">مشاهده مطلب ←</a></div>
 </article><?php endforeach; ?></div>
 <?php else: ?><div class="empty-state"><div class="empty-state__icon">⌕</div><h2>مطلبی یافت نشد</h2><p>در حال حاضر محتوایی برای این برند منتشر نشده است.</p></div><?php endif; ?>
 <?php if($totalPages>1): ?><nav class="pagination-site" aria-label="صفحه‌بندی">
