@@ -747,29 +747,12 @@ button{cursor:pointer}
   color:var(--pn-brand-2)!important;
 }
 @media(min-width:1101px){
-  .site-header__inner{min-height:72px;gap:12px}
-  .site-logo{order:0;flex:0 0 auto}
+  .site-header__inner{min-height:72px;gap:18px}
   .site-logo img{height:46px;max-width:136px}
-
-  .site-header__actions{
-    order:1;
-    margin:0;
-    margin-inline-start:4px;
-    flex:0 0 auto;
-    gap:7px;
-  }
-  .site-header__actions .account-menu{order:-1}
-  .site-header__actions .search-trigger{order:0}
-
-  .site-nav{
-    order:2;
-    margin-inline-start:auto;
-    margin-inline-end:0;
-    min-width:0;
-  }
+  .site-nav{margin-inline-start:auto;min-width:0}
   .site-nav__list{gap:2px}
   .site-nav__list>li>a{padding:9px 11px;font-size:.88rem;white-space:nowrap}
-
+  .site-header__actions{margin-inline-start:8px;flex:0 0 auto}
   .account-menu>summary{
     min-height:44px;
     padding:5px 10px;
@@ -777,10 +760,6 @@ button{cursor:pointer}
     max-width:220px;
   }
   .account-menu__name{max-width:118px}
-  .account-menu__dropdown{
-    right:0;
-    left:auto;
-  }
 }
 
 /* Card contrast */
