@@ -12,7 +12,27 @@ $root = dirname(__DIR__);
 $index = file_get_contents($root . '/index.php');
 $htaccess = file_get_contents($root . '/.htaccess');
 $database = file_get_contents($root . '/database/DataBase.php');
+$originalHost = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : null;
+
+$_SERVER['HTTP_HOST'] = 'localhost:8080';
+$localConfig = require $root . '/config/database.php';
+
+compatAssert($localConfig['environment'] === 'local', 'localhost must select local DB configuration');
+compatAssert($localConfig['primary']['host'] === 'localhost', 'local DB host must be localhost');
+compatAssert($localConfig['primary']['name'] === 'danesh', 'local DB name must be danesh');
+compatAssert($localConfig['primary']['username'] === 'root', 'local DB username must be root');
+compatAssert($localConfig['primary']['password'] === '', 'local DB password must be empty');
+compatAssert($localConfig['legacy_constants'] === $localConfig['primary'], 'legacy constants must use local DB in local development');
+
+$_SERVER['HTTP_HOST'] = 'example.com';
 $config = require $root . '/config/database.php';
+compatAssert($config['environment'] === 'production', 'non-local host must preserve production DB configuration');
+
+if ($originalHost === null) {
+    unset($_SERVER['HTTP_HOST']);
+} else {
+    $_SERVER['HTTP_HOST'] = $originalHost;
+}
 
 compatAssert(strpos($index, "require_once './router/admin.php';") !== false, 'legacy admin router must remain active');
 compatAssert(strpos($index, "require_once './router/panel.php';") !== false, 'legacy panel router must remain active');
