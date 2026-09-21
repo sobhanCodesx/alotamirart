@@ -16,8 +16,8 @@ $totalPages = isset($pages) ? max(1,(int)$pages) : 1;
 <section class="site-section"><div class="site-container">
 <?php if(!empty($post)&&is_array($post)): ?><div class="content-grid">
 <?php foreach($post as $b): ?><article class="content-card">
-<a class="content-card__media" href="<?= assets('post/'.(int)$b['id']) ?>"><img src="<?= assets($b['img']) ?>" alt="<?= htmlspecialchars(isset($b['title'])?strip_tags($b['title']):'',ENT_QUOTES,'UTF-8') ?>" width="640" height="400" loading="lazy" decoding="async"></a>
-<div class="content-card__body"><div class="content-card__meta"><?= htmlspecialchars($categoryTitle,ENT_QUOTES,'UTF-8') ?></div><h3><a href="<?= assets('post/'.(int)$b['id']) ?>"><?= htmlspecialchars(isset($b['title'])?strip_tags($b['title']):'',ENT_QUOTES,'UTF-8') ?></a></h3><p><?= htmlspecialchars(limit_words(strip_tags(isset($b['content'])?$b['content']:''),25),ENT_QUOTES,'UTF-8') ?></p><a class="content-card__action" href="<?= assets('post/'.(int)$b['id']) ?>">ادامه مطلب ←</a></div>
+<a class="content-card__media" href="<?= assets('post/'.(int)$b['id']) ?>"><img src="<?= assets($b['img']) ?>" alt="<?= htmlspecialchars(clean_display_text(isset($b['title'])?$b['title']:''),ENT_QUOTES,'UTF-8') ?>" width="640" height="400" loading="lazy" decoding="async"></a>
+<div class="content-card__body"><div class="content-card__meta"><?= htmlspecialchars($categoryTitle,ENT_QUOTES,'UTF-8') ?></div><h3><a href="<?= assets('post/'.(int)$b['id']) ?>"><?= htmlspecialchars(clean_display_text(isset($b['title'])?$b['title']:''),ENT_QUOTES,'UTF-8') ?></a></h3><p><?= htmlspecialchars(excerpt_text(isset($b['content'])?$b['content']:'',25),ENT_QUOTES,'UTF-8') ?></p><a class="content-card__action" href="<?= assets('post/'.(int)$b['id']) ?>">ادامه مطلب ←</a></div>
 </article><?php endforeach; ?></div>
 <?php else: ?><div class="empty-state"><div class="empty-state__icon">⌕</div><h2>مقاله‌ای یافت نشد</h2><p>در حال حاضر محتوایی در این دسته‌بندی منتشر نشده است.</p></div><?php endif; ?>
 <?php if($totalPages>1): ?><nav class="pagination-site" aria-label="صفحه‌بندی">
