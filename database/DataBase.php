@@ -8,18 +8,16 @@ class DataBase
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
     );
-    private $dbhost = 'localhost';
-    private $dbname = 'mbziliwc_danesh';
-    private $dbusername = 'mbziliwc_danesh';
-    private $dbpassword = '9711212103';
 
     public function __construct()
     {
+        $config = require __DIR__ . '/../config/database.php';
+
         try {
             $this->conn = new PDO(
-                'mysql:host=' . $this->dbhost . ';dbname=' . $this->dbname,
-                $this->dbusername,
-                $this->dbpassword,
+                'mysql:host=' . $config['host'] . ';dbname=' . $config['name'],
+                $config['username'],
+                $config['password'],
                 $this->option
             );
         } catch (PDOException $e) {
