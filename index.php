@@ -164,41 +164,61 @@ function flash($name, $value = null)
 
 function uri($path, $class, $method, $methodfild = "GET")
 {
-    // requset uri
-    $requri = explode("?", currentreq())[0];
-    $requri = str_replace(CURRENT_DOMAIN, "", $requri);
-    $requri = trim($requri, "/ ");
-    $Array_request = explode("/", $requri);
-    $Array_request = array_filter($Array_request);
-    // reser uri
-    $path = trim($path, "/ ");
-    $pathes = explode("/", $path);
-    $Array_reserved = array_filter($pathes);
-    // compair uri req with reserved uri
-
-    if (sizeof($Array_request) != sizeof($Array_reserved) || methodFild() != $methodfild) {
+    if (strtoupper(methodFild()) !== strtoupper($methodfild)) {
         return false;
     }
-    $prameter = [];
-    for ($i = 0; $i < sizeof($Array_request); $i++) {
-        if ($Array_reserved[$i][0] == "{" and $Array_reserved[$i][strlen($Array_reserved[$i]) - 1] == "}") {
-            array_push($prameter, $Array_request[$i]);
-        } elseif ($Array_request[$i] !== $Array_reserved[$i]) {
+
+    $requestPath = parse_url(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/', PHP_URL_PATH);
+    $requestPath = trim(rawurldecode((string)$requestPath), '/ ');
+    $routePath = trim((string)$path, '/ ');
+
+    if ($routePath === '' && $requestPath === '') {
+        $parameters = [];
+    } else {
+        $parts = preg_split(
+            '/(\{[A-Za-z_][A-Za-z0-9_]*\})/',
+            $routePath,
+            -1,
+            PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
+        );
+
+        $regex = '';
+        foreach ($parts as $part) {
+            if (preg_match('/^\{[A-Za-z_][A-Za-z0-9_]*\}$/', $part)) {
+                $regex .= '([^/]+)';
+            } else {
+                $regex .= preg_quote($part, '#');
+            }
+        }
+
+        if (!preg_match('#^' . $regex . '$#u', $requestPath, $matches)) {
             return false;
         }
+
+        array_shift($matches);
+        $parameters = array_map('rawurldecode', $matches);
     }
-    if (methodFild() == "POST") {
-        $req = isset($_FILES) ? array_merge($_POST, $_FILES) : $_POST;
-        $prameter = array_merge([$req], $prameter);
+
+    if (strtoupper($methodfild) === 'POST') {
+        $request = !empty($_FILES) ? array_merge($_POST, $_FILES) : $_POST;
+        array_unshift($parameters, $request);
     }
+
+    if (!class_exists($class) || !is_callable([$class, $method])) {
+        http_response_code(500);
+        error_log('Invalid route target: ' . $class . '::' . $method);
+        echo 'خطای داخلی در مسیر درخواست‌شده.';
+        exit();
+    }
+
     $object = new $class;
-    call_user_func_array(array($object, $method), $prameter);
+    call_user_func_array([$object, $method], $parameters);
     exit();
 }
 
 function getByUser($arg)
 {
-    return $_SESSION[$arg];
+    return isset($_SESSION[$arg]) ? $_SESSION[$arg] : null;
 }
 
 function unsetUsers()
