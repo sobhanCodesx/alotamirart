@@ -18,5 +18,4 @@ uri('user/brand/{page}','BrandUser','index');
 uri('userbrand/create','BrandUser','create');
 uri('user/brand/created','BrandUser','created','POST');
 uri('user/brand/update/{id}','BrandUser','update');
-uri('user/brand/update/{id}','BrandUser','updated');
 uri('userbrand/updated/{id}','BrandUser','updated','POST');
