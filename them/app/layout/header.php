@@ -44,9 +44,18 @@ $phoneHref = preg_replace('/[^\d+]/', '', $phone);
         </form>
 
         <?php if (isset($_SESSION['name'])): ?>
-          <div class="mobile-account-card">
-            <div class="mobile-account-card__name"><?= htmlspecialchars((string)$_SESSION['name'], ENT_QUOTES, 'UTF-8') ?></div>
-            <div class="mobile-account-links">
+          <details class="mobile-account-menu">
+            <summary>
+              <span class="mobile-account-menu__label">
+                <span class="mobile-account-menu__avatar" aria-hidden="true"><?= htmlspecialchars(mb_substr((string)$_SESSION['name'], 0, 1, 'UTF-8'), ENT_QUOTES, 'UTF-8') ?></span>
+                <span>
+                  <strong><?= htmlspecialchars((string)$_SESSION['name'], ENT_QUOTES, 'UTF-8') ?></strong>
+                  <small>حساب کاربری</small>
+                </span>
+              </span>
+              <span class="mobile-account-menu__chevron" aria-hidden="true"></span>
+            </summary>
+            <div class="mobile-account-menu__dropdown">
               <?php if (isset($_SESSION['role']) && (int)$_SESSION['role'] === 1): ?><a href="<?= assets('admin/dashboard') ?>">پنل ادمین</a><?php endif; ?>
               <?php if (isset($_SESSION['w']) && (int)$_SESSION['w'] === 1): ?>
                 <a href="<?= assets('panelcp/') ?>">پنل کاربری</a>
@@ -56,9 +65,9 @@ $phoneHref = preg_replace('/[^\d+]/', '', $phone);
                 <a href="<?= assets('userbrand/create') ?>">محتوای برند جدید</a>
                 <a href="<?= assets('user/brand/1') ?>">محتوای برند من</a>
               <?php endif; ?>
-              <a href="<?= assets('logout') ?>">خروج</a>
+              <a class="mobile-account-menu__logout" href="<?= assets('logout') ?>">خروج</a>
             </div>
-          </div>
+          </details>
         <?php else: ?>
           <div class="mobile-auth-actions">
             <a class="btn-site btn-site--primary" href="<?= assets('login') ?>">ورود</a>
