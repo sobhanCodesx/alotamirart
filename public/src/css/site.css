@@ -747,31 +747,35 @@ button{cursor:pointer}
   color:var(--pn-brand-2)!important;
 }
 @media(min-width:1101px){
-  .site-header__inner{min-height:72px;gap:12px}
+  .site-header__inner{
+    min-height:72px;
+    gap:12px;
+  }
+
+  /* RTL desktop: logo + navigation on the right, account controls on the far left */
   .site-logo{
     order:0;
     flex:0 0 auto;
   }
   .site-logo img{height:46px;max-width:136px}
 
-  /* RTL desktop order: logo -> account -> search -> navigation */
-  .site-header__actions{
+  .site-nav{
     order:1;
     margin:0;
-    flex:0 0 auto;
-    gap:7px;
-  }
-  .site-header__actions .account-menu{order:-1}
-  .site-header__actions .search-trigger{order:0}
-
-  .site-nav{
-    order:2;
-    margin-inline-start:auto;
-    margin-inline-end:0;
+    margin-inline-end:auto;
     min-width:0;
   }
   .site-nav__list{gap:2px}
   .site-nav__list>li>a{padding:9px 11px;font-size:.88rem;white-space:nowrap}
+
+  .site-header__actions{
+    order:2;
+    margin:0;
+    flex:0 0 auto;
+    gap:7px;
+  }
+  .site-header__actions .search-trigger{order:0}
+  .site-header__actions .account-menu{order:1}
 
   .account-menu>summary{
     min-height:44px;
@@ -781,8 +785,8 @@ button{cursor:pointer}
   }
   .account-menu__name{max-width:118px}
   .account-menu__dropdown{
-    right:0;
-    left:auto;
+    left:0;
+    right:auto;
   }
 }
 
