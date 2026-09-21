@@ -1,4 +1,11 @@
 <?php
+if (!defined('BASE_PATH')) {
+    $legacyService = isset($_GET['service']) ? preg_replace('/[^a-zA-Z0-9-]/', '', (string)$_GET['service']) : 'refrigerator';
+    $legacyCity = isset($_GET['city']) ? preg_replace('/[^a-zA-Z0-9-]/', '', (string)$_GET['city']) : 'tehran';
+    header('Location: /' . $legacyService . '-repair-in-' . $legacyCity, true, 301);
+    exit;
+}
+
 // ============================================================
 // اتصال به دیتابیس
 // ============================================================
