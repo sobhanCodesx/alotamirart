@@ -7,14 +7,12 @@
   const searchPanel=document.querySelector("[data-search-panel]");
   const backTop=document.querySelector("[data-back-top]");
 
-  const menuIcon=document.querySelector("[data-menu-icon]");
   function syncMenu(open){
     body.classList.toggle("nav-open",open);
     if(menu){
       menu.setAttribute("aria-expanded",open?"true":"false");
       menu.setAttribute("aria-label",open?"بستن منو":"باز کردن منو");
     }
-    if(menuIcon) menuIcon.textContent=open?"×":"☰";
   }
   function closeNav(){syncMenu(false);}
   if(menu){
@@ -24,10 +22,10 @@
     });
   }
   if(nav){
-    nav.addEventListener("click",function(e){if(e.target.closest("a")&&window.innerWidth<=900) closeNav();});
+    nav.addEventListener("click",function(e){if(e.target.closest("a")&&window.innerWidth<=1100) closeNav();});
   }
   document.addEventListener("click",function(e){
-    if(body.classList.contains("nav-open")&&window.innerWidth<=900&&!e.target.closest("[data-site-nav]")&&!e.target.closest("[data-menu-toggle]")) closeNav();
+    if(body.classList.contains("nav-open")&&window.innerWidth<=1100&&!e.target.closest("[data-site-nav]")&&!e.target.closest("[data-menu-toggle]")) closeNav();
   });
   searchButtons.forEach(function(btn){
     btn.addEventListener("click",function(){
@@ -44,7 +42,7 @@
     }
   });
   window.addEventListener("resize",function(){
-    if(window.innerWidth>900) closeNav();
+    if(window.innerWidth>1100) closeNav();
   },{passive:true});
   if(backTop){
     const sync=function(){backTop.classList.toggle("is-visible",window.scrollY>500);};
