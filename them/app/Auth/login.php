@@ -1,68 +1,39 @@
+<?php
+$error = flash('login_error');
+$success = flash('saveuser');
+?>
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <?php require_once BASE_PATH . '/them/app/layout/heading.php'; ?>
-    <link rel="stylesheet" href="<?= assets('public/src/css/auth.css') ?>">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,600' rel='stylesheet'
-          type='text/css'>
-    <link href="//netdna.bootstrapcdn.com/font-awesome/3.1.1/css/font-awesome.css" rel="stylesheet">
-    <title>ورود</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ورود | <?= htmlspecialchars(isset($dataSeo['title']) ? strip_tags($dataSeo['title']) : 'الو تعمیراتچی', ENT_QUOTES, 'UTF-8') ?></title>
+<meta name="robots" content="noindex,follow">
+<?php require BASE_PATH . '/them/app/layout/heading.php'; ?>
 </head>
 <body>
-<?php require_once BASE_PATH . "/them/app/layout/header.php"; ?>
-
-<div class="container mt-3">
-    <div class="testbox">
-        <h1>ورود</h1>
-        <form action="<?= assets('logined') ?>" method="post">
-            <label id="icon" class="box-icon" for="name"><i class="fa fa-address-card icon-reg"></i></label>
-            <input type="text" class="box-icon p-2" name="user_name" id="name" placeholder="نام کاربری" required/>
-            <label id="icon" for="name"><i class="icon-shield icon-reg"></i></label>
-            <input type="password" class="p-2" name="password" id="name" placeholder="پسورد" required/>
-            <input type="submit" value="ارسال"  class="btn btn-success">
-        </form>
-    </div>
+<?php require BASE_PATH . '/them/app/layout/header.php'; ?>
+<main id="main-content" class="auth-page">
+<div class="auth-shell">
+<aside class="auth-aside">
+<div><span class="hero__badge">حساب کاربری</span><h1>خوش برگشتید</h1><p>برای مدیریت محتوای خود و دسترسی به امکانات حساب وارد شوید.</p></div>
+<ul><li>✓ دسترسی سریع به پروفایل</li><li>✓ مدیریت محتوای کاربری</li><li>✓ تجربه یکپارچه در موبایل و دسکتاپ</li></ul>
+</aside>
+<section class="auth-card">
+<h2>ورود به حساب</h2>
+<p class="auth-card__lead">نام کاربری و رمز عبور خود را وارد کنید.</p>
+<?php if ($error !== ''): ?><div class="alert-site alert-site--danger"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+<?php if ($success !== ''): ?><div class="alert-site alert-site--success"><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+<form action="<?= assets('logined') ?>" method="post" class="form-grid">
+<div class="form-group form-group--full"><label class="form-label" for="login-user">نام کاربری</label><input class="form-control-site" type="text" name="user_name" id="login-user" autocomplete="username" required></div>
+<div class="form-group form-group--full"><label class="form-label" for="login-password">رمز عبور</label><input class="form-control-site" type="password" name="password" id="login-password" autocomplete="current-password" required></div>
+<div class="form-group form-group--full"><button class="btn-site btn-site--primary btn-site--block" type="submit">ورود</button></div>
+</form>
+<p class="auth-footer-note">حساب ندارید؟ <a href="<?= assets('register') ?>">ثبت‌نام کنید</a></p>
+</section>
 </div>
-<?php require_once BASE_PATH . "/them/app/layout/footer.php" ?>
-<?php require_once BASE_PATH . "/them/app/layout/js.php" ?>
-<script>
-
-    <?php
-    $message = flash('login_error');
-    if (!empty($message)) {
-    ?>
-    Swal.fire({
-        icon: 'error',
-        title: 'خطا',
-        text: '<?= $message ?>',
-        footer: '<a style="nav-link" href="<?= assets('/register') ?>">ثبت نام</a>'
-    })
-    <?php }   ?>
-
-    <?php
-    $message = flash('saveuser');
-    if (!empty($message)) {
-    ?>
-    Swal.fire({
-        title: '<?= $message ?>',
-        width: 600,
-        padding: '3em',
-        color: '#716add',
-        background: '#fff url(<?=assets("public/src/img/trees.png") ?>)',
-        backdrop: `
-    rgba(0,0,123,0.4)
-    url()
-    left top
-    no-repeat
-  `
-    })
-    <?php }   ?>
-
-</script>
+</main>
+<?php require BASE_PATH . '/them/app/layout/footer.php'; ?>
+<?php require BASE_PATH . '/them/app/layout/js.php'; ?>
 </body>
 </html>

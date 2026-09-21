@@ -1,179 +1,74 @@
-<!-- start header   -->
-<div style="background:<?=$dataSeo['bg_topheader']?>" class="top-menu">
-    <div class="container">
-        <div class="topbar-right">
-            <ul>
-                <li>
-                    <a class="text-white" href="tel:09---513698"
-                    ><i class="fas fa-phone"></i
-                        ></a>
-                    <span> مشاوره و پشتیبانی واتساپ : <?=$dataFooter['phon'] ?></span>
-                </li>
-                <li>
-                    <i class="fa fa-envelope"></i>
-                    <span><?=$dataFooter['email'] ?></span>
-                </li>
-            </ul>
-        </div>
-
-        <div class="topbar-left">
-            <ul>
-                <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"> -->
-                <li>
-                    <i
-                            class="fas fa-search"
-                            data-bs-toggle="modal"
-                            data-bs-target="#exampleModal"
-                    ></i>
-                </li>
-                <!-- </button> -->
-                <!-- Modal -->
-                <div
-                        class="modal fade"
-                        id="exampleModal"
-                        tabindex="-1"
-                        aria-labelledby="exampleModalLabel"
-                        aria-hidden="true"
-                >
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel">
-                                    Modal title
-                                </h5>
-                                <button
-                                        type="button"
-                                        class="btn-close"
-                                        data-bs-dismiss="modal"
-                                        aria-label="Close"
-                                ></button>
-                            </div>
-                            <div class="modal-body">
-
-                                <form method="post" action="<?= assets('search/1') ?>">
-                                    <input style="border-radius: 20px;box-shadow: 0 0 10px 0 #000" name="search"
-                                           type="search" class="form-control bg-light search-modal"
-                                           placeholder="نام شهر و برند سرچ را کنید">
-                                    <button style="margin-top: -20px" class="search-btn btn-success"><i
-                                                class="fas fa-search text-white"></i>
-                                    </button>
-                                    <
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </ul>
-        </div>
+<?php
+$siteTitle = isset($dataSeo['title']) ? strip_tags((string) $dataSeo['title']) : 'الو تعمیراتچی';
+$logo = isset($dataSeo['logo']) ? $dataSeo['logo'] : 'public/src/img/logo.png';
+$phone = isset($dataFooter['phon']) ? strip_tags((string) $dataFooter['phon']) : '';
+$email = isset($dataFooter['email']) ? strip_tags((string) $dataFooter['email']) : '';
+$phoneHref = preg_replace('/[^\d+]/', '', $phone);
+?>
+<a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
+<div class="site-topbar">
+  <div class="site-container site-topbar__inner">
+    <div class="site-topbar__group">
+      <?php if ($phone !== ''): ?><a href="tel:<?= htmlspecialchars($phoneHref, ENT_QUOTES, 'UTF-8') ?>">مشاوره و پشتیبانی: <?= htmlspecialchars($phone, ENT_QUOTES, 'UTF-8') ?></a><?php endif; ?>
+      <?php if ($email !== ''): ?><a href="mailto:<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?></a><?php endif; ?>
     </div>
+    <div class="site-topbar__group"><span>خدمات تخصصی تعمیر لوازم خانگی</span></div>
+  </div>
 </div>
-<header class="header">
-    <div class="container">
-        <div class="logo">
-            <a href="<?=assets('/')?>"><img src="<?=assets($dataSeo['logo']) ?>"  alt="<?=$dataSeo['title']?>"/></a>
-        </div>
+<header class="site-header">
+  <div class="site-container site-header__inner">
+    <a class="site-logo" href="<?= assets('/') ?>" aria-label="<?= htmlspecialchars($siteTitle, ENT_QUOTES, 'UTF-8') ?>">
+      <img src="<?= assets($logo) ?>" alt="<?= htmlspecialchars($siteTitle, ENT_QUOTES, 'UTF-8') ?>" width="150" height="50">
+    </a>
 
-        <div id="hamberger">
-            <i class="fas fa-bars"></i>
-        </div>
-        <nav class="navigation">
-            <ul>
-                <li><a href="<?= assets('/') ?>">صفحه اصلی</a></li>
-                <?php foreach ($menu as $m) { ?>
-                    <li><a href="<?= assets('posts/categories/' . $m['id'] . "/1") ?>"><?= $m['title'] ?></a></li>
-                <?php } ?>
-                <div class="container">
-                    <div class="sign">
-                        <?php if (isset($_SESSION['name'])) { ?>
-                            <nav>
-                                <div class="btn-group dropdown">
-                                    <button type="button" style="margin-left: 60px !important;"  class="btn btn-success text-white dropdown-toggle navbar"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                        <?= $_SESSION['name']; ?>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <?php if ($_SESSION['role'] == 1) { ?>
-                                            <li><a class="dropdown-item" href="<?= assets('admin/dashboard') ?>">پنل
-                                                    ادمین</a></li>
-                                        <?php } ?>
-                                        <?php if ($_SESSION['w'] == 1) { ?>
-                                            <li><a class="dropdown-item" href="<?= assets('panelcp/') ?>">پنل کاربری</a>
-                                </li>
-                                <li><a class="dropdown-item" href="<?= assets('profile/'.getByUser('user_name').'/'.getByUser('id')) ?>">پروفایل</a>
-                                            <li><a class="dropdown-item" href="<?= assets('user/posts/create') ?>">نوشتن
-                                                    مقاله</a></li>
-                                            <li><a class="dropdown-item" href="<?= assets('user/post/1') ?>">نمایش
-                                                    مقالات</a></li>
-                                            <li><a class="dropdown-item" href="<?= assets('userbrand/create') ?>">نوشتن
-                                                    تبلیغات برند ها</a></li>
-                                            <li><a class="dropdown-item" href="<?= assets('user/brand/1') ?>">مقاله های
-                                                    برند ها</a></li>
-                                        <?php } ?>
-                                        <li><a class="dropdown-item" href="#"><?= $_SESSION['user_name'] ?></a></li>
-                                        <li><a class="dropdown-item" href="<?= assets('logout') ?>">خروج</a></li>
-                                    </ul>
-                                </div>
-                            </nav>
-                        <?php } else { ?>
-                            <a class="mt-2" href="<?= assets('register'); ?>"> ثبت نام </a>
-                            <a class="mt-2" href="<?= assets('login'); ?>"> ورود </a>
-                        <?php } ?>
-                    </div>
-
-                </div>
-            </ul>
-        </nav>
-        <span class="signmobile">
-          <a> <i class="fas fa-user-lock"></i> </a
-          ></span>
-    </div>
-
-    <nav class="main-menu">
-        <ul>
-            <li><a href="<?= assets('/') ?>">صفحه اصلی</a></li>
-            <?php foreach ($menu as $m) { ?>
-                <li><a href="<?= assets('posts/categories/' . $m['id'] . "/1") ?>"><?= $m['title'] ?></a></li>
-            <?php } ?>
-        </ul>
+    <nav class="site-nav" data-site-nav aria-label="منوی اصلی">
+      <ul class="site-nav__list">
+        <li><a href="<?= assets('/') ?>">خانه</a></li>
+        <li><a href="<?= assets('cities') ?>">شهرهای تحت پوشش</a></li>
+        <?php if (!empty($menu) && is_array($menu)): ?>
+          <?php foreach ($menu as $m): ?>
+            <li><a href="<?= assets('posts/categories/' . (int)$m['id'] . '/1') ?>"><?= htmlspecialchars(isset($m['title']) ? $m['title'] : '', ENT_QUOTES, 'UTF-8') ?></a></li>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </ul>
     </nav>
-    <div class="container">
-        <div class="sign">
-            <?php if (isset($_SESSION['name'])) { ?>
-                <nav>
-                    <div style="margin-left: 4rem;" class="btn-group dropdown">
-                        <button type="button" class="btn btn-success text-white dropdown-toggle navbar"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                            <?= $_SESSION['name']; ?>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <?php if ($_SESSION['role'] == 1) { ?>
-                                <li><a class="dropdown-item" href="<?= assets('admin/dashboard') ?>">پنل ادمین</a></li>
-                            <?php } ?>
-                            <?php if ($_SESSION['w'] == 1) { ?>
-                                <li><a class="dropdown-item" href="<?= assets('panelcp/') ?>">پنل کاربری</a>
-                                </li>
-                                <li><a class="dropdown-item" href="<?= assets('profile/'.getByUser('user_name').'/'.getByUser('id')) ?>">پروفایل</a>
-                                </li>
-                                </li>
-                                <li><a class="dropdown-item" href="<?= assets('user/posts/create') ?>">نوشتن مقاله</a>
-                                </li>
-                                <li><a class="dropdown-item" href="<?= assets('user/post/1') ?>">نمایش مقالات</a></li>
-                                <li><a class="dropdown-item" href="<?= assets('userbrand/create') ?>">نوشتن تبلیغات برند
-                                        ها</a></li>
-                                <li><a class="dropdown-item" href="<?= assets('user/brand/1') ?>">مقاله های برند ها</a>
-                                </li>
-                            <?php } ?>
-                            <li><a class="dropdown-item" href="#"><?= $_SESSION['user_name'] ?></a></li>
-                            <li><a class="dropdown-item" href="<?= assets('logout') ?>">خروج</a></li>
-                        </ul>
-                    </div>
-                </nav>
-            <?php } else { ?>
-                <a href="<?= assets('register'); ?>"> ثبت نام </a>
-                <a href="<?= assets('login'); ?>"> ورود </a>
-            <?php } ?>
-        </div>
 
+    <div class="site-header__actions">
+      <button class="icon-btn search-trigger" type="button" data-search-toggle aria-expanded="false" aria-label="باز کردن جستجو">⌕</button>
+
+      <?php if (isset($_SESSION['name'])): ?>
+        <details class="account-menu">
+          <summary><?= htmlspecialchars((string)$_SESSION['name'], ENT_QUOTES, 'UTF-8') ?> ▾</summary>
+          <div class="account-menu__dropdown">
+            <?php if (isset($_SESSION['role']) && (int)$_SESSION['role'] === 1): ?><a href="<?= assets('admin/dashboard') ?>">پنل ادمین</a><?php endif; ?>
+            <?php if (isset($_SESSION['w']) && (int)$_SESSION['w'] === 1): ?>
+              <a href="<?= assets('panelcp/') ?>">پنل کاربری</a>
+              <a href="<?= assets('profile/'.getByUser('user_name').'/'.getByUser('id')) ?>">پروفایل</a>
+              <a href="<?= assets('user/posts/create') ?>">نوشتن مقاله</a>
+              <a href="<?= assets('user/post/1') ?>">مقالات من</a>
+              <a href="<?= assets('userbrand/create') ?>">ثبت محتوای برند</a>
+              <a href="<?= assets('user/brand/1') ?>">محتوای برند من</a>
+            <?php endif; ?>
+            <a href="<?= assets('logout') ?>">خروج</a>
+          </div>
+        </details>
+      <?php else: ?>
+        <div class="auth-actions">
+          <a href="<?= assets('login') ?>">ورود</a>
+          <a href="<?= assets('register') ?>">ثبت‌نام</a>
+        </div>
+      <?php endif; ?>
+
+      <button class="icon-btn menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-label="باز کردن منو">☰</button>
     </div>
+  </div>
+
+  <div class="search-panel" data-search-panel>
+    <div class="site-container search-panel__inner">
+      <form method="post" action="<?= assets('search/1') ?>" class="search-form" role="search">
+        <input name="search" type="search" placeholder="نام شهر، برند یا موضوع را جستجو کنید" aria-label="جستجو">
+        <button class="btn-site btn-site--primary" type="submit">جستجو</button>
+      </form>
+    </div>
+  </div>
 </header>
-<!-- // end header  -->

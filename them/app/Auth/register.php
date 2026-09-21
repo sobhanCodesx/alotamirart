@@ -1,58 +1,45 @@
+<?php
+$error = flash('msg');
+$name = isset($_SESSION['name_temp']) ? (string)$_SESSION['name_temp'] : '';
+$username = isset($_SESSION['user_name_temp']) ? (string)$_SESSION['user_name_temp'] : '';
+$email = isset($_SESSION['email_temp']) ? (string)$_SESSION['email_temp'] : '';
+$phone = isset($_SESSION['phon_temp']) ? (string)$_SESSION['phon_temp'] : '';
+?>
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <?php require_once BASE_PATH . "/them/app/layout/heading.php" ?>
-    <link rel="stylesheet" href="<?= assets('public/src/css/auth.css') ?>">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,600' rel='stylesheet'
-          type='text/css'>
-    <link href="//netdna.bootstrapcdn.com/font-awesome/3.1.1/css/font-awesome.css" rel="stylesheet">
-    <title>ثبت نام</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ثبت‌نام | <?= htmlspecialchars(isset($dataSeo['title']) ? strip_tags($dataSeo['title']) : 'الو تعمیراتچی', ENT_QUOTES, 'UTF-8') ?></title>
+<meta name="robots" content="noindex,follow">
+<?php require BASE_PATH . '/them/app/layout/heading.php'; ?>
 </head>
 <body>
-<?php require_once BASE_PATH . "/them/app/layout/header.php" ?>
-
-<div class="container mt-3">
-    <div class="testbox">
-        <h1>ثبت نام</h1>
-        <form action="<?= assets('registered') ?>" method="POST">
-            <label id="icon" class="box-icon" for="name"><i class="icon-user icon-reg"></i></label>
-            <input type="text" value="<?php if(!empty($_SESSION['name_temp'])){ echo getByUser('name_temp'); ?><?php }?>" class="box-icon p-2" name="name" id="name" placeholder="نام و نام خانوادگی" required/>
-            <label id="icon" class="box-icon" for="user_name"><i class="fa fa-address-card icon-reg"></i></label>
-            <input type="text" value="<?php if(!empty($_SESSION['user_name_temp'])){ echo getByUser('user_name_temp'); ?><?php }?>" class="box-icon p-2" name="user_name" id="name" placeholder="نام کاربری"/ required>
-            <label id="icon" class="box-icon" for="email"><i class="icon-envelope  icon-reg"></i></label>
-            <input type="text" value="<?php if(!empty($_SESSION['email_temp'])){ echo getByUser('email_temp'); ?><?php }?>" class="p-2" name="email" id="name" placeholder="ایمیل"/ required>
-            <label id="icon" class="box-icon" for="phon"><i class="fa fa-phone icon-reg"></i></label>
-            <input type="text" value="<?php if(!empty($_SESSION['phon_temp'])){ echo getByUser('phon_temp'); ?><?php }?>" class="p-2" name="phon" id="name" placeholder="شماره تماس"/ required>
-            <label id="icon" for="name"><i class="icon-shield icon-reg"></i></label>
-            <input type="password" value="<?php if(!empty($_SESSION['password_temp'])){ echo getByUser('password_temp'); ?><?php }?>" class="p-2" name="password" id="name" placeholder="پسورد"/ required>
-            <label id="icon" for="name"><i class="icon-shield icon-reg"></i></label>
-            <input type="password" class="p-2" name="password_two" placeholder="تکرار پسورد"/ required>
-            <input type="submit" value="ارسال" class="btn btn-success">
-        </form>
-    </div>
+<?php require BASE_PATH . '/them/app/layout/header.php'; ?>
+<main id="main-content" class="auth-page">
+<div class="auth-shell">
+<aside class="auth-aside">
+<div><span class="hero__badge">ایجاد حساب</span><h1>به جمع کاربران بپیوندید</h1><p>حساب خود را بسازید تا پروفایل و امکانات محتوایی در دسترس شما باشد.</p></div>
+<ul><li>✓ ثبت‌نام سریع و ساده</li><li>✓ طراحی بهینه برای موبایل</li><li>✓ دسترسی یکپارچه به حساب</li></ul>
+</aside>
+<section class="auth-card">
+<h2>ثبت‌نام</h2>
+<p class="auth-card__lead">اطلاعات زیر را تکمیل کنید. فیلدهای اصلی الزامی هستند.</p>
+<?php if ($error !== ''): ?><div class="alert-site alert-site--danger"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+<form action="<?= assets('registered') ?>" method="post" class="form-grid">
+<div class="form-group"><label class="form-label" for="reg-name">نام و نام خانوادگی</label><input class="form-control-site" type="text" name="name" id="reg-name" value="<?= htmlspecialchars($name,ENT_QUOTES,'UTF-8') ?>" autocomplete="name" required></div>
+<div class="form-group"><label class="form-label" for="reg-user">نام کاربری</label><input class="form-control-site" type="text" name="user_name" id="reg-user" value="<?= htmlspecialchars($username,ENT_QUOTES,'UTF-8') ?>" autocomplete="username" required></div>
+<div class="form-group"><label class="form-label" for="reg-email">ایمیل</label><input class="form-control-site" type="email" name="email" id="reg-email" value="<?= htmlspecialchars($email,ENT_QUOTES,'UTF-8') ?>" autocomplete="email" required></div>
+<div class="form-group"><label class="form-label" for="reg-phone">شماره تماس</label><input class="form-control-site" type="tel" name="phon" id="reg-phone" value="<?= htmlspecialchars($phone,ENT_QUOTES,'UTF-8') ?>" autocomplete="tel"></div>
+<div class="form-group"><label class="form-label" for="reg-pass">رمز عبور</label><input class="form-control-site" type="password" name="password" id="reg-pass" autocomplete="new-password" required></div>
+<div class="form-group"><label class="form-label" for="reg-pass2">تکرار رمز عبور</label><input class="form-control-site" type="password" name="password_two" id="reg-pass2" autocomplete="new-password" required></div>
+<div class="form-group form-group--full"><button class="btn-site btn-site--primary btn-site--block" type="submit">ساخت حساب</button></div>
+</form>
+<p class="auth-footer-note">قبلاً ثبت‌نام کرده‌اید؟ <a href="<?= assets('login') ?>">وارد شوید</a></p>
+</section>
 </div>
-<?php require_once BASE_PATH . "/them/app/layout/footer.php" ?>
-<?php require_once BASE_PATH . "/them/app/layout/js.php" ?>
-<script>
-
-    <?php
-    $message = flash('msg');
-    if (!empty($message)) {
-    ?>
-
-    Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: '<?=$message ?>!',
-    })
-
-    <?php
-    } ?>
-</script>
+</main>
+<?php require BASE_PATH . '/them/app/layout/footer.php'; ?>
+<?php require BASE_PATH . '/them/app/layout/js.php'; ?>
 </body>
 </html>
