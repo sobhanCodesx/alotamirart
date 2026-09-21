@@ -17,12 +17,11 @@ if ($db->connect_error) {
 }
 
 // ===== گرفتن اطلاعات از آدرس =====
-$serviceSlug = isset($_GET['service']) ? $_GET['service'] : 'refrigerator';
-$citySlug = isset($_GET['city']) ? $_GET['city'] : 'tehran';
+$serviceSlug = !empty($serviceSlug) ? $serviceSlug : (isset($_GET['service']) ? $_GET['service'] : 'refrigerator');
+$citySlug = !empty($city['slug']) ? $city['slug'] : (isset($_GET['city']) ? $_GET['city'] : 'tehran');
 
 // ===== دریافت اطلاعات شهر =====
-$city = null;
-if (!empty($citySlug)) {
+if (empty($city) && !empty($citySlug)) {
     $stmt = $db->prepare("SELECT * FROM cities WHERE slug = ? AND status = 1");
     $stmt->bind_param("s", $citySlug);
     $stmt->execute();
@@ -1210,7 +1209,7 @@ $ogImage = "https://alotamiratchi.ir/assets/images/logo.png";
     }
     </script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;800;900&display=swap" rel="stylesheet" />
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     
     <style>
@@ -1344,8 +1343,12 @@ $ogImage = "https://alotamiratchi.ir/assets/images/logo.png";
             .contact-row .btn { justify-content: center; }
         }
     </style>
+    <?php require_once BASE_PATH . '/them/app/layout/heading.php'; ?>
+    <link rel="stylesheet" href="<?= assets('public/src/css/legacy-public.css') ?>">
 </head>
-<body>
+<body class="legacy-service-page">
+<?php require_once BASE_PATH . '/them/app/layout/header.php'; ?>
+<main id="main-content" class="legacy-service-main">
 
 <div class="container">
 
@@ -1488,6 +1491,9 @@ $ogImage = "https://alotamiratchi.ir/assets/images/logo.png";
 
 </div>
 
+</main>
+<?php require_once BASE_PATH . '/them/app/layout/footer.php'; ?>
+<?php require_once BASE_PATH . '/them/app/layout/js.php'; ?>
 </body>
 </html>
 <?php
