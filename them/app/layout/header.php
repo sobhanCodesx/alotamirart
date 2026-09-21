@@ -1,8 +1,8 @@
 <?php
-$siteTitle = isset($dataSeo['title']) ? strip_tags((string) $dataSeo['title']) : 'الو تعمیراتچی';
+$siteTitle = isset($dataSeo['title']) ? clean_display_text($dataSeo['title']) : 'الو تعمیراتچی';
 $logo = isset($dataSeo['logo']) ? $dataSeo['logo'] : 'public/src/img/logo.png';
-$phone = isset($dataFooter['phon']) ? strip_tags((string) $dataFooter['phon']) : '';
-$email = isset($dataFooter['email']) ? strip_tags((string) $dataFooter['email']) : '';
+$phone = isset($dataFooter['phon']) ? clean_display_text($dataFooter['phon']) : '';
+$email = isset($dataFooter['email']) ? clean_display_text($dataFooter['email']) : '';
 $phoneHref = preg_replace('/[^\d+]/', '', $phone);
 ?>
 <a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
@@ -15,6 +15,7 @@ $phoneHref = preg_replace('/[^\d+]/', '', $phone);
     <div class="site-topbar__group"><span>خدمات تخصصی تعمیر لوازم خانگی</span></div>
   </div>
 </div>
+
 <header class="site-header">
   <div class="site-container site-header__inner">
     <a class="site-logo" href="<?= assets('/') ?>" aria-label="<?= htmlspecialchars($siteTitle, ENT_QUOTES, 'UTF-8') ?>">
@@ -27,10 +28,40 @@ $phoneHref = preg_replace('/[^\d+]/', '', $phone);
         <li><a href="<?= assets('cities') ?>">شهرهای تحت پوشش</a></li>
         <?php if (!empty($menu) && is_array($menu)): ?>
           <?php foreach ($menu as $m): ?>
-            <li><a href="<?= assets('posts/categories/' . (int)$m['id'] . '/1') ?>"><?= htmlspecialchars(isset($m['title']) ? $m['title'] : '', ENT_QUOTES, 'UTF-8') ?></a></li>
+            <li><a href="<?= assets('posts/categories/' . (int)$m['id'] . '/1') ?>"><?= htmlspecialchars(clean_display_text(isset($m['title']) ? $m['title'] : ''), ENT_QUOTES, 'UTF-8') ?></a></li>
           <?php endforeach; ?>
         <?php endif; ?>
       </ul>
+
+      <div class="site-nav__mobile-tools">
+        <form method="post" action="<?= assets('search/1') ?>" class="mobile-nav-search" role="search">
+          <input name="search" type="search" placeholder="جستجو در سایت" aria-label="جستجو در سایت">
+          <button type="submit">جستجو</button>
+        </form>
+
+        <?php if (isset($_SESSION['name'])): ?>
+          <div class="mobile-account-card">
+            <div class="mobile-account-card__name"><?= htmlspecialchars((string)$_SESSION['name'], ENT_QUOTES, 'UTF-8') ?></div>
+            <div class="mobile-account-links">
+              <?php if (isset($_SESSION['role']) && (int)$_SESSION['role'] === 1): ?><a href="<?= assets('admin/dashboard') ?>">پنل ادمین</a><?php endif; ?>
+              <?php if (isset($_SESSION['w']) && (int)$_SESSION['w'] === 1): ?>
+                <a href="<?= assets('panelcp/') ?>">پنل کاربری</a>
+                <a href="<?= assets('profile/'.getByUser('user_name').'/'.getByUser('id')) ?>">پروفایل</a>
+                <a href="<?= assets('user/posts/create') ?>">مقاله جدید</a>
+                <a href="<?= assets('user/post/1') ?>">مقالات من</a>
+                <a href="<?= assets('userbrand/create') ?>">محتوای برند جدید</a>
+                <a href="<?= assets('user/brand/1') ?>">محتوای برند من</a>
+              <?php endif; ?>
+              <a href="<?= assets('logout') ?>">خروج</a>
+            </div>
+          </div>
+        <?php else: ?>
+          <div class="mobile-auth-actions">
+            <a class="btn-site btn-site--primary" href="<?= assets('login') ?>">ورود</a>
+            <a class="btn-site btn-site--light" href="<?= assets('register') ?>">ثبت‌نام</a>
+          </div>
+        <?php endif; ?>
+      </div>
     </nav>
 
     <div class="site-header__actions">
@@ -59,7 +90,9 @@ $phoneHref = preg_replace('/[^\d+]/', '', $phone);
         </div>
       <?php endif; ?>
 
-      <button class="icon-btn menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-label="باز کردن منو">☰</button>
+      <button class="icon-btn menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobile-site-nav" aria-label="باز کردن منو">
+        <span data-menu-icon aria-hidden="true">☰</span>
+      </button>
     </div>
   </div>
 
