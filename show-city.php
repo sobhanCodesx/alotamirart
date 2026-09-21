@@ -220,6 +220,4 @@ if (!isset($city) || !is_array($city)) {
 </body>
 </html>
 <?php
-if (isset($stmt)) $stmt->close();
-$db->close();
-?>
+if (isset($stmt)) $stmt->close();?>
