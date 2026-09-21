@@ -2,12 +2,15 @@
 // ============================================================
 // تنظیمات دیتابیس
 // ============================================================
-$host = 'localhost';
-$dbname = 'mbziliwc_danesh';
-$username = 'mbziliwc_danesh';
-$password = '9711212103';
+$dbConfig = require __DIR__ . '/config/database.php';
 
-$db = new mysqli($host, $username, $password, $dbname);
+$db = new mysqli(
+    $dbConfig['host'],
+    $dbConfig['username'],
+    $dbConfig['password'],
+    $dbConfig['name']
+);
+unset($dbConfig);
 if ($db->connect_error) {
     die("❌ خطا: " . $db->connect_error);
 }
