@@ -2,7 +2,9 @@
 $found = isset($err) && $err === true && !empty($post);
 $title = $found && isset($post['title']) ? strip_tags((string)$post['title']) : 'مقاله یافت نشد';
 $description = $found && isset($post['description']) ? strip_tags((string)$post['description']) : '';
-$authorName = !empty($user['name']) ? strip_tags((string)$user['name']) : 'تحریریه';
+$authorName = !empty($user['name']) ? clean_display_text($user['name']) : 'تحریریه';
+$authorPhone = !empty($user['phon']) ? clean_display_text($user['phon']) : '';
+$authorPhoneHref = $authorPhone !== '' ? preg_replace('/[^\d+]/', '', $authorPhone) : '';
 ?>
 <!doctype html><html lang="fa" dir="rtl"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -27,6 +29,15 @@ $authorName = !empty($user['name']) ? strip_tags((string)$user['name']) : 'تح�
 <span><?= (int)$view ?> بازدید</span>
 <?php if(!empty($post['created_at'])): ?><span><?= htmlspecialchars((string)$post['created_at'],ENT_QUOTES,'UTF-8') ?></span><?php endif; ?>
 </div>
+<?php if($authorPhone !== ''): ?>
+<div class="article-contact">
+  <div>
+    <strong>تماس با نویسنده / تعمیرکار</strong>
+    <span><?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?></span>
+  </div>
+  <a href="tel:<?= htmlspecialchars($authorPhoneHref,ENT_QUOTES,'UTF-8') ?>" aria-label="تماس با <?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?>"><?= htmlspecialchars($authorPhone,ENT_QUOTES,'UTF-8') ?></a>
+</div>
+<?php endif; ?>
 <div class="article-content"><?= isset($post['content']) ? $post['content'] : '' ?></div>
 </div>
 </article>
