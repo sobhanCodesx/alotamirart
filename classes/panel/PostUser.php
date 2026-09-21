@@ -107,9 +107,12 @@ class PostUser extends Panel
 
         $data = [
             'title' => $req['title'],
+            'description' => isset($req['description']) ? $req['description'] : (isset($currentPost['description']) ? $currentPost['description'] : ''),
             'content' => $req['content'],
-            'category_id' => isset($req['category_id']) ? $req['category_id'] : $currentPost['category_id'],
-            'status' => isset($req['status']) ? $req['status'] : $currentPost['status']
+            'tags' => isset($req['tags']) ? $req['tags'] : (isset($currentPost['tags']) ? $currentPost['tags'] : ''),
+            'post_id' => isset($req['post_id']) ? $req['post_id'] : (isset($currentPost['post_id']) ? $currentPost['post_id'] : null),
+            'status' => isset($req['status']) ? $req['status'] : $currentPost['status'],
+            'user_id' => isset($currentPost['user_id']) ? $currentPost['user_id'] : (isset($_SESSION['id']) ? $_SESSION['id'] : 0)
         ];
 
         if (isset($req['title']) && !empty($req['title'])) {
