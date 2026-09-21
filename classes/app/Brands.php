@@ -27,14 +27,14 @@ class Brands
         require_once BASE_PATH . '/them/app/brands/categories.php';
     }
 
-    public function show($id, $slug)
+    public function show($slug, $id)
     {
         $err = null;
         $db = new DataBase();
         $dataSeo = $db->getLastInsert('seo');
         $dataHeader = $db->getLastInsert('header');
         $dataFooter = $db->getLastInsert('footer');
-        $array = [$id , $slug];
+        $array = [$slug, $id];
         $menu = $db->select('SELECT * FROM menu WHERE NOT id = 5 ORDER BY sort')->fetchAll();
         
         // ===== اصلاح: استفاده از selectOne برای دریافت یک رکورد =====
