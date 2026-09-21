@@ -1,66 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex,nofollow">
-    <?php include BASE_PATH . '/them/admin/layout/head.php' ?>
-    <title>نمایش پست - <?=$_SESSION['name'] ?></title>
-</head>
-<body>
-<?php include BASE_PATH . '/them/panel/sidbar.php'; ?>
-    <div class="content-wrapper">
-        <div class="content-header">
-        <div class="container">
-        <div class="alert alert-info">
-            <h3><?=$_SESSION['name'] ?></h3>
-            <p>نمایش مقاله های برند </p>
-        </div>
-    <table class="table mt-3">
-        <thead>
-        <tr>
-            <th scope="col">ردیف</th>
-            <th scope="col">عنوان</th>
-            <th scope="col">عکس</th>
-            <th scope="col">وضعیت</th>
-        </tr>
-        </thead>
-        <tbody>
-        <?php
-        $count = 1;
-        foreach ($post as $c) { ?>
-            <tr>
-                <th scope="row"><?= $count++ ?></th>
-                <td><?= $c['title'] ?></td>
-                <td><img src="<?= assets($c['img']) ?>" style="width:80px;height:100px" class="img-row-post"></td>
-                <td><a class="btn btn-info" href="<?= $c['status'] == 0 ? assets('user/brand/update/'.$c['id']) : assets('post/brand/'.$c['id']) ?>"><?=$c['status'] == 0 ? 'آپدیت' : 'مشاهده مقاله'  ?></a><br>
-                        <p class="<?=$c['status'] == 0 ? 'badge bg-warning' : 'badge bg-success' ?>"><?=$c['status'] == 0 ? 'درحال بررسی' : 'تایید شده' ?></p>
-                    </td>
-        <?php } ?>
-        </tbody>
-    </table>
-    <div class="container mt-5 mb-3">
-                    <nav aria-label="Page navigation example">
-                        <ul class="pagination">
-                            <li class="page-item">
-                                <a class="page-link" href="#" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-                            <?php echo get_pag($page,'user/brand', $pages, ''); ?>
-                            <li class="page-item">
-                                <a class="page-link" href="#" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-        </div>
-</div>
-    </div>
-        </div>
-    </div>
-    <?php include BASE_PATH . '/them/admin/layout/js.php'; ?>
-</body>
-</html>
+<?php $current=max(1,(int)$page);$total=max(1,(int)$pages); ?>
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>محتوای برند من</title>
+<?php require BASE_PATH.'/them/app/layout/heading.php'; ?><link rel="stylesheet" href="<?= assets('public/src/css/user-panel.css') ?>"></head><body class="user-panel-page">
+<?php require BASE_PATH.'/them/app/layout/header.php'; ?><main id="main-content" class="user-panel-shell"><div class="site-container">
+<div class="user-panel-head"><div><h1>محتوای برند من</h1><p>مطالب مرتبط با برندها و وضعیت انتشار آن‌ها</p></div><a class="btn-site btn-site--primary" href="<?= assets('userbrand/create') ?>">محتوای جدید</a></div>
+<div class="user-panel-grid"><nav class="user-panel-nav"><div class="user-panel-nav__user"><strong><?= htmlspecialchars((string)getByUser('name'),ENT_QUOTES,'UTF-8') ?></strong></div><a href="<?= assets('panelcp') ?>">حساب</a><a href="<?= assets('user/post/1') ?>">مقالات من</a><a class="is-active" href="<?= assets('user/brand/1') ?>">محتوای برند</a></nav>
+<section class="user-panel-card"><?php if(!empty($post)): ?><div class="user-table-wrap"><table class="user-table"><thead><tr><th>#</th><th>عنوان</th><th>تصویر</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>
+<?php $n=(($current-1)*5)+1;foreach($post as $item): ?><?php $viewUrl=assets((isset($item['slug'])?$item['slug']:'').'/'.(int)$item['id']); ?><tr><td><?= $n++ ?></td><td><?= htmlspecialchars(strip_tags($item['title']),ENT_QUOTES,'UTF-8') ?></td><td><?php if(!empty($item['img'])): ?><img src="<?= assets($item['img']) ?>" alt="" width="68" height="52" loading="lazy"><?php endif; ?></td><td><span class="status-pill <?= (int)$item['status']===1?'status-pill--ok':'status-pill--pending' ?>"><?= (int)$item['status']===1?'تأیید شده':'در حال بررسی' ?></span></td><td><a class="row-action" href="<?= (int)$item['status']===1?$viewUrl:assets('user/brand/update/'.(int)$item['id']) ?>"><?= (int)$item['status']===1?'مشاهده':'ویرایش' ?></a></td></tr><?php endforeach; ?>
+</tbody></table></div><?php else: ?><div class="panel-empty">هنوز محتوای برندی ثبت نکرده‌اید.</div><?php endif; ?>
+<?php if($total>1): ?><nav class="pagination-site"><?php for($i=max(1,$current-2);$i<=min($total,$current+2);$i++): ?><a class="<?= $i===$current?'is-active':'' ?>" href="<?= assets('user/brand/'.$i) ?>"><?= $i ?></a><?php endfor; ?></nav><?php endif; ?></section></div></div></main>
+<?php require BASE_PATH.'/them/app/layout/footer.php'; ?><?php require BASE_PATH.'/them/app/layout/js.php'; ?></body></html>
