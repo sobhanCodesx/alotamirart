@@ -3,6 +3,8 @@
   const body=document.body;
   const menu=document.querySelector("[data-menu-toggle]");
   const nav=document.querySelector("[data-site-nav]");
+  const backdrop=document.querySelector("[data-nav-backdrop]");
+  const closeButton=document.querySelector("[data-menu-close]");
   const searchButtons=document.querySelectorAll("[data-search-toggle]");
   const searchPanel=document.querySelector("[data-search-panel]");
   const backTop=document.querySelector("[data-back-top]");
@@ -22,11 +24,12 @@
     });
   }
   if(nav){
-    nav.addEventListener("click",function(e){if(e.target.closest("a")&&window.innerWidth<=1100) closeNav();});
+    nav.addEventListener("click",function(e){
+      if(e.target.closest("a")&&window.innerWidth<=1100) closeNav();
+    });
   }
-  document.addEventListener("click",function(e){
-    if(body.classList.contains("nav-open")&&window.innerWidth<=1100&&!e.target.closest("[data-site-nav]")&&!e.target.closest("[data-menu-toggle]")) closeNav();
-  });
+  if(backdrop) backdrop.addEventListener("click",closeNav);
+  if(closeButton) closeButton.addEventListener("click",closeNav);
   searchButtons.forEach(function(btn){
     btn.addEventListener("click",function(){
       if(!searchPanel) return;
