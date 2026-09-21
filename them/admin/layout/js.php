@@ -37,10 +37,13 @@
   <!-- AdminLTE for demo purposes -->
   <script src="<?= assets('them/admin/dist/js/demo.js'); ?>"></script>
   <script src="<?= assets('them/admin/dist/editor/plugin.js'); ?>"></script>
+<?php if (empty($skipDefaultCkeditor)): ?>
 <script src="<?= assets('them/admin/plugins/ckeditor/ckeditor.js')?>"></script>
-
 <script>
     $(document).ready(function() {
-      CKEDITOR.replace('editor1');
-    })
- </script>
+        if (window.CKEDITOR && document.getElementById('editor1') && !CKEDITOR.instances.editor1) {
+            CKEDITOR.replace('editor1');
+        }
+    });
+</script>
+<?php endif; ?>
