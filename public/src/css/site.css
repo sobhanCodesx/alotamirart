@@ -1437,3 +1437,14 @@ button{cursor:pointer}
     padding:0 12px;
   }
 }
+
+@media(max-width:620px){
+  .mobile-contact-bar{
+    transition:transform .22s ease,opacity .22s ease;
+  }
+  body.nav-open .mobile-contact-bar{
+    opacity:0;
+    pointer-events:none;
+    transform:translateY(120%);
+  }
+}
