@@ -8,7 +8,7 @@ Recommended indexes should be checked against the production schema before creat
 - users(email)
 - cities(slug, status)
 - posts(status, created_at)
-- posts(category_id, status, created_at)
+- posts(post_id, status, created_at)
 - posts(user_id, created_at)
 - post_brand(status, created_at)
 - post_brand(brand_id, status, updated_at)
