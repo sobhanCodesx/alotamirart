@@ -12,6 +12,7 @@ unset($dbConfig);
 
 /// reqir
 require_once './database/DataBase.php';
+require_once './router/LegacyRouteMatcher.php';
 require_once './classes/admin/index.php';
 require_once './classes/admin/cities/AdminCities.php';
 require_once './classes/admin/Admin.php';
@@ -170,34 +171,10 @@ function uri($path, $class, $method, $methodfild = "GET")
     }
 
     $requestPath = parse_url(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/', PHP_URL_PATH);
-    $requestPath = trim(rawurldecode((string)$requestPath), '/ ');
-    $routePath = trim((string)$path, '/ ');
+    $parameters = LegacyRouteMatcher::match($path, (string)$requestPath);
 
-    if ($routePath === '' && $requestPath === '') {
-        $parameters = [];
-    } else {
-        $parts = preg_split(
-            '/(\{[A-Za-z_][A-Za-z0-9_]*\})/',
-            $routePath,
-            -1,
-            PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
-        );
-
-        $regex = '';
-        foreach ($parts as $part) {
-            if (preg_match('/^\{[A-Za-z_][A-Za-z0-9_]*\}$/', $part)) {
-                $regex .= '([^/]+)';
-            } else {
-                $regex .= preg_quote($part, '#');
-            }
-        }
-
-        if (!preg_match('#^' . $regex . '$#u', $requestPath, $matches)) {
-            return false;
-        }
-
-        array_shift($matches);
-        $parameters = array_map('rawurldecode', $matches);
+    if ($parameters === null) {
+        return false;
     }
 
     if (strtoupper($methodfild) === 'POST') {
