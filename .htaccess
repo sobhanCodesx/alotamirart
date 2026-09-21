@@ -1,31 +1,44 @@
+DirectoryIndex index.php
+
 RewriteEngine On
 RewriteBase /
 
-# ===== هدایت به HTTPS =====
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
-# ===== اگر فایل یا پوشه وجود دارد، تغییر مسیر نده =====
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(?:app|bootstrap|config|storage|classes|database|router|reqires)(?:/|$) - [F,L,NC]
 
-# ===== هدایت آدرس‌های سئو شده به service-city.php =====
-RewriteRule ^refrigerator-repair-in-([a-zA-Z0-9-]+)$ service-city.php?service=refrigerator&city=$1 [L,QSA]
-RewriteRule ^washing-machine-repair-in-([a-zA-Z0-9-]+)$ service-city.php?service=washing-machine&city=$1 [L,QSA]
-RewriteRule ^air-conditioner-repair-in-([a-zA-Z0-9-]+)$ service-city.php?service=air-conditioner&city=$1 [L,QSA]
-RewriteRule ^tv-repair-in-([a-zA-Z0-9-]+)$ service-city.php?service=tv&city=$1 [L,QSA]
-RewriteRule ^oven-repair-in-([a-zA-Z0-9-]+)$ service-city.php?service=oven&city=$1 [L,QSA]
-RewriteRule ^dishwasher-repair-in-([a-zA-Z0-9-]+)$ service-city.php?service=dishwasher&city=$1 [L,QSA]
+RewriteRule ^(?:service-city|show-city|city-services|service-washing-machine)\.php$ index.php [QSA,L,NC]
 
-# ===== هدایت آدرس‌های خدمات شهر =====
-RewriteRule ^services-in-([a-zA-Z0-9-]+)$ show-city.php?city=$1 [L,QSA]
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-# ===== هدایت لیست شهرها =====
-RewriteRule ^cities$ cities/index.php [L,QSA]
+RewriteRule ^ index.php [QSA,L]
 
-# ===== اگر هیچکدام از قوانین بالا اجرا نشد =====
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.+)$ index.php [QSA,L]
-ErrorDocument 404 /404.php
-RewriteRule ^washing-machine-repair-in-([a-zA-Z0-9-]+)$ service-washing-machine.php?city=$1 [L,QSA]
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript application/javascript application/json application/xml image/svg+xml
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType text/javascript "access plus 7 days"
+    ExpiresByType image/jpeg "access plus 30 days"
+    ExpiresByType image/png "access plus 30 days"
+    ExpiresByType image/gif "access plus 30 days"
+    ExpiresByType image/webp "access plus 30 days"
+    ExpiresByType image/svg+xml "access plus 30 days"
+    ExpiresByType font/woff "access plus 30 days"
+    ExpiresByType font/woff2 "access plus 30 days"
+</IfModule>
+
+<IfModule mod_headers.c>
+    <FilesMatch "\.(?:css|js|jpg|jpeg|png|gif|webp|svg|woff|woff2)$">
+        Header set Cache-Control "public, max-age=604800"
+    </FilesMatch>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
