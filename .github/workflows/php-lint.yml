@@ -21,6 +21,7 @@ jobs:
           set -e
           find app bootstrap config routes -type f -name '*.php' -print0 | xargs -0 -n1 php -l
           php -l index.php
+          php -l dev-router.php
           php -l service-city.php
           php -l show-city.php
       - name: Router smoke tests
