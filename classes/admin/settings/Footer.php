@@ -12,37 +12,43 @@ class Footer extends Admin
     public function create($req)
     {
         $db = new \DataBase();
-        $randone = rand(1,400);
-        if (empty($req)) $this->redirectBack();
+        if (empty($req)) $this->redirectBack('admin/settings/footer');
 
-        if (empty($req['id'])) {
+        $id = !empty($req['id']) ? (int) $req['id'] : 0;
+        $current = $id ? $db->new_select('*', 'footer', 'id', $id) : null;
+        $newImage = null;
+        $oldImage = null;
 
-            if ($req['img_footer']['tmp_name'] != null) {
-
-                $req['img_footer'] = $this->saveImage($req['img_footer'], $randone.'-img');
-
-            } else {
-                flash('msg-post', 'لطفا  عکس را وارد کنید');
-                $this->redirectBack();
-                exit();
+        if (isset($req['img_footer']) && is_array($req['img_footer']) && !empty($req['img_footer']['tmp_name'])) {
+            $newImage = $this->saveImage($req['img_footer'], uniqid('footer-', true));
+            if (!$newImage) {
+                flash('msg-post', 'آپلود تصویر فوتر انجام نشد');
+                $this->redirectBack('admin/settings/footer');
             }
-            $db->insert('footer', array_keys($req), $req);
-            flash('SuccessFooter', 'اطلاعات ثبت شد');
-            $this->redirectBack();
-
+            $req['img_footer'] = $newImage;
+            if ($current && !empty($current['img_footer'])) $oldImage = $current['img_footer'];
         } else {
-            $data = $db->select("SELECT * FROM footer WHERE id = ?",$req['id'])->fetch();
-            if ($req['img_footer']['tmp_name'] != null) {
-                $this->removeImage($data['img_footer']);
-                $req['img_footer'] = $this->saveImage($req['img_footer'], $randone.'-img');
-            } else {
-
-                unset($req['img_footer']);
-            }
-
-            $db->update('footer', $req['id'], array_keys($req), $req);
-            flash('SuccessFooter', 'اطلاعات بروز شد');
-            $this->redirectBack();
+            unset($req['img_footer']);
         }
+
+        if (!$id && !$newImage) {
+            flash('msg-post', 'لطفا عکس فوتر را وارد کنید');
+            $this->redirectBack('admin/settings/footer');
+        }
+
+        unset($req['id']);
+        $ok = $id
+            ? $db->update('footer', $id, array_keys($req), array_values($req))
+            : $db->insert('footer', array_keys($req), array_values($req)) !== false;
+
+        if (!$ok) {
+            if ($newImage) $this->removeImage($newImage);
+            flash('msg-post', 'ذخیره تنظیمات فوتر انجام نشد');
+            $this->redirectBack('admin/settings/footer');
+        }
+
+        if ($oldImage) $this->removeImage($oldImage);
+        flash('SuccessFooter', $id ? 'اطلاعات بروز شد' : 'اطلاعات ثبت شد');
+        $this->redirectBack('admin/settings/footer');
     }
 }

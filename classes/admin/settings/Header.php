@@ -8,61 +8,53 @@ class Header extends Admin
         $data = $db->getLastInsert('header');
         require_once BASE_PATH . "/them/admin/pages/setting/header.php";
     }
+
     public function create($req)
     {
         $db = new \DataBase();
-        $randone = rand(1,100);
-        $randtwo = rand(100,200);
-        $randtree = rand(200,300);
-        if (empty($req)) $this->redirectBack();
+        if (empty($req)) $this->redirectBack('admin/settings/header');
 
-        if (empty($req['id'])) {
+        $id = !empty($req['id']) ? (int) $req['id'] : 0;
+        $current = $id ? $db->new_select('*', 'header', 'id', $id) : null;
+        $fields = ['img_one', 'img_two', 'img_tree'];
+        $oldImages = [];
+        $newImages = [];
 
-            if ($req['img_one']['tmp_name'] != null and $req['img_two']['tmp_name'] != null and $req['img_tree']['tmp_name'] != null) {
-
-                $req['img_one'] = $this->saveImage($req['img_one'], $randone.'-img-img_one');
-                $req['img_two'] = $this->saveImage($req['img_two'], $randtwo.'-img-img_two');
-                $req['img_tree'] = $this->saveImage($req['img_tree'], $randtree.'-img-img_tree');
-
+        foreach ($fields as $field) {
+            if (isset($req[$field]) && is_array($req[$field]) && !empty($req[$field]['tmp_name'])) {
+                $saved = $this->saveImage($req[$field], uniqid($field . '-', true));
+                if (!$saved) {
+                    foreach ($newImages as $path) $this->removeImage($path);
+                    flash('msg-post', 'آپلود تصویر انجام نشد');
+                    $this->redirectBack('admin/settings/header');
+                }
+                $req[$field] = $saved;
+                $newImages[$field] = $saved;
+                if ($current && !empty($current[$field])) $oldImages[$field] = $current[$field];
             } else {
-                flash('msg-post', 'لطفا  عکس را وارد کنید');
-                $this->redirectBack();
-                exit();
+                unset($req[$field]);
             }
-            $db->insert('header', array_keys($req), $req);
-            flash('SuccessHeader', 'اطلاعات ثبت شد');
-            $this->redirectBack();
-
-        } else {
-
-            $data = $db->select("SELECT * FROM header WHERE id = ?",$req['id'])->fetch();
-
-
-
-            if ($req['img_one']['tmp_name'] != null) {
-                $this->removeImage($data['img_one']);
-                $req['img_one'] = $this->saveImage($req['img_one'], $randone.'-img_img-one');
-            } else {
-
-                unset($req['img_one']);
-            }
-
-            if ($req['img_two']['tmp_name'] != null) {
-                $this->removeImage($data['img_two']);
-                $req['img_two'] = $this->saveImage($req['img_two'], $randtwo.'-img_img-tree');
-            } else {
-                unset($req['img_two']);
-            }
-
-            if ($req['img_tree']['tmp_name'] != null) {
-                $this->removeImage($data['img_tree']);
-                $req['img_tree'] = $this->saveImage($req['img_tree'], $randtree.'-img_img-tree');
-            } else {
-                unset($req['img_tree']);
-            }
-            $db->update('header', $req['id'], array_keys($req), $req);
-            flash('SuccessHeader', 'اطلاعات بروز شد');
-            $this->redirectBack();
         }
+
+        if (!$id && count($newImages) !== count($fields)) {
+            foreach ($newImages as $path) $this->removeImage($path);
+            flash('msg-post', 'لطفا هر سه عکس را وارد کنید');
+            $this->redirectBack('admin/settings/header');
+        }
+
+        unset($req['id']);
+        $ok = $id
+            ? $db->update('header', $id, array_keys($req), array_values($req))
+            : $db->insert('header', array_keys($req), array_values($req)) !== false;
+
+        if (!$ok) {
+            foreach ($newImages as $path) $this->removeImage($path);
+            flash('msg-post', 'ذخیره تنظیمات هدر انجام نشد');
+            $this->redirectBack('admin/settings/header');
+        }
+
+        foreach ($oldImages as $path) $this->removeImage($path);
+        flash('SuccessHeader', $id ? 'اطلاعات بروز شد' : 'اطلاعات ثبت شد');
+        $this->redirectBack('admin/settings/header');
     }
 }

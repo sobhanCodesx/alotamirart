@@ -1,3 +1,4 @@
+<?php $skipDefaultCkeditor = true; ?>
 <!DOCTYPE html>
 <html lang="fa">
 

@@ -221,6 +221,7 @@ $title = isset($_POST['title']) ? $_POST['title'] : '';
 $keyword = isset($_POST['keyword']) ? $_POST['keyword'] : ''; // کلمه کلیدی اصلی
 $description = isset($_POST['description']) ? $_POST['description'] : '';
 
+$skipDefaultCkeditor = true;
 $seoResult = null;
 if (!empty($content)) {
     $seoResult = analyzeSEO($content, $keyword, $title, $description);
@@ -392,7 +393,8 @@ if (!empty($content)) {
                 <h1 class="page-title">🚀 افزودن پست جدید + تحلیل سئو</h1>
 
                 <!-- ===== فرم ===== -->
-                <form action="" method="POST" enctype="multipart/form-data">
+                <form action="<?= assets('admin/posts/created') ?>" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="user_id" value="<?= isset($_SESSION['id']) ? (int) $_SESSION['id'] : 0 ?>">
                     <div class="row">
                         <div class="col-6">
                             <label class="form-label">عنوان مقاله</label>
@@ -428,7 +430,8 @@ if (!empty($content)) {
                     <label class="form-label">متن اصلی مقاله</label>
                     <textarea name="content" id="editor1"><?= isset($_POST['content']) ? htmlspecialchars($_POST['content']) : '' ?></textarea>
                     
-                    <button type="submit" class="btn-submit">📊 تحلیل سئو + ذخیره</button>
+                    <button type="submit" class="btn-submit">💾 ذخیره مقاله</button>
+                    <button type="submit" class="btn-submit" formaction="<?= assets('admin/posts/create') ?>" formmethod="POST">📊 فقط تحلیل سئو</button>
                 </form>
 
                 <!-- ===== نمایش نتایج تحلیل ===== -->

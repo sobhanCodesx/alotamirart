@@ -15,7 +15,10 @@ uri('admin/menu/deleted/{id}', 'Menu', 'deleted');
 ///////////////////// routing posts ///////////////////
 uri('admin/posts/index/{page}', 'Post', 'index');
 uri('admin/posts/create', 'Post', 'create');
+uri('admin/posts/create', 'Post', 'create', 'POST');
 uri('admin/posts/created', 'Post', 'created', 'POST');
+uri('admin/upload-image.php', 'Post', 'uploadImageCkeditor', 'POST');
+uri('admin/upload-image-ajax.php', 'Post', 'uploadImageAjax', 'POST');
 uri('admin/posts/update/{id}', 'Post', 'update');
 uri('admin/posts/updated/{id}', 'Post', 'updated', 'POST');
 uri('admin/posts/deleted/{id}', 'Post', 'deleted');

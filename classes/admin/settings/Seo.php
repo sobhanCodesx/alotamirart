@@ -1,6 +1,5 @@
 <?php
 
-
 class Seo extends Admin
 {
     public function index()
@@ -13,47 +12,51 @@ class Seo extends Admin
     public function create($req)
     {
         $db = new \DataBase();
-        $randone = rand(1,100);
-        $randtwo = rand(100,200);
-        if (empty($req)) $this->redirectBack();
+        if (empty($req)) $this->redirectBack('admin/settings/seo');
 
-        if (empty($req['id'])) {
+        $id = !empty($req['id']) ? (int) $req['id'] : 0;
+        $current = $id ? $db->new_select('*', 'seo', 'id', $id) : null;
+        $oldImages = [];
+        $newImages = [];
 
-            if ($req['logo']['tmp_name'] != null and $req['header']['tmp_name'] != null) {
-
-                $req['logo'] = $this->saveImage($req['logo'], $randone.'-img');
-                $req['header'] = $this->saveImage($req['header'], $randtwo.'-img');
-
+        foreach (['logo', 'header'] as $field) {
+            if (isset($req[$field]) && is_array($req[$field]) && !empty($req[$field]['tmp_name'])) {
+                $saved = $this->saveImage($req[$field], uniqid($field . '-', true));
+                if (!$saved) {
+                    foreach ($newImages as $path) $this->removeImage($path);
+                    flash('msg-post', 'آپلود تصویر انجام نشد');
+                    $this->redirectBack('admin/settings/seo');
+                }
+                $req[$field] = $saved;
+                $newImages[$field] = $saved;
+                if ($current && !empty($current[$field])) $oldImages[$field] = $current[$field];
             } else {
-                flash('msg-post', 'لطفا  عکس را وارد کنید');
-                $this->redirectBack();
-                exit();
+                unset($req[$field]);
             }
-            $db->insert('seo', array_keys($req), $req);
-            flash('SuccessSeo', 'اطلاعات ثبت شد');
-            $this->redirectBack();
-
-        } else {
-            $data = $db->select("SELECT * FROM seo WHERE id = ?",$req['id'])->fetch();
-            if ($req['logo']['tmp_name'] != null) {
-                $this->removeImage($data['logo']);
-                $req['logo'] = $this->saveImage($req['logo'], $randone.'-img');
-            } else {
-
-                unset($req['logo']);
-            }
-
-            if ($req['header']['tmp_name'] != null) {
-                $this->removeImage($data['header']);
-                $req['header'] = $this->saveImage($req['header'], $randtwo.'-img');
-            } else {
-                unset($req['header']);
-            }
-
-
-            $db->update('seo', $req['id'], array_keys($req), $req);
-            flash('SuccessSeo', 'اطلاعات بروز شد');
-            $this->redirectBack();
         }
+
+        if (!$id && (!isset($newImages['logo']) || !isset($newImages['header']))) {
+            foreach ($newImages as $path) $this->removeImage($path);
+            flash('msg-post', 'لطفا عکس‌ها را وارد کنید');
+            $this->redirectBack('admin/settings/seo');
+        }
+
+        if ($id) {
+            unset($req['id']);
+            $ok = $db->update('seo', $id, array_keys($req), array_values($req));
+        } else {
+            unset($req['id']);
+            $ok = $db->insert('seo', array_keys($req), array_values($req)) !== false;
+        }
+
+        if (!$ok) {
+            foreach ($newImages as $path) $this->removeImage($path);
+            flash('msg-post', 'ذخیره تنظیمات سئو انجام نشد');
+            $this->redirectBack('admin/settings/seo');
+        }
+
+        foreach ($oldImages as $path) $this->removeImage($path);
+        flash('SuccessSeo', $id ? 'اطلاعات بروز شد' : 'اطلاعات ثبت شد');
+        $this->redirectBack('admin/settings/seo');
     }
 }
