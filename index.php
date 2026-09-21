@@ -13,6 +13,7 @@ unset($dbConfig);
 /// reqir
 require_once './database/DataBase.php';
 require_once './classes/admin/index.php';
+require_once './classes/admin/cities/AdminCities.php';
 require_once './classes/admin/Admin.php';
 require_once "./classes/admin/menu/Menu.php";
 require_once "./classes/admin/posts/Post.php";
