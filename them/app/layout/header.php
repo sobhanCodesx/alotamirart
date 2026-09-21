@@ -91,7 +91,7 @@ $phoneHref = preg_replace('/[^\d+]/', '', $phone);
       <?php endif; ?>
 
       <button class="icon-btn menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobile-site-nav" aria-label="باز کردن منو">
-        <span data-menu-icon aria-hidden="true">☰</span>
+        <span class="hamburger-icon" aria-hidden="true"><span></span></span>
       </button>
     </div>
   </div>
