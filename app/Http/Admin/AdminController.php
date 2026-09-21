@@ -1,0 +1,38 @@
+<?php
+namespace App\Http\Admin;
+
+use App\Core\Database;
+use App\Core\Request;
+use App\Core\View;
+use App\Http\Controller;
+use App\Services\AuthService;
+use App\Services\SiteContext;
+use App\Services\UploadService;
+
+abstract class AdminController extends Controller
+{
+    protected $db;
+    protected $auth;
+
+    public function __construct(Request $request, View $view, SiteContext $site, UploadService $uploads, Database $db, AuthService $auth)
+    {
+        parent::__construct($request, $view, $site, $uploads);
+        $this->db = $db;
+        $this->auth = $auth;
+        $this->auth->requireAdmin();
+    }
+
+    protected function page($page, $perPage)
+    {
+        $page = max(1, (int) $page);
+        return [$page, ($page - 1) * $perPage];
+    }
+
+    protected function slug($value)
+    {
+        $value = trim((string) $value);
+        $value = preg_replace('/\s+/u', '-', $value);
+        $value = preg_replace('/[^\pL\pN\-]+/u', '', $value);
+        return trim(mb_strtolower($value, 'UTF-8'), '-');
+    }
+}
