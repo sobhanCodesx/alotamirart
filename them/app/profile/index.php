@@ -1,7 +1,7 @@
 <?php
-$name=isset($user['name'])?strip_tags((string)$user['name']):'کاربر';
-$bio=isset($user['bio'])?trim(strip_tags((string)$user['bio'])):'';
-$title=isset($user['title'])?trim(strip_tags((string)$user['title'])):'';
+$name=isset($user['name'])?clean_display_text($user['name']):'کاربر';
+$bio=isset($user['bio'])?clean_display_text($user['bio']):'';
+$title=isset($user['title'])?clean_display_text($user['title']):'';
 $avatar=!empty($user['img'])?$user['img']:'them/admin/dist/img/avatar.png';
 ?>
 <!doctype html><html lang="fa" dir="rtl"><head>
@@ -25,14 +25,14 @@ $avatar=!empty($user['img'])?$user['img']:'them/admin/dist/img/avatar.png';
 </div></section>
 <section class="site-section"><div class="site-container profile-columns">
 <div><div class="section-head"><div><span class="site-eyebrow">نوشته‌ها</span><h2 class="site-title">آخرین مقالات</h2></div></div>
-<?php if(!empty($posts)): ?><div style="display:grid;gap:14px"><?php foreach($posts as $item): ?><article class="content-card" style="display:grid;grid-template-columns:130px minmax(0,1fr)">
-<a class="content-card__media" style="aspect-ratio:auto;height:100%" href="<?= assets('post/'.(int)$item['id']) ?>"><img src="<?= assets($item['img']) ?>" alt="<?= htmlspecialchars(strip_tags($item['title']),ENT_QUOTES,'UTF-8') ?>" width="260" height="180" loading="lazy"></a>
-<div class="content-card__body"><h3><a href="<?= assets('post/'.(int)$item['id']) ?>"><?= htmlspecialchars(strip_tags($item['title']),ENT_QUOTES,'UTF-8') ?></a></h3><p><?= htmlspecialchars(limit_words(strip_tags(isset($item['content'])?$item['content']:''),18),ENT_QUOTES,'UTF-8') ?></p><span class="content-card__meta"><?= (int)(isset($item['view'])?$item['view']:0) ?> بازدید</span></div></article><?php endforeach; ?></div>
+<?php if(!empty($posts)): ?><div style="display:grid;gap:14px"><?php foreach($posts as $item): ?><article class="content-card profile-content-card">
+<a class="content-card__media profile-content-card__media" href="<?= assets('post/'.(int)$item['id']) ?>"><img src="<?= assets($item['img']) ?>" alt="<?= htmlspecialchars(clean_display_text($item['title']),ENT_QUOTES,'UTF-8') ?>" width="260" height="180" loading="lazy"></a>
+<div class="content-card__body"><h3><a href="<?= assets('post/'.(int)$item['id']) ?>"><?= htmlspecialchars(clean_display_text($item['title']),ENT_QUOTES,'UTF-8') ?></a></h3><p><?= htmlspecialchars(excerpt_text(isset($item['content'])?$item['content']:'',18),ENT_QUOTES,'UTF-8') ?></p><span class="content-card__meta"><?= (int)(isset($item['view'])?$item['view']:0) ?> بازدید</span></div></article><?php endforeach; ?></div>
 <?php else: ?><div class="empty-state"><p>هنوز مقاله‌ای منتشر نشده است.</p></div><?php endif; ?></div>
 <div><div class="section-head"><div><span class="site-eyebrow">برندها</span><h2 class="site-title">محتوای برند</h2></div></div>
-<?php if(!empty($brand)): ?><div style="display:grid;gap:14px"><?php foreach($brand as $item): ?><?php $url=assets((isset($item['slug'])?$item['slug']:'').'/'.(int)$item['id']); ?><article class="content-card" style="display:grid;grid-template-columns:130px minmax(0,1fr)">
-<a class="content-card__media" style="aspect-ratio:auto;height:100%" href="<?= $url ?>"><img src="<?= assets($item['img']) ?>" alt="<?= htmlspecialchars(strip_tags($item['title']),ENT_QUOTES,'UTF-8') ?>" width="260" height="180" loading="lazy"></a>
-<div class="content-card__body"><h3><a href="<?= $url ?>"><?= htmlspecialchars(strip_tags($item['title']),ENT_QUOTES,'UTF-8') ?></a></h3><p><?= htmlspecialchars(limit_words(strip_tags(isset($item['content'])?$item['content']:''),18),ENT_QUOTES,'UTF-8') ?></p><span class="content-card__meta"><?= (int)(isset($item['view'])?$item['view']:0) ?> بازدید</span></div></article><?php endforeach; ?></div>
+<?php if(!empty($brand)): ?><div style="display:grid;gap:14px"><?php foreach($brand as $item): ?><?php $url=assets((isset($item['slug'])?$item['slug']:'').'/'.(int)$item['id']); ?><article class="content-card profile-content-card">
+<a class="content-card__media profile-content-card__media" href="<?= $url ?>"><img src="<?= assets($item['img']) ?>" alt="<?= htmlspecialchars(clean_display_text($item['title']),ENT_QUOTES,'UTF-8') ?>" width="260" height="180" loading="lazy"></a>
+<div class="content-card__body"><h3><a href="<?= $url ?>"><?= htmlspecialchars(clean_display_text($item['title']),ENT_QUOTES,'UTF-8') ?></a></h3><p><?= htmlspecialchars(excerpt_text(isset($item['content'])?$item['content']:'',18),ENT_QUOTES,'UTF-8') ?></p><span class="content-card__meta"><?= (int)(isset($item['view'])?$item['view']:0) ?> بازدید</span></div></article><?php endforeach; ?></div>
 <?php else: ?><div class="empty-state"><p>هنوز محتوای برندی منتشر نشده است.</p></div><?php endif; ?></div>
 </div></section>
 </main>
