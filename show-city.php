@@ -1,15 +1,51 @@
 <?php
-if (!defined('APP_BOOTSTRAPPED')) {
-    require __DIR__ . '/index.php';
-    return;
+// ============================================================
+// اتصال به دیتابیس
+// ============================================================
+$dbConfig = require __DIR__ . '/config/database.php';
+$dbConfig = $dbConfig['primary'];
+
+$db = new mysqli(
+    $dbConfig['host'],
+    $dbConfig['username'],
+    $dbConfig['password'],
+    $dbConfig['name']
+);
+unset($dbConfig);
+if ($db->connect_error) {
+    die("❌ خطا: " . $db->connect_error);
 }
 
-if (!isset($city) || !is_array($city)) {
-    http_response_code(404);
-    echo 'شهر مورد نظر یافت نشد';
-    return;
+// ===== گرفتن نام شهر از آدرس =====
+$citySlug = isset($_GET['city']) ? $_GET['city'] : '';
+
+// اگر خالی بود، از آدرس بگیر
+if (empty($citySlug)) {
+    $path = $_SERVER['REQUEST_URI'];
+    $parts = explode('/', trim($path, '/'));
+    $citySlug = end($parts);
+}
+
+// ===== دریافت اطلاعات شهر =====
+$city = null;
+if (!empty($citySlug)) {
+    $stmt = $db->prepare("SELECT * FROM cities WHERE slug = ? AND status = 1");
+    $stmt->bind_param("s", $citySlug);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $city = $result->fetch_assoc();
+}
+
+// ===== اگر شهر پیدا نشد =====
+if (!$city) {
+    // شهر پیش‌فرض برای تست
+    $city = [
+        'name' => 'تهران',
+        'slug' => 'tehran'
+    ];
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -220,4 +256,6 @@ if (!isset($city) || !is_array($city)) {
 </body>
 </html>
 <?php
-if (isset($stmt)) $stmt->close();?>
+if (isset($stmt)) $stmt->close();
+$db->close();
+?>

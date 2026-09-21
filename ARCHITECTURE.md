@@ -1,43 +1,36 @@
 # AloTamirArt architecture
 
-This application is intentionally built for shared PHP hosting: no daemon, no queue worker, no Redis requirement, no framework bootstrap overhead, and no Composer requirement at runtime.
+## Compatibility-first rule
 
-## Request flow
+The production runtime deliberately preserves the behavior that existed before the architecture refactor. The compatibility baseline is commit ab233f8e83150a1ea7f4c3f09de187f782edfa70.
 
-Apache htaccess -> root index.php -> bootstrap/app.php -> lightweight Router -> controller -> Database/services -> existing PHP views.
+No legacy route, form contract, authentication behavior, database schema, or public URL should be replaced only for architectural cleanliness. New components must be introduced behind compatibility boundaries and activated only after tests prove equivalent behavior.
 
-The document root stays at the repository root because many shared-hosting panels do not allow changing it. Internal directories are denied by htaccess.
+## Active production request flow
 
-## Directories
+Apache .htaccess -> index.php -> legacy router files -> existing classes -> existing views.
 
-- app/Core: request lifecycle, router, PDO connection, view renderer, cache, logging and container.
-- app/Services: shared site context, authentication and uploads.
-- app/Http/Controllers: public website controllers.
-- app/Http/Admin: admin controllers.
-- app/Http/Panel: writer/user panel controllers.
-- routes: route definitions only.
-- config: editable application/database configuration.
-- storage/cache: filesystem cache suitable for shared hosting.
-- storage/logs: application error logs.
-- them: existing views/assets kept for business compatibility.
+This is intentional. The newer app/Core, app/Http, app/Services, bootstrap and routes directories are a migration target, not the active production request path yet.
 
-## Performance decisions
+## Safe improvements currently active
 
-- One lazy PDO connection per request.
-- Native prepared statements with utf8mb4.
-- No persistent PDO connections, which are often harmful on shared hosting.
-- Common SEO/header/footer/menu data is memoized in-request and cached on disk.
-- Admin changes invalidate the relevant shared cache.
-- Static assets receive browser-cache headers and compression when Apache modules are available.
-- The router and autoloader are small dependency-free PHP code that benefits from host OPcache automatically.
-- Profile view counts are fetched without N+1 PHP query loops.
+- Database connection settings are centralized in config/database.php.
+- Historical DB constants are preserved separately in that same file to avoid an accidental compatibility break.
+- DataBase keeps its historical public API and global instance.
+- Multiple DataBase objects in one PHP request reuse one PDO connection.
+- Standalone city/service pages keep their original HTML, SQL and URL behavior while reading credentials from the central config.
+- The original Apache rewrite rules remain active.
+- Compatibility checks run in CI before future migration work is merged.
 
-## Compatibility
+## Migration strategy
 
-Existing public URLs, admin URLs and writer-panel URLs are retained. Existing views are reused so the rewrite changes the execution architecture without replacing the site's visual/business layer in one risky deployment.
+1. Freeze the legacy behavior as a contract.
+2. Add a replacement component without changing the active route.
+3. Add equivalence tests for inputs, outputs and side effects.
+4. Switch one bounded feature at a time.
+5. Keep rollback possible through ordinary Git commits.
+6. Remove old code only after the replacement has been proven in production.
 
-Legacy plaintext passwords are accepted once and transparently migrated to password_hash on successful login.
+## Shared hosting
 
-## Shared-hosting deployment
-
-Set the real database values in config/database.php, or host environment variables if supported. Ensure storage/cache, storage/logs, and upload directories are writable by PHP. PHP 7.4+ is required; PHP 8.1+ is recommended.
+The active runtime requires only normal PHP, Apache rewrite support and MySQL. No Redis, daemon, queue worker, Docker, supervisor, persistent process or server-level service is required.
