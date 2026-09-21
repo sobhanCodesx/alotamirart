@@ -34,6 +34,7 @@ abstract class PanelController extends Controller
         $value = trim((string) $value);
         $value = preg_replace('/\s+/u', '-', $value);
         $value = preg_replace('/[^\pL\pN\-]+/u', '', $value);
-        return trim(mb_strtolower($value, 'UTF-8'), '-');
+        $value = function_exists('mb_strtolower') ? mb_strtolower($value, 'UTF-8') : strtolower($value);
+        return trim($value, '-');
     }
 }

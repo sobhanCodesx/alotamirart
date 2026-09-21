@@ -22,3 +22,5 @@ jobs:
           php -l index.php
           php -l service-city.php
           php -l show-city.php
+      - name: Router smoke tests
+        run: php tests/router-smoke.php

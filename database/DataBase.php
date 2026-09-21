@@ -1,187 +1,105 @@
 <?php
-
+/**
+ * Backward-compatible database facade.
+ *
+ * New code uses App\Core\Database directly. This class remains so old views or
+ * legacy files cannot accidentally create a second database configuration path.
+ */
 class DataBase
 {
-    private $conn;
-    private $option = array(
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
-    );
+    private $db;
 
     public function __construct()
     {
-        $config = require __DIR__ . '/../config/database.php';
-
-        try {
-            $this->conn = new PDO(
-                'mysql:host=' . $config['host'] . ';dbname=' . $config['name'],
-                $config['username'],
-                $config['password'],
-                $this->option
-            );
-        } catch (PDOException $e) {
-            die("❌ خطا در اتصال به دیتابیس: " . $e->getMessage());
+        if (!class_exists(\App\Core\Database::class)) {
+            throw new RuntimeException('Application bootstrap must be loaded before DataBase.');
         }
+
+        $this->db = new \App\Core\Database(\App\Core\Config::load('database'));
     }
 
     public function select($sql, $values = [])
     {
-        try {
-            $stmt = $this->conn->prepare($sql);
-            if (!is_array($values)) $values = [$values];
-            $stmt->execute($values);
-            return $stmt;
-        } catch (PDOException $e) {
-            echo "❌ خطا در SELECT: " . $e->getMessage();
-            return false;
-        }
+        return $this->db->statement($sql, $this->values($values));
     }
 
-    // ===== ✅ متد selectOne (جدید) =====
     public function selectOne($sql, $values = [])
     {
-        try {
-            $stmt = $this->conn->prepare($sql);
-            if (!is_array($values)) $values = [$values];
-            $stmt->execute($values);
-            return $stmt->fetch();
-        } catch (PDOException $e) {
-            echo "❌ خطا در SELECT ONE: " . $e->getMessage();
-            return false;
-        }
+        return $this->db->fetch($sql, $this->values($values));
     }
 
     public function selectAll($sql, $values = [])
     {
-        try {
-            $stmt = $this->conn->prepare($sql);
-            if (!is_array($values)) $values = [$values];
-            $stmt->execute($values);
-            return $stmt->fetchAll();
-        } catch (PDOException $e) {
-            echo "❌ خطا در SELECT ALL: " . $e->getMessage();
-            return false;
-        }
+        return $this->db->fetchAll($sql, $this->values($values));
     }
 
     public function new_select($fields, $tableName, $where, $value)
     {
-        try {
-            $stmt = $this->conn->prepare("SELECT {$fields} FROM {$tableName} WHERE {$where} = ?");
-            $stmt->execute([$value]);
-            return $stmt->fetch();
-        } catch (PDOException $e) {
-            echo "❌ خطا در NEW_SELECT: " . $e->getMessage();
-            return false;
-        }
+        $this->identifier($tableName);
+        $this->identifier($where);
+        return $this->db->fetch(
+            'SELECT ' . $fields . ' FROM ' . $tableName . ' WHERE ' . $where . ' = ? LIMIT 1',
+            [$value]
+        );
     }
 
     public function all($sql, $values = [])
     {
-        try {
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute($values);
-            return $stmt->fetchAll();
-        } catch (PDOException $e) {
-            echo "❌ خطا در ALL: " . $e->getMessage();
-            return false;
-        }
+        return $this->db->fetchAll($sql, $this->values($values));
     }
 
     public function insert($tableName, $fields, $values)
     {
-        try {
-            $placeholders = ':' . implode(', :', $fields);
-            $sql = "INSERT INTO " . $tableName . " (" . implode(', ', $fields) . ", created_at) 
-                    VALUES (" . $placeholders . ", now())";
-            $stmt = $this->conn->prepare($sql);
-            $data = array_combine($fields, $values);
-            $stmt->execute($data);
-            return $this->conn->lastInsertId();
-        } catch (PDOException $e) {
-            echo "❌ خطا در INSERT: " . $e->getMessage();
-            return false;
+        $data = [];
+        $values = array_values($values);
+        foreach (array_values($fields) as $index => $field) {
+            $data[$field] = array_key_exists($index, $values) ? $values[$index] : null;
         }
+        return $this->db->insert($tableName, $data);
     }
 
     public function update($tableName, $id, $fields, $values)
     {
-        try {
-            $sql = "UPDATE " . $tableName . " SET ";
-            $setParts = [];
-            $data = [];
-            foreach ($fields as $index => $field) {
-                $setParts[] = "`$field` = ?";
-                $data[] = $values[$index];
-            }
-            $sql .= implode(', ', $setParts);
-            $sql .= ", updated_at = now() WHERE id = ?";
-            $data[] = $id;
-            $stmt = $this->conn->prepare($sql);
-            return $stmt->execute($data);
-        } catch (PDOException $e) {
-            echo "❌ خطا در UPDATE: " . $e->getMessage();
-            return false;
+        $data = [];
+        $values = array_values($values);
+        foreach (array_values($fields) as $index => $field) {
+            $data[$field] = array_key_exists($index, $values) ? $values[$index] : null;
         }
+        return $this->db->updateById($tableName, $id, $data);
     }
 
     public function delete($tableName, $id)
     {
-        try {
-            $stmt = $this->conn->prepare("DELETE FROM " . $tableName . " WHERE id = ?");
-            return $stmt->execute([$id]);
-        } catch (PDOException $e) {
-            echo "❌ خطا در DELETE: " . $e->getMessage();
-            return false;
-        }
+        return $this->db->deleteById($tableName, $id);
     }
 
     public function query($sql, $values = [])
     {
-        try {
-            $stmt = $this->conn->prepare($sql);
-            if (!is_array($values)) $values = [$values];
-            $stmt->execute($values);
-            return $stmt;
-        } catch (PDOException $e) {
-            echo "❌ خطا در QUERY: " . $e->getMessage();
-            return false;
-        }
+        return $this->db->statement($sql, $this->values($values));
     }
 
     public function getLastInsert($tableName)
     {
-        try {
-            $stmt = $this->conn->prepare("SELECT * FROM " . $tableName . " ORDER BY id DESC LIMIT 1");
-            $stmt->execute();
-            return $stmt->fetch();
-        } catch (PDOException $e) {
-            echo "❌ خطا در GET LAST INSERT: " . $e->getMessage();
-            return false;
-        }
+        return $this->db->last($tableName);
     }
 
     public function count($tableName, $where = '', $value = null)
     {
-        try {
-            $sql = "SELECT COUNT(*) as total FROM " . $tableName;
-            if ($where) {
-                $sql .= " WHERE " . $where . " = ?";
-                $stmt = $this->conn->prepare($sql);
-                $stmt->execute([$value]);
-            } else {
-                $stmt = $this->conn->prepare($sql);
-                $stmt->execute();
-            }
-            $result = $stmt->fetch();
-            return isset($result['total']) ? $result['total'] : 0;
-        } catch (PDOException $e) {
-            echo "❌ خطا در COUNT: " . $e->getMessage();
-            return 0;
+        return $where === ''
+            ? $this->db->count($tableName)
+            : $this->db->count($tableName, $where . ' = ?', [$value]);
+    }
+
+    private function values($values)
+    {
+        if ($values === null || $values === '') return [];
+        return is_array($values) ? array_values($values) : [$values];
+    }
+
+    private function identifier($value)
+    {
+        if (!preg_match('/^[A-Za-z0-9_]+$/', (string) $value)) {
+            throw new InvalidArgumentException('Invalid SQL identifier.');
         }
     }
 }
-
-$db = new DataBase();
-?>
