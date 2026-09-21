@@ -21,7 +21,7 @@ class CityController extends Controller
     public function index()
     {
         $cities = $this->db->fetchAll('SELECT * FROM cities WHERE status = 1 ORDER BY name ASC');
-        return $this->render('them/app/cities/index.php', ['cities' => $cities]);
+        return $this->render('them/app/cities/index.php', ['cities' => $cities], true);
     }
 
     public function show($slug)
@@ -31,7 +31,7 @@ class CityController extends Controller
             http_response_code(404);
             return $this->render('404.php');
         }
-        return $this->render('them/app/cities/show.php', ['city' => $city]);
+        return $this->render('them/app/cities/show.php', ['city' => $city], true);
     }
 
     public function services($city)
@@ -41,7 +41,7 @@ class CityController extends Controller
             http_response_code(404);
             return $this->render('404.php');
         }
-        return $this->render('show-city.php', ['city' => $cityData]);
+        return $this->render('show-city.php', ['city' => $cityData], true);
     }
 
     public function serviceDetail($service, $city)
@@ -55,7 +55,7 @@ class CityController extends Controller
         return $this->render('service-city.php', [
             'city' => $cityData,
             'serviceSlug' => $service,
-        ]);
+        ], true);
     }
 
     public function legacyServices()
