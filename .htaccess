@@ -1,31 +1,17 @@
 RewriteEngine On
 RewriteBase /
 
-# ===== هدایت به HTTPS =====
+# Force HTTPS while keeping the original path/query.
 RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# ===== اگر فایل یا پوشه وجود دارد، تغییر مسیر نده =====
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-f
+# Real files and directories (assets, uploads, robots.txt, etc.) are served directly.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-# ===== هدایت آدرس‌های سئو شده به service-city.php =====
-RewriteRule ^refrigerator-repair-in-([a-zA-Z0-9-]+)$ service-city.php?service=refrigerator&city=$1 [L,QSA]
-RewriteRule ^washing-machine-repair-in-([a-zA-Z0-9-]+)$ service-city.php?service=washing-machine&city=$1 [L,QSA]
-RewriteRule ^air-conditioner-repair-in-([a-zA-Z0-9-]+)$ service-city.php?service=air-conditioner&city=$1 [L,QSA]
-RewriteRule ^tv-repair-in-([a-zA-Z0-9-]+)$ service-city.php?service=tv&city=$1 [L,QSA]
-RewriteRule ^oven-repair-in-([a-zA-Z0-9-]+)$ service-city.php?service=oven&city=$1 [L,QSA]
-RewriteRule ^dishwasher-repair-in-([a-zA-Z0-9-]+)$ service-city.php?service=dishwasher&city=$1 [L,QSA]
+# All application URLs go through the existing front controller.
+# This keeps old public URLs unchanged while allowing the router to resolve them consistently.
+RewriteRule ^ index.php [QSA,L]
 
-# ===== هدایت آدرس‌های خدمات شهر =====
-RewriteRule ^services-in-([a-zA-Z0-9-]+)$ show-city.php?city=$1 [L,QSA]
-
-# ===== هدایت لیست شهرها =====
-RewriteRule ^cities$ cities/index.php [L,QSA]
-
-# ===== اگر هیچکدام از قوانین بالا اجرا نشد =====
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.+)$ index.php [QSA,L]
 ErrorDocument 404 /404.php
-RewriteRule ^washing-machine-repair-in-([a-zA-Z0-9-]+)$ service-washing-machine.php?city=$1 [L,QSA]
