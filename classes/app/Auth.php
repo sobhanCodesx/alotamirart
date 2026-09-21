@@ -102,6 +102,7 @@ class Auth
                 $_SESSION['w']         = $user['writer'];
                 $_SESSION['writer']    = $user['writer'];   // 👈 هماهنگ‌سازی با فایل‌های دیگر
                 $_SESSION['user_name'] = $user['user_name'];
+                $_SESSION['img']       = isset($user['img']) ? $user['img'] : '';
 
                 $sName = $_SESSION['name'];
                 flash('login', "خوش آمدی $sName برای رشد کسب کارت آماده باش");
