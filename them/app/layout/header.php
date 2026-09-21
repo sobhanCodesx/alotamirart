@@ -4,6 +4,15 @@ $logo = isset($dataSeo['logo']) ? $dataSeo['logo'] : 'public/src/img/logo.png';
 $phone = isset($dataFooter['phon']) ? clean_display_text($dataFooter['phon']) : '';
 $email = isset($dataFooter['email']) ? clean_display_text($dataFooter['email']) : '';
 $phoneHref = preg_replace('/[^\d+]/', '', $phone);
+
+if (isset($_SESSION['id']) && empty($_SESSION['img'])) {
+    $headerUserDb = new DataBase();
+    $headerUser = $headerUserDb->selectOne('SELECT img FROM users WHERE id = ?', [(int)$_SESSION['id']]);
+    if (!empty($headerUser['img'])) {
+        $_SESSION['img'] = $headerUser['img'];
+    }
+}
+
 $userAvatar = !empty($_SESSION['img']) ? (string)$_SESSION['img'] : 'them/admin/dist/img/avatar.png';
 ?>
 <a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
@@ -89,7 +98,11 @@ $userAvatar = !empty($_SESSION['img']) ? (string)$_SESSION['img'] : 'them/admin/
 
       <?php if (isset($_SESSION['name'])): ?>
         <details class="account-menu">
-          <summary><?= htmlspecialchars((string)$_SESSION['name'], ENT_QUOTES, 'UTF-8') ?> ▾</summary>
+          <summary>
+            <span class="account-menu__avatar"><img src="<?= assets($userAvatar) ?>" alt="" width="32" height="32"></span>
+            <span class="account-menu__name"><?= htmlspecialchars((string)$_SESSION['name'], ENT_QUOTES, 'UTF-8') ?></span>
+            <span class="account-menu__chevron" aria-hidden="true">▾</span>
+          </summary>
           <div class="account-menu__dropdown">
             <?php if (isset($_SESSION['role']) && (int)$_SESSION['role'] === 1): ?><a href="<?= assets('admin/dashboard') ?>">پنل ادمین</a><?php endif; ?>
             <?php if (isset($_SESSION['w']) && (int)$_SESSION['w'] === 1): ?>
