@@ -103,7 +103,7 @@ class HomeController extends Controller
         }
 
         $posts = $this->db->fetchAll(
-            'SELECT * FROM posts WHERE category_id = ? AND status = 1 ORDER BY created_at DESC',
+            'SELECT * FROM posts WHERE post_id = ? AND status = 1 ORDER BY created_at DESC',
             [$category['id']]
         );
 
