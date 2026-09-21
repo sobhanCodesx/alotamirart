@@ -1467,6 +1467,4 @@ $ogImage = "https://alotamiratchi.ir/assets/images/logo.png";
 </body>
 </html>
 <?php
-if (isset($stmt)) $stmt->close();
-$db->close();
-?>
+if (isset($stmt)) $stmt->close();?>
