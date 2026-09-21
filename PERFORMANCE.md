@@ -1,22 +1,18 @@
-# Performance notes for shared hosting
+# Performance plan for shared hosting
 
-The runtime rewrite removes repeated bootstrap work and repeated database configuration. Backend performance now depends mostly on MySQL indexes and the hosting provider's PHP OPcache.
+Performance work is compatibility-first. An optimization is not enabled when it can change business behavior without an equivalence test.
 
-Recommended indexes should be checked against the production schema before creation:
+## Active safe optimizations
 
-- users(user_name)
-- users(email)
-- cities(slug, status)
-- posts(status, created_at)
-- posts(post_id, status, created_at)
-- posts(user_id, created_at)
-- post_brand(status, created_at)
-- post_brand(brand_id, status, updated_at)
-- post_brand(user_id, created_at)
-- view(post_id)
-- view_brand(post_id)
-- menu(sort)
+- One shared PDO connection is reused by all DataBase instances inside the same PHP request.
+- Database credentials are loaded from one PHP config file instead of being duplicated.
+- No persistent PDO connection is used.
+- The project remains compatible with ordinary shared PHP hosting.
 
-Do not enable persistent PDO connections on shared hosting. The application deliberately keeps one normal lazy PDO connection per PHP request.
+## Staged optimizations
 
-For the best result in the hosting panel, use PHP 8.2 or newer and enable OPcache if the provider offers a switch for it. No long-running server process is required.
+The newer lightweight router, file cache, service layer and controller architecture remain available as migration code but are not the production request path yet.
+
+They should be activated feature by feature only after compatibility tests cover the relevant legacy behavior.
+
+Database indexes, response caching, query rewrites and authentication migrations must be reviewed against the real production schema/data before activation.

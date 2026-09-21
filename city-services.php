@@ -3,6 +3,7 @@
 // تنظیمات دیتابیس
 // ============================================================
 $dbConfig = require __DIR__ . '/config/database.php';
+$dbConfig = $dbConfig['primary'];
 
 $db = new mysqli(
     $dbConfig['host'],

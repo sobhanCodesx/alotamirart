@@ -1,14 +1,14 @@
-name: PHP Lint
+name: PHP Compatibility Checks
 
 on:
   push:
     branches:
       - main
-      - architecture/shared-hosting-v2
+      - safe-compatibility-refactor
   pull_request:
 
 jobs:
-  lint:
+  compatibility:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,13 +16,23 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-      - name: Lint application PHP
+      - name: Lint active legacy runtime
         run: |
           set -e
-          find app bootstrap config routes -type f -name '*.php' -print0 | xargs -0 -n1 php -l
           php -l index.php
           php -l dev-router.php
+          php -l config/database.php
+          php -l database/DataBase.php
+          php -l city-services.php
           php -l service-city.php
+          php -l service-washing-machine.php
           php -l show-city.php
-      - name: Router smoke tests
+          find classes router -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Verify compatibility contract
+        run: php tests/legacy-compatibility.php
+      - name: Lint migration architecture
+        run: |
+          set -e
+          find app bootstrap routes -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Router smoke tests for migration layer
         run: php tests/router-smoke.php
