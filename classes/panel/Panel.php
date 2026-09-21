@@ -2,6 +2,9 @@
 
 class Panel
 {
+    protected $currentDomain;
+    protected $basePath;
+
     public function __construct()
     {
         $atch = new Auth();
