@@ -3,6 +3,7 @@ name: PHP Lint
 on:
   push:
     branches:
+      - main
       - architecture/shared-hosting-v2
   pull_request:
 
