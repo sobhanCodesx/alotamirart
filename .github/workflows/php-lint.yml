@@ -35,6 +35,8 @@ jobs:
           find them/app them/panel -type f -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Verify compatibility contract
         run: php tests/legacy-compatibility.php
+      - name: Verify legacy route contract
+        run: php tests/legacy-route-contract.php
       - name: Verify admin panel contract
         run: php tests/admin-panel-contract.php
       - name: Lint migration architecture
