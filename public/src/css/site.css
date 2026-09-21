@@ -390,3 +390,14 @@ button{cursor:pointer}
   .content-card__body{padding:16px}
   .content-card p{min-height:auto}
 }
+
+.profile-content-card{display:grid;grid-template-columns:130px minmax(0,1fr)}
+.profile-content-card__media{aspect-ratio:auto;height:100%}
+@media(max-width:620px){
+  .profile-content-card{grid-template-columns:96px minmax(0,1fr)}
+  .profile-content-card__media{min-height:132px}
+}
+@media(max-width:420px){
+  .profile-content-card{grid-template-columns:1fr}
+  .profile-content-card__media{aspect-ratio:16/9;min-height:0}
+}
