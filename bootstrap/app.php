@@ -26,7 +26,17 @@ use App\Services\SiteContext;
 use App\Services\UploadService;
 
 $appConfig = Config::load('app');
+$dbConfig = Config::load('database');
+
 date_default_timezone_set(isset($appConfig['timezone']) ? $appConfig['timezone'] : 'Asia/Tehran');
+
+if (!defined('CURRENT_DOMAIN')) define('CURRENT_DOMAIN', rtrim(currentdomain(), '/') . '/');
+if (!defined('DISPLAY_ERROR')) define('DISPLAY_ERROR', !empty($appConfig['debug']));
+if (!defined('DB_HOST')) define('DB_HOST', isset($dbConfig['host']) ? $dbConfig['host'] : 'localhost');
+if (!defined('DB_NAME')) define('DB_NAME', isset($dbConfig['name']) ? $dbConfig['name'] : '');
+if (!defined('BD_NAME')) define('BD_NAME', DB_NAME);
+if (!defined('DB_USERNAME')) define('DB_USERNAME', isset($dbConfig['username']) ? $dbConfig['username'] : '');
+if (!defined('DB_PASSWORD')) define('DB_PASSWORD', isset($dbConfig['password']) ? $dbConfig['password'] : '');
 
 if (!empty($appConfig['debug'])) {
     ini_set('display_errors', '1');
@@ -52,7 +62,7 @@ $container = new Container();
 $request = Request::capture();
 $container->instance(Request::class, $request);
 
-$container->singleton(Database::class, function () { return new Database(Config::load('database')); });
+$container->singleton(Database::class, function () use ($dbConfig) { return new Database($dbConfig); });
 $container->singleton(FileCache::class, function () use ($appConfig) {
     $cache = isset($appConfig['cache']) ? $appConfig['cache'] : [];
     return new FileCache(
@@ -66,7 +76,81 @@ $container->singleton(SiteContext::class, function ($c) { return new SiteContext
 $container->singleton(AuthService::class, function ($c) { return new AuthService($c->get(Database::class)); });
 $container->singleton(UploadService::class, function () { return new UploadService(BASE_PATH); });
 
+$publicControllers = [
+    App\Http\Controllers\HomeController::class,
+    App\Http\Controllers\PostController::class,
+    App\Http\Controllers\BrandController::class,
+    App\Http\Controllers\CityController::class,
+    App\Http\Controllers\SitemapController::class,
+];
+foreach ($publicControllers as $class) {
+    $container->singleton($class, function ($c) use ($class) {
+        return new $class(
+            $c->get(Request::class),
+            $c->get(View::class),
+            $c->get(SiteContext::class),
+            $c->get(UploadService::class),
+            $c->get(Database::class)
+        );
+    });
+}
+
+$container->singleton(App\Http\Controllers\AuthController::class, function ($c) {
+    return new App\Http\Controllers\AuthController(
+        $c->get(Request::class),
+        $c->get(View::class),
+        $c->get(SiteContext::class),
+        $c->get(UploadService::class),
+        $c->get(Database::class),
+        $c->get(AuthService::class)
+    );
+});
+
+$adminControllers = [
+    App\Http\Admin\DashboardController::class,
+    App\Http\Admin\MenuController::class,
+    App\Http\Admin\PostController::class,
+    App\Http\Admin\UserController::class,
+    App\Http\Admin\BrandController::class,
+    App\Http\Admin\BrandPostController::class,
+    App\Http\Admin\LinkController::class,
+    App\Http\Admin\SettingsController::class,
+];
+foreach ($adminControllers as $class) {
+    $container->singleton($class, function ($c) use ($class) {
+        return new $class(
+            $c->get(Request::class),
+            $c->get(View::class),
+            $c->get(SiteContext::class),
+            $c->get(UploadService::class),
+            $c->get(Database::class),
+            $c->get(AuthService::class)
+        );
+    });
+}
+
+$panelControllers = [
+    App\Http\Panel\DashboardController::class,
+    App\Http\Panel\PostController::class,
+    App\Http\Panel\BrandController::class,
+];
+foreach ($panelControllers as $class) {
+    $container->singleton($class, function ($c) use ($class) {
+        return new $class(
+            $c->get(Request::class),
+            $c->get(View::class),
+            $c->get(SiteContext::class),
+            $c->get(UploadService::class),
+            $c->get(Database::class),
+            $c->get(AuthService::class)
+        );
+    });
+}
+
 $router = new Router($container, $request);
+require BASE_PATH . '/routes/admin.php';
+require BASE_PATH . '/routes/panel.php';
+require BASE_PATH . '/routes/web.php';
 
 return new Application(
     $container,
