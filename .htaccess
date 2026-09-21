@@ -10,6 +10,11 @@ RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
+# Legacy routing contract (kept as documentation for backward compatibility):
+# service-city.php?service=refrigerator&city=$1
+# service-city.php?service=washing-machine&city=$1
+# show-city.php?city=$1
+#
 # All application URLs go through the existing front controller.
 # This keeps old public URLs unchanged while allowing the router to resolve them consistently.
 RewriteRule ^ index.php [QSA,L]
