@@ -73,6 +73,10 @@ class Panel
         $db = new DataBase();
         $iUserId = getByUser('id');
         $aUser = $db->select("SELECT * FROM users WHERE id = ?", $iUserId)->fetch();
+        $dataSeo = $db->getLastInsert('seo');
+        $dataHeader = $db->getLastInsert('header');
+        $dataFooter = $db->getLastInsert('footer');
+        $menu = $db->select('SELECT * FROM menu WHERE NOT id = 5 ORDER BY sort')->fetchAll();
         require_once BASE_PATH . "/them/panel/index.php";
     }
 
