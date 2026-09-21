@@ -1,57 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex,nofollow">
-    <?php include BASE_PATH . '/them/admin/layout/head.php' ?>
-    <!-- <script src="//cdn.ckeditor.com/4.18.0/full/ckeditor.js"></script> -->
-    <title>ایجاد پست - <?=$_SESSION['name'] ?></title>
-</head>
-<body>
-<?php include BASE_PATH . '/them/panel/sidbar.php'; ?>
-    <div class="content-wrapper">
-        <div class="content-header">
-        <div class="container">
-    <?php
-    $message = flash('msg-post');
-    if (!empty($message)) {
-        ?>
-        <div class="mb-2 alert alert-danger p-3"><small class="form-text text-danger">
-                <?= $message ?>
-            </small></div>
-        <?php
-    } ?>
-    <form action="<?= assets('user/post/created') ?>" method="POST" enctype="multipart/form-data">
-            <label class="mt-5" for="">انتخاب تصویر</label>
-                <input type="file" class="form-control mt-2" name="img" accept="image/*">
-                <label class="mt-2" for="">عنوان ها</label>
-                <input type="text" name="title" class="form-control mt-3" placeholder="عنوان مرورگر">
-                <label class="mt-3" for="">چکیده</label>
-                <input type="text" name="description" class="form-control mt-3" placeholder="خلاصه مطلب">
-                <div class="mt-3">
-                    <textarea class="mt-3" name="content" id="editor1">
-
-                    </textarea>
-                </div>
-                <input type="hidden" value="<?=$_SESSION['id'] ?>" name="user_id">
-                
-                <label class="mt-2" for="">کلمات مرتبط</label>
-                <input type="text" name="tags" placeholder="تگ ها" class="form-control mt-4">
-                <label class="mt-2" for="">دسته بندی</label>
-                <select name="post_id" id="" class="form-control mt-3 mb-4">
-                    <?php foreach ($menus as $m) { ?>
-                        <option value="<?= $m['id'] ?>"><?= $m['title'] ?></option>
-                    <?php } ?>
-                </select>
-                <input type="submit" class="form-control mt-3 mb-5 btn btn-success" value="ارسال">
-            </form>
-    </div>
-        </div>
-    </div>
-    <?php include BASE_PATH . '/them/admin/layout/js.php'; ?>
-</body>
-</html>
-
-
+<?php $error=flash('msg-post'); ?>
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>ایجاد مقاله</title>
+<?php require BASE_PATH.'/them/app/layout/heading.php'; ?><link rel="stylesheet" href="<?= assets('public/src/css/user-panel.css') ?>"></head><body class="user-panel-page">
+<?php require BASE_PATH.'/them/app/layout/header.php'; ?><main id="main-content" class="user-panel-shell"><div class="site-container">
+<div class="user-panel-head"><div><h1>مقاله جدید</h1><p>عنوان واضح، تصویر مناسب و محتوای خوانا به تجربه بهتر مخاطب کمک می‌کند.</p></div><a class="btn-site btn-site--light" href="<?= assets('user/post/1') ?>">بازگشت به مقالات</a></div>
+<div class="user-panel-grid"><nav class="user-panel-nav"><div class="user-panel-nav__user"><strong><?= htmlspecialchars((string)getByUser('name'),ENT_QUOTES,'UTF-8') ?></strong></div><a href="<?= assets('panelcp') ?>">حساب</a><a class="is-active" href="<?= assets('user/post/1') ?>">مقالات من</a><a href="<?= assets('user/brand/1') ?>">محتوای برند</a></nav>
+<section class="user-panel-card"><h2>اطلاعات مقاله</h2><p class="user-panel-card__lead">فیلدهای اصلی را کامل کنید و سپس برای بررسی ارسال کنید.</p><?php if($error!==''): ?><div class="user-alert user-alert--danger"><?= htmlspecialchars($error,ENT_QUOTES,'UTF-8') ?></div><?php endif; ?>
+<form action="<?= assets('user/post/created') ?>" method="post" enctype="multipart/form-data"><div class="user-form-grid">
+<div class="user-form-group user-form-group--full"><label class="user-form-label">تصویر شاخص</label><input class="user-input" style="padding-top:10px" type="file" name="img" accept="image/*"></div>
+<div class="user-form-group user-form-group--full"><label class="user-form-label">عنوان</label><input class="user-input" required name="title" placeholder="عنوان مقاله"></div>
+<div class="user-form-group user-form-group--full"><label class="user-form-label">چکیده</label><input class="user-input" name="description" placeholder="خلاصه کوتاه و دقیق"></div>
+<div class="user-form-group user-form-group--full editor-wrap"><label class="user-form-label">محتوا</label><textarea class="user-textarea" required name="content" id="editor1"></textarea></div>
+<div class="user-form-group"><label class="user-form-label">کلمات مرتبط</label><input class="user-input" name="tags" placeholder="مثال: تعمیرات، یخچال"></div>
+<div class="user-form-group"><label class="user-form-label">دسته‌بندی</label><select class="user-select" name="post_id"><?php foreach($menus as $m): ?><option value="<?= (int)$m['id'] ?>"><?= htmlspecialchars($m['title'],ENT_QUOTES,'UTF-8') ?></option><?php endforeach; ?></select></div>
+</div><div style="margin-top:22px"><button class="btn-site btn-site--primary" type="submit">ارسال برای بررسی</button></div></form></section></div></div></main>
+<?php require BASE_PATH.'/them/app/layout/footer.php'; ?><script src="<?= assets('them/admin/plugins/ckeditor/ckeditor.js') ?>"></script><script>if(window.CKEDITOR){CKEDITOR.replace('editor1');}</script><?php require BASE_PATH.'/them/app/layout/js.php'; ?></body></html>
