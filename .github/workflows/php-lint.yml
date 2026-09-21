@@ -28,6 +28,11 @@ jobs:
           php -l service-washing-machine.php
           php -l show-city.php
           find classes router -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Lint public and user panel templates
+        run: |
+          set -e
+          php -l 404.php
+          find them/app them/panel -type f -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Verify compatibility contract
         run: php tests/legacy-compatibility.php
       - name: Verify admin panel contract
