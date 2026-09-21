@@ -1,32 +1,7 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لیست شهرهای تحت پوشش</title>
-    <style>
-        body { font-family: Tahoma; padding: 20px; background: #f0f0f0; direction: rtl; }
-        .box { max-width: 1000px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 16px; }
-        h1 { text-align: center; color: #0f172a; border-bottom: 3px solid #facc15; padding-bottom: 15px; }
-        .city { display: inline-block; background: #f8fafc; border: 2px solid #e9edf2; padding: 15px 25px; margin: 8px; border-radius: 12px; }
-        .city a { text-decoration: none; color: #1a1a2e; font-weight: 700; }
-        .city a:hover { color: #facc15; }
-    </style>
-</head>
-<body>
-<div class="box">
-    <h1>🏙️ شهرهای تحت پوشش</h1>
-    <div style="text-align:center;">
-        <?php if (!empty($cities)): ?>
-            <?php foreach ($cities as $city): ?>
-                <div class="city">
-                    <a href="/city/<?= $city['slug'] ?>">🏙️ <?= $city['name'] ?></a>
-                </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p style="text-align:center;color:#999;">هیچ شهری یافت نشد</p>
-        <?php endif; ?>
-    </div>
-</div>
-</body>
-</html>
+<?php $pageTitle='شهرهای تحت پوشش'; ?>
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title><?= htmlspecialchars($pageTitle,ENT_QUOTES,'UTF-8') ?> | <?= htmlspecialchars(isset($dataSeo['title'])?strip_tags($dataSeo['title']):'الو تعمیراتچی',ENT_QUOTES,'UTF-8') ?></title>
+<meta name="description" content="فهرست شهرهای تحت پوشش خدمات تعمیرات لوازم خانگی"><?php require BASE_PATH.'/them/app/layout/heading.php'; ?></head><body>
+<?php require BASE_PATH.'/them/app/layout/header.php'; ?><main id="main-content"><section class="page-hero"><div class="site-container"><div class="breadcrumbs"><a href="<?= assets('/') ?>">خانه</a> / شهرها</div><span class="site-eyebrow">پوشش خدمات</span><h1>شهرهای تحت پوشش</h1><p>شهر خود را انتخاب کنید تا سرویس‌های قابل ارائه و مسیرهای دسترسی مرتبط را ببینید.</p></div></section>
+<section class="site-section"><div class="site-container"><?php if(!empty($cities)&&is_array($cities)): ?><div class="city-grid"><?php foreach($cities as $city): ?><a class="city-card" href="<?= assets('city/'.rawurlencode($city['slug'])) ?>"><strong><?= htmlspecialchars($city['name'],ENT_QUOTES,'UTF-8') ?></strong><span>مشاهده خدمات ←</span></a><?php endforeach; ?></div><?php else: ?><div class="empty-state"><div class="empty-state__icon">⌖</div><h2>شهری ثبت نشده است</h2><p>در حال حاضر فهرست شهرهای فعال خالی است.</p></div><?php endif; ?></div></section></main>
+<?php require BASE_PATH.'/them/app/layout/footer.php'; ?><?php require BASE_PATH.'/them/app/layout/js.php'; ?></body></html>
