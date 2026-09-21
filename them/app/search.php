@@ -1,5 +1,5 @@
 <?php
-$query = isset($result) ? trim(strip_tags((string)$result)) : '';
+$query = isset($result) ? clean_display_text($result) : '';
 $title = $query !== '' ? 'نتایج جستجو برای «' . $query . '»' : 'نتایج جستجو';
 $currentPage = isset($page) ? max(1, (int)$page) : 1;
 $totalPages = isset($pages) ? max(1, (int)$pages) : 1;
@@ -27,8 +27,8 @@ $totalPages = isset($pages) ? max(1, (int)$pages) : 1;
       <div class="content-grid">
         <?php foreach ($post as $item): ?><?php $url=assets((isset($item['slug'])?$item['slug']:'').'/'.(int)$item['id']); ?>
           <article class="content-card">
-            <a class="content-card__media" href="<?= $url ?>"><img src="<?= assets($item['img']) ?>" alt="<?= htmlspecialchars(isset($item['title'])?strip_tags($item['title']):'',ENT_QUOTES,'UTF-8') ?>" width="640" height="400" loading="lazy" decoding="async"></a>
-            <div class="content-card__body"><div class="content-card__meta">نتیجه جستجو</div><h3><a href="<?= $url ?>"><?= htmlspecialchars(isset($item['title'])?strip_tags($item['title']):'',ENT_QUOTES,'UTF-8') ?></a></h3><p><?= htmlspecialchars(limit_words(strip_tags(isset($item['content'])?$item['content']:''),25),ENT_QUOTES,'UTF-8') ?></p><a class="content-card__action" href="<?= $url ?>">مشاهده نتیجه ←</a></div>
+            <a class="content-card__media" href="<?= $url ?>"><img src="<?= assets($item['img']) ?>" alt="<?= htmlspecialchars(clean_display_text(isset($item['title'])?$item['title']:''),ENT_QUOTES,'UTF-8') ?>" width="640" height="400" loading="lazy" decoding="async"></a>
+            <div class="content-card__body"><div class="content-card__meta">نتیجه جستجو</div><h3><a href="<?= $url ?>"><?= htmlspecialchars(clean_display_text(isset($item['title'])?$item['title']:''),ENT_QUOTES,'UTF-8') ?></a></h3><p><?= htmlspecialchars(excerpt_text(isset($item['content'])?$item['content']:'',25),ENT_QUOTES,'UTF-8') ?></p><a class="content-card__action" href="<?= $url ?>">مشاهده نتیجه ←</a></div>
           </article>
         <?php endforeach; ?>
       </div>
