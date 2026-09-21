@@ -266,6 +266,9 @@ button{cursor:pointer}
 
 /* Responsive */
 @media(max-width:1100px){
+  .desktop-categories-item{display:none!important}
+  .mobile-category-item{display:list-item!important}
+
   .content-grid{grid-template-columns:repeat(3,1fr)}
   .brand-grid{grid-template-columns:repeat(4,1fr)}
   .trust-strip{grid-template-columns:repeat(2,1fr)}
@@ -690,3 +693,78 @@ button{cursor:pointer}
 .hamburger-icon:before{top:0}
 .hamburger-icon>span{top:6px}
 .hamburger-icon:after{top:12px}
+
+
+/* Desktop navigation */
+.mobile-category-item{display:none}
+.desktop-categories-item{position:relative}
+.desktop-categories{position:relative}
+.desktop-categories>summary{
+  list-style:none;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-height:42px;
+  padding:0 12px;
+  border-radius:12px;
+  color:#344054;
+  font-size:.9rem;
+  font-weight:800;
+  cursor:pointer;
+}
+.desktop-categories>summary::-webkit-details-marker{display:none}
+.desktop-categories>summary:hover,
+.desktop-categories[open]>summary{
+  background:#f2f4f7;
+  color:var(--pn-brand-2);
+}
+.desktop-categories__dropdown{
+  position:absolute;
+  top:calc(100% + 10px);
+  right:0;
+  z-index:1300;
+  width:min(540px,70vw);
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:4px;
+  padding:10px;
+  background:#fff;
+  border:1px solid var(--pn-line);
+  border-radius:18px;
+  box-shadow:var(--pn-shadow-lg);
+}
+.desktop-categories__dropdown a{
+  display:block;
+  min-width:0;
+  padding:10px 12px!important;
+  border-radius:10px;
+  color:#344054!important;
+  font-size:.84rem!important;
+  font-weight:700!important;
+}
+.desktop-categories__dropdown a:hover{
+  background:#f8fafc!important;
+  color:var(--pn-brand-2)!important;
+}
+@media(min-width:1101px){
+  .site-header__inner{min-height:72px;gap:18px}
+  .site-logo img{height:46px;max-width:136px}
+  .site-nav{margin-inline-start:auto;min-width:0}
+  .site-nav__list{gap:2px}
+  .site-nav__list>li>a{padding:9px 11px;font-size:.88rem;white-space:nowrap}
+  .site-header__actions{margin-inline-start:8px;flex:0 0 auto}
+  .account-menu>summary{
+    min-height:44px;
+    padding:5px 10px;
+    border-radius:14px;
+    max-width:220px;
+  }
+  .account-menu__name{max-width:118px}
+}
+
+/* Card contrast */
+.content-card h3,.content-card h3 a{color:var(--pn-ink)}
+.content-card h3 a:visited{color:var(--pn-ink)}
+.content-card h3 a:hover,.content-card h3 a:focus-visible{color:var(--pn-brand-2)}
+.content-card p{color:var(--pn-muted)}
+.content-card__meta{color:var(--pn-muted)}
