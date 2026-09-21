@@ -7,6 +7,7 @@ class BrandUser extends Panel
         $db = new \DataBase();
        $dataSeo = $db->getLastInsert('seo');
        $dataHeader = $db->getLastInsert('header');
+       $dataFooter = $db->getLastInsert('footer');
 
         $menus = $db->select("SELECT * FROM menu")->fetchAll();
         $menu = $db->select('SELECT * FROM menu WHERE NOT id = 5 ORDER BY sort')->fetchAll();
@@ -55,6 +56,9 @@ $dataFooter = $db->getLastInsert('footer');
     public function update($id)
     {
         $db = new DataBase();
+        $dataSeo = $db->getLastInsert('seo');
+        $dataHeader = $db->getLastInsert('header');
+        $dataFooter = $db->getLastInsert('footer');
         $menu = $db->select('SELECT * FROM menu WHERE NOT id = 5 ORDER BY sort')->fetchAll();
         $item = $db->select("SELECT * FROM items_brands")->fetchAll();
         $post = $db->new_select('*', 'post_brand ', 'id', $id);
@@ -77,11 +81,11 @@ $dataFooter = $db->getLastInsert('footer');
                 $this->redirecte('user/brand/1');
             }else{
                 flash('msg-post', 'لطفا نوار آدرس را انگلیسی پر کنید');
-                $this->redirectBack();
+                $this->redirectBacked();
             }
         }else{
             flash('msg-post', 'لطفا عنوان را پر کنید');
-            $this->redirectBack();
+            $this->redirectBacked();
         }
         
     }
