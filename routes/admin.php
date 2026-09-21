@@ -19,6 +19,7 @@ $router->get('admin/menu/deleted/{id}', [MenuController::class, 'delete']);
 
 $router->get('admin/posts/index/{page}', [PostController::class, 'index']);
 $router->get('admin/posts/create', [PostController::class, 'create']);
+$router->post('admin/posts/create', [PostController::class, 'store']);
 $router->post('admin/posts/created', [PostController::class, 'store']);
 $router->get('admin/posts/update/{id}', [PostController::class, 'edit']);
 $router->post('admin/posts/updated/{id}', [PostController::class, 'update']);
