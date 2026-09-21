@@ -7,6 +7,10 @@
 uri('/', 'Hom', 'index');
 uri('/home', 'Hom', 'index');
 
+// سئو؛ قبل از routeهای داینامیک هم‌ساختار
+uri('post/sitemap', 'SiteMap', 'post');
+uri('brand/sitemap', 'SiteMap', 'brand');
+
 // مقالات
 uri('posts/categories/{id}/{page}', 'Posts', 'category');
 uri('post/{id}', 'Posts', 'show');
@@ -28,10 +32,6 @@ uri('dishwasher-repair-in-{city}', 'Cities', 'serviceDetail');
 // دسته برند
 uri('brands/categories/{id}/{page}', 'Brands', 'category');
 
-// سئو
-uri('post/sitemap', 'SiteMap', 'post');
-uri('brand/sitemap', 'SiteMap', 'brand');
-
 // جستجو
 uri('search/{page}', 'Hom', 'search', 'POST');
 
@@ -46,5 +46,5 @@ uri('logout', 'Auth', 'logout');
 uri('profile/{name}/{id}', 'Hom', 'profile');
 uri('menu/{slug}', 'Hom', 'menu');
 
-// این route عمومی است و باید بعد از تمام مسیرهای مشخص دو بخشی باشد.
+// route عمومی برند باید در انتها باشد تا مسیرهای مشخص را shadow نکند.
 uri('{slug}/{id}', 'Brands', 'show');
