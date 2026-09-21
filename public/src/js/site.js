@@ -7,11 +7,20 @@
   const searchPanel=document.querySelector("[data-search-panel]");
   const backTop=document.querySelector("[data-back-top]");
 
-  function closeNav(){body.classList.remove("nav-open");if(menu) menu.setAttribute("aria-expanded","false");}
+  const menuIcon=document.querySelector("[data-menu-icon]");
+  function syncMenu(open){
+    body.classList.toggle("nav-open",open);
+    if(menu){
+      menu.setAttribute("aria-expanded",open?"true":"false");
+      menu.setAttribute("aria-label",open?"بستن منو":"باز کردن منو");
+    }
+    if(menuIcon) menuIcon.textContent=open?"×":"☰";
+  }
+  function closeNav(){syncMenu(false);}
   if(menu){
     menu.addEventListener("click",function(){
-      const open=body.classList.toggle("nav-open");
-      menu.setAttribute("aria-expanded",open?"true":"false");
+      const open=!body.classList.contains("nav-open");
+      syncMenu(open);
     });
   }
   if(nav){
@@ -34,6 +43,9 @@
       if(searchPanel) searchPanel.classList.remove("is-open");
     }
   });
+  window.addEventListener("resize",function(){
+    if(window.innerWidth>900) closeNav();
+  },{passive:true});
   if(backTop){
     const sync=function(){backTop.classList.toggle("is-visible",window.scrollY>500);};
     sync();window.addEventListener("scroll",sync,{passive:true});
