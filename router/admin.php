@@ -1,10 +1,10 @@
 <?php
 // primery page admin
 uri('admin/dashboard', 'Dashboard', 'index');
-uri('admin/cities/{id}/{page}', 'Cities', 'index');
-uri('admin/create/cities/{id}', 'Cities', 'create', "POST");
-uri('admin/update/cities/{id}', 'Cities', 'updated', "POST");
-uri('admin/cities/delete/{id}/{provi}', 'Cities', 'deletd');
+uri('admin/cities/{id}/{page}', 'AdminCities', 'index');
+uri('admin/create/cities/{id}', 'AdminCities', 'create', "POST");
+uri('admin/update/cities/{id}', 'AdminCities', 'updated', "POST");
+uri('admin/cities/delete/{id}/{provi}', 'AdminCities', 'deletd');
 ////////////// routing menu or cate gories//
 uri('admin/menu/index/{page}', 'Menu', 'index');
 uri('admin/menu/create', 'Menu', 'create');
