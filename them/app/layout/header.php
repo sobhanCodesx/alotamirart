@@ -4,6 +4,7 @@ $logo = isset($dataSeo['logo']) ? $dataSeo['logo'] : 'public/src/img/logo.png';
 $phone = isset($dataFooter['phon']) ? clean_display_text($dataFooter['phon']) : '';
 $email = isset($dataFooter['email']) ? clean_display_text($dataFooter['email']) : '';
 $phoneHref = preg_replace('/[^\d+]/', '', $phone);
+$userAvatar = !empty($_SESSION['img']) ? (string)$_SESSION['img'] : 'them/admin/dist/img/avatar.png';
 ?>
 <a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
 <div class="site-topbar">
@@ -27,6 +28,43 @@ $phoneHref = preg_replace('/[^\d+]/', '', $phone);
         <strong>منوی سایت</strong>
         <button class="mobile-nav-close" type="button" data-menu-close aria-label="بستن منو"><span aria-hidden="true">×</span></button>
       </div>
+
+      <div class="site-nav__account-first">
+        <?php if (isset($_SESSION['name'])): ?>
+        <details class="mobile-account-menu">
+          <summary>
+            <span class="mobile-account-menu__label">
+              <span class="mobile-account-menu__avatar">
+                <img src="<?= assets($userAvatar) ?>" alt="" width="40" height="40">
+              </span>
+              <span>
+                <strong><?= htmlspecialchars((string)$_SESSION['name'], ENT_QUOTES, 'UTF-8') ?></strong>
+                <small>حساب کاربری</small>
+              </span>
+            </span>
+            <span class="mobile-account-menu__chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="mobile-account-menu__dropdown">
+            <?php if (isset($_SESSION['role']) && (int)$_SESSION['role'] === 1): ?><a href="<?= assets('admin/dashboard') ?>">پنل ادمین</a><?php endif; ?>
+            <?php if (isset($_SESSION['w']) && (int)$_SESSION['w'] === 1): ?>
+              <a href="<?= assets('panelcp/') ?>">پنل کاربری</a>
+              <a href="<?= assets('profile/'.getByUser('user_name').'/'.getByUser('id')) ?>">پروفایل</a>
+              <a href="<?= assets('user/posts/create') ?>">مقاله جدید</a>
+              <a href="<?= assets('user/post/1') ?>">مقالات من</a>
+              <a href="<?= assets('userbrand/create') ?>">محتوای برند جدید</a>
+              <a href="<?= assets('user/brand/1') ?>">محتوای برند من</a>
+            <?php endif; ?>
+            <a class="mobile-account-menu__logout" href="<?= assets('logout') ?>">خروج</a>
+          </div>
+        </details>
+      <?php else: ?>
+        <div class="mobile-auth-actions mobile-auth-actions--top">
+          <a class="btn-site btn-site--primary" href="<?= assets('login') ?>">ورود</a>
+          <a class="btn-site btn-site--light" href="<?= assets('register') ?>">ثبت‌نام</a>
+        </div>
+      <?php endif; ?>
+      </div>
+
       <ul class="site-nav__list">
         <li><a href="<?= assets('/') ?>">خانه</a></li>
         <li><a href="<?= assets('cities') ?>">شهرهای تحت پوشش</a></li>
@@ -42,38 +80,6 @@ $phoneHref = preg_replace('/[^\d+]/', '', $phone);
           <input name="search" type="search" placeholder="جستجو در سایت" aria-label="جستجو در سایت">
           <button type="submit">جستجو</button>
         </form>
-
-        <?php if (isset($_SESSION['name'])): ?>
-          <details class="mobile-account-menu">
-            <summary>
-              <span class="mobile-account-menu__label">
-                <span class="mobile-account-menu__avatar" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" focusable="false"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/></svg></span>
-                <span>
-                  <strong><?= htmlspecialchars((string)$_SESSION['name'], ENT_QUOTES, 'UTF-8') ?></strong>
-                  <small>حساب کاربری</small>
-                </span>
-              </span>
-              <span class="mobile-account-menu__chevron" aria-hidden="true"></span>
-            </summary>
-            <div class="mobile-account-menu__dropdown">
-              <?php if (isset($_SESSION['role']) && (int)$_SESSION['role'] === 1): ?><a href="<?= assets('admin/dashboard') ?>">پنل ادمین</a><?php endif; ?>
-              <?php if (isset($_SESSION['w']) && (int)$_SESSION['w'] === 1): ?>
-                <a href="<?= assets('panelcp/') ?>">پنل کاربری</a>
-                <a href="<?= assets('profile/'.getByUser('user_name').'/'.getByUser('id')) ?>">پروفایل</a>
-                <a href="<?= assets('user/posts/create') ?>">مقاله جدید</a>
-                <a href="<?= assets('user/post/1') ?>">مقالات من</a>
-                <a href="<?= assets('userbrand/create') ?>">محتوای برند جدید</a>
-                <a href="<?= assets('user/brand/1') ?>">محتوای برند من</a>
-              <?php endif; ?>
-              <a class="mobile-account-menu__logout" href="<?= assets('logout') ?>">خروج</a>
-            </div>
-          </details>
-        <?php else: ?>
-          <div class="mobile-auth-actions">
-            <a class="btn-site btn-site--primary" href="<?= assets('login') ?>">ورود</a>
-            <a class="btn-site btn-site--light" href="<?= assets('register') ?>">ثبت‌نام</a>
-          </div>
-        <?php endif; ?>
       </div>
     </nav>
     <button class="site-nav-backdrop" type="button" data-nav-backdrop aria-label="بستن منو" tabindex="-1"></button>
