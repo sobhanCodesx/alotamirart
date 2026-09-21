@@ -22,7 +22,7 @@ $phoneHref = preg_replace('/[^\d+]/', '', $phone);
       <img src="<?= assets($logo) ?>" alt="<?= htmlspecialchars($siteTitle, ENT_QUOTES, 'UTF-8') ?>" width="150" height="50">
     </a>
 
-    <nav class="site-nav" data-site-nav aria-label="منوی اصلی">
+    <nav class="site-nav" id="mobile-site-nav" data-site-nav aria-label="منوی اصلی">
       <ul class="site-nav__list">
         <li><a href="<?= assets('/') ?>">خانه</a></li>
         <li><a href="<?= assets('cities') ?>">شهرهای تحت پوشش</a></li>
