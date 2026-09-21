@@ -204,7 +204,7 @@ function uri($path, $class, $method, $methodfild = "GET")
         array_unshift($parameters, $request);
     }
 
-    if (!class_exists($class) || !is_callable([$class, $method])) {
+    if (!class_exists($class) || !method_exists($class, $method)) {
         http_response_code(500);
         error_log('Invalid route target: ' . $class . '::' . $method);
         echo 'خطای داخلی در مسیر درخواست‌شده.';
@@ -212,6 +212,13 @@ function uri($path, $class, $method, $methodfild = "GET")
     }
 
     $object = new $class;
+    if (!is_callable([$object, $method])) {
+        http_response_code(500);
+        error_log('Uncallable route target: ' . $class . '::' . $method);
+        echo 'خطای داخلی در مسیر درخواست‌شده.';
+        exit();
+    }
+
     call_user_func_array([$object, $method], $parameters);
     exit();
 }
