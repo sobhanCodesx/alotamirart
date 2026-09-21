@@ -39,8 +39,28 @@ require_once './classes/panel/PostUser.php';
 
 function limit_words($string, $word_limit)
 {
-    $words = explode(" ", $string);
-    return implode(" ", array_splice($words, 0, $word_limit));
+    $words = preg_split('/\s+/u', trim((string)$string), -1, PREG_SPLIT_NO_EMPTY);
+    return implode(" ", array_slice($words, 0, max(0, (int)$word_limit)));
+}
+
+function clean_display_text($value)
+{
+    $text = (string)$value;
+    for ($i = 0; $i < 3; $i++) {
+        $decoded = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if ($decoded === $text) break;
+        $text = $decoded;
+    }
+
+    $text = strip_tags($text);
+    $text = str_replace("\xC2\xA0", ' ', $text);
+    $text = preg_replace('/[\r\n\t ]+/u', ' ', $text);
+    return trim($text);
+}
+
+function excerpt_text($value, $word_limit = 25)
+{
+    return limit_words(clean_display_text($value), $word_limit);
 }
 
 function vd($argument)
