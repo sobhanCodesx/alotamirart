@@ -77,6 +77,7 @@ public function profile($name, $id)
     $dataSeo = $db->getLastInsert('seo');
     $dataHeader = $db->getLastInsert('header');
     $dataFooter = $db->getLastInsert('footer');
+    $menu = $db->select('SELECT * FROM menu WHERE NOT id = 5 ORDER BY sort')->fetchAll();
     $posts = $db->select('SELECT id,title,user_id,description,content,img FROM posts WHERE user_id = ? AND status = 1 ORDER BY created_at DESC LIMIT 0,6', $id)->fetchAll();
     $brand = $db->select('SELECT id,title,content,brand_id,des,img,slug FROM post_brand WHERE user_id = ? AND status = 1 ORDER BY created_at DESC LIMIT 0,6', $id)->fetchAll();
 
