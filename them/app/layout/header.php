@@ -47,7 +47,7 @@ $phoneHref = preg_replace('/[^\d+]/', '', $phone);
           <details class="mobile-account-menu">
             <summary>
               <span class="mobile-account-menu__label">
-                <span class="mobile-account-menu__avatar" aria-hidden="true"><?= htmlspecialchars(mb_substr((string)$_SESSION['name'], 0, 1, 'UTF-8'), ENT_QUOTES, 'UTF-8') ?></span>
+                <span class="mobile-account-menu__avatar" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" focusable="false"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/></svg></span>
                 <span>
                   <strong><?= htmlspecialchars((string)$_SESSION['name'], ENT_QUOTES, 'UTF-8') ?></strong>
                   <small>حساب کاربری</small>
