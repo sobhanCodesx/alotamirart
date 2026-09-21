@@ -23,6 +23,10 @@ $phoneHref = preg_replace('/[^\d+]/', '', $phone);
     </a>
 
     <nav class="site-nav" id="mobile-site-nav" data-site-nav aria-label="منوی اصلی">
+      <div class="site-nav__mobile-head">
+        <strong>منوی سایت</strong>
+        <button class="mobile-nav-close" type="button" data-menu-close aria-label="بستن منو"><span aria-hidden="true">×</span></button>
+      </div>
       <ul class="site-nav__list">
         <li><a href="<?= assets('/') ?>">خانه</a></li>
         <li><a href="<?= assets('cities') ?>">شهرهای تحت پوشش</a></li>
@@ -63,6 +67,7 @@ $phoneHref = preg_replace('/[^\d+]/', '', $phone);
         <?php endif; ?>
       </div>
     </nav>
+    <button class="site-nav-backdrop" type="button" data-nav-backdrop aria-label="بستن منو" tabindex="-1"></button>
 
     <div class="site-header__actions">
       <button class="icon-btn search-trigger" type="button" data-search-toggle aria-expanded="false" aria-label="باز کردن جستجو">⌕</button>
