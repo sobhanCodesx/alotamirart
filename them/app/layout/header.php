@@ -77,9 +77,21 @@ $userAvatar = !empty($_SESSION['img']) ? (string)$_SESSION['img'] : 'them/admin/
       <ul class="site-nav__list">
         <li><a href="<?= assets('/') ?>">خانه</a></li>
         <li><a href="<?= assets('cities') ?>">شهرهای تحت پوشش</a></li>
+
         <?php if (!empty($menu) && is_array($menu)): ?>
+          <li class="desktop-categories-item">
+            <details class="desktop-categories">
+              <summary>دسته‌بندی‌ها <span aria-hidden="true">▾</span></summary>
+              <div class="desktop-categories__dropdown">
+                <?php foreach ($menu as $m): ?>
+                  <a href="<?= assets('posts/categories/' . (int)$m['id'] . '/1') ?>"><?= htmlspecialchars(clean_display_text(isset($m['title']) ? $m['title'] : ''), ENT_QUOTES, 'UTF-8') ?></a>
+                <?php endforeach; ?>
+              </div>
+            </details>
+          </li>
+
           <?php foreach ($menu as $m): ?>
-            <li><a href="<?= assets('posts/categories/' . (int)$m['id'] . '/1') ?>"><?= htmlspecialchars(clean_display_text(isset($m['title']) ? $m['title'] : ''), ENT_QUOTES, 'UTF-8') ?></a></li>
+            <li class="mobile-category-item"><a href="<?= assets('posts/categories/' . (int)$m['id'] . '/1') ?>"><?= htmlspecialchars(clean_display_text(isset($m['title']) ? $m['title'] : ''), ENT_QUOTES, 'UTF-8') ?></a></li>
           <?php endforeach; ?>
         <?php endif; ?>
       </ul>
