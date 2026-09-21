@@ -97,6 +97,9 @@
                                                     ادمین</a></li>
                                         <?php } ?>
                                         <?php if ($_SESSION['w'] == 1) { ?>
+                                            <li><a class="dropdown-item" href="<?= assets('panelcp/') ?>">پنل کاربری</a>
+                                </li>
+                                <li><a class="dropdown-item" href="<?= assets('profile/'.getByUser('user_name').'/'.getByUser('id')) ?>">پروفایل</a>
                                             <li><a class="dropdown-item" href="<?= assets('user/posts/create') ?>">نوشتن
                                                     مقاله</a></li>
                                             <li><a class="dropdown-item" href="<?= assets('user/post/1') ?>">نمایش
@@ -148,6 +151,9 @@
                             <?php } ?>
                             <?php if ($_SESSION['w'] == 1) { ?>
                                 <li><a class="dropdown-item" href="<?= assets('panelcp/') ?>">پنل کاربری</a>
+                                </li>
+                                <li><a class="dropdown-item" href="<?= assets('profile/'.getByUser('user_name').'/'.getByUser('id')) ?>">پروفایل</a>
+                                </li>
                                 </li>
                                 <li><a class="dropdown-item" href="<?= assets('user/posts/create') ?>">نوشتن مقاله</a>
                                 </li>

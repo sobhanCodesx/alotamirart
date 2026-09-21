@@ -36,6 +36,15 @@
             <label class="mt-3" for="">چکیده</label>
             <input type="text" value="<?= $post['des'] ?>" name="des" class="form-control mt-3"
                    placeholder="خلاصه مطلب">
+                   
+                   
+                               <div class="form-group">
+                <label for="contact_number" class="mt-2">شماره تماس دلخواه</label>
+                <input type="text" class="form-control mt-3" id="contact_number" name="contact_number" value="<?= htmlspecialchars($post['contact_number'] ?? '') ?>" placeholder="شماره تماس دلخواه (اختیاری)">
+                <small class="form-text text-muted">اگر وارد نشود، شماره تماس پیش‌فرض کاربر نمایش داده می‌شود.</small>
+            </div>
+
+                   
             <label class="mt-3" for="">انتخاب تصویر</label>
             <input type="file" class="form-control mt-2" name="img" accept="image/*">
             <div class="mt-3">

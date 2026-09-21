@@ -25,6 +25,7 @@ uri('admin/users/{page}', 'User', 'index');
 uri('admin/users/status/{id}', 'User', 'status');
 uri('admin/users/delete/{id}','User','delete');
 uri('user/status/{id}','User','writer');
+uri('inner/user/{id}','User','innerUser');
 //////////////////// routing brand items ////////////////////////////////////////
 uri('admin/brands/index/{page}','Items','index');
 uri('admin/brands/created','Items','created',"POST");
@@ -50,3 +51,5 @@ uri('admin/settings/header','Header','index');
 uri('admin/settings/header/create','Header','create',"POST");
 uri('admin/settings/footer','Footer','index');
 uri('admin/settings/footer/create','Footer','create',"POST");
+
+/////////////////////////////////////////////////////////////////

@@ -1,0 +1,4 @@
+[02-Aug-2025 02:10:43 Asia/Tehran] PHP Fatal error:  Uncaught Error: Undefined constant "BASE_PATH" in /home3/mbziliwc/public_html/them/admin/pages/users/index.php:9
+Stack trace:
+#0 {main}
+  thrown in /home3/mbziliwc/public_html/them/admin/pages/users/index.php on line 9

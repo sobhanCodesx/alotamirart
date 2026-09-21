@@ -1,1 +1,17 @@
 [12-Jul-2022 14:51:18 Asia/Tehran] PHP Warning:  Undefined array key "name" in /home/avinbast/public_html/admin/layout/nav.php on line 138
+[02-Aug-2025 02:08:57 Asia/Tehran] PHP Fatal error:  Uncaught Error: Undefined constant "BASE_PATH" in /home3/mbziliwc/public_html/them/admin/index.php:6
+Stack trace:
+#0 {main}
+  thrown in /home3/mbziliwc/public_html/them/admin/index.php on line 6
+[03-Aug-2025 00:38:35 Asia/Tehran] PHP Fatal error:  Uncaught Error: Undefined constant "BASE_PATH" in /home3/mbziliwc/public_html/them/admin/index.php:6
+Stack trace:
+#0 {main}
+  thrown in /home3/mbziliwc/public_html/them/admin/index.php on line 6
+[03-Aug-2025 00:55:23 Asia/Tehran] PHP Fatal error:  Uncaught Error: Undefined constant "BASE_PATH" in /home3/mbziliwc/public_html/them/admin/index.php:6
+Stack trace:
+#0 {main}
+  thrown in /home3/mbziliwc/public_html/them/admin/index.php on line 6
+[03-Aug-2025 15:04:44 Asia/Tehran] PHP Fatal error:  Uncaught Error: Undefined constant "BASE_PATH" in /home3/mbziliwc/public_html/them/admin/index.php:6
+Stack trace:
+#0 {main}
+  thrown in /home3/mbziliwc/public_html/them/admin/index.php on line 6

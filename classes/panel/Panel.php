@@ -12,14 +12,28 @@ class Panel
 
     protected function redirecte($url)
     {
-        header('Location: ' . trim($this->currentDomain, '/ ') . '/' . trim($url, '/ '));
-        exit;
+        if (!headers_sent()) {
+            header('Location: ' . trim($this->currentDomain, '/ ') . '/' . trim($url, '/ '));
+            exit;
+        } else {
+            echo '<script>window.location.href="' . trim($this->currentDomain, '/ ') . '/' . trim($url, '/ ') . '";</script>';
+            exit;
+        }
     }
 
     protected function redirectBacked()
     {
-        header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit;
+        if (isset($_SERVER['HTTP_REFERER'])) {
+            if (!headers_sent()) {
+                header('Location: ' . $_SERVER['HTTP_REFERER']);
+                exit;
+            } else {
+                echo '<script>window.location.href="' . $_SERVER['HTTP_REFERER'] . '";</script>';
+                exit;
+            }
+        } else {
+            $this->redirecte('/');
+        }
     }
 
     protected function saveImage($image, $imagePath, $imageName = null)
@@ -44,7 +58,6 @@ class Panel
         } else {
             return false;
         }
-
     }
 
     protected function removeImage($path)
@@ -63,53 +76,98 @@ class Panel
         require_once BASE_PATH . "/them/panel/index.php";
     }
 
+    // ============================================================
+    // ===== متد به‌روزرسانی کاربر (اصلاح شده) =====
+    // ============================================================
     public function updateUser($req, $id)
     {
         $db = new DataBase();
 
-        if (!empty($req['name']) and !empty($req['user_name']) and !empty($req['email']) and !empty($req['password'])) {
-            $aUserEmail = $db->select('SELECT email FROM users WHERE id = ?', $id)->fetch();
-            $aUserUserName = $db->select('SELECT user_name FROM users WHERE id = ?', $id)->fetch();
-
-            $userName = $db->new_select('user_name', 'users', 'user_name', $req['user_name']);
-            $user = $db->new_select('email', 'users', 'email', $req['email']);
-
-            if ($aUserEmail[0] == $req['email']) {
-                $user = null;
-            }
-            if ($userName[0] == $req['user_name']) {
-                $userName = null;
-            }
-
-            if (!empty($user)) {
-                flash('msg', 'این ایمیل تکراری می باشد');
-                $this->redirectBacked();
-                exit();
-            }
-            if (!empty($userName)) {
-                flash('msg', 'نام کاربری در سیستم موجود است لطفا نام کاربری دیگری وارد کنید');
-                $this->redirectBacked();
-                exite();
-
-            }
-
-            if ($req['img']['tmp_name'] != null) {
-                $userimg = $db->new_select('img', 'users', 'id', $id);
-                if (!empty($userimg)) $this->removeImage($post['img']);
-                $rand = rand(1, 2000000);
-                $req['img'] = $this->saveImage($req['img'], $rand . '-userprofile');
-            } else {
-                unset($req['img']);
-            }
-            $db->update('users', $id, array_keys($req), $req);
-            $_SESSION['img'] = $db->select("SELECT img FROM users WHERE id = ?", $req['id']);
-            flash('saveuser', 'اطلاعات بروز شدن برای کارکرد درست یکبار دیگر لاگین کنید');
-            $this->redirectBacked();
-
-
-        } else {
+        // ===== فقط فیلدهای ضروری رو چک کن (پسورد الزامی نیست) =====
+        if (empty($req['name']) || empty($req['user_name']) || empty($req['email']) || empty($req['phon'])) {
             flash('msg', 'لطفا همه اطلاعات را وارد کنید');
             $this->redirectBacked();
+            return;
         }
+
+        // ===== دریافت اطلاعات فعلی کاربر =====
+        $currentUser = $db->selectOne("SELECT * FROM users WHERE id = ?", [$id]);
+        
+        if (!$currentUser) {
+            flash('msg', 'کاربر یافت نشد');
+            $this->redirectBacked();
+            return;
+        }
+
+        // ===== بررسی تکراری بودن ایمیل (به جز خود کاربر) =====
+        $emailExists = $db->selectOne("SELECT email FROM users WHERE email = ? AND id != ?", [$req['email'], $id]);
+        if ($emailExists) {
+            flash('msg', 'این ایمیل تکراری می باشد');
+            $this->redirectBacked();
+            return;
+        }
+
+        // ===== بررسی تکراری بودن نام کاربری (به جز خود کاربر) =====
+        $usernameExists = $db->selectOne("SELECT user_name FROM users WHERE user_name = ? AND id != ?", [$req['user_name'], $id]);
+        if ($usernameExists) {
+            flash('msg', 'نام کاربری در سیستم موجود است');
+            $this->redirectBacked();
+            return;
+        }
+
+        // ===== ساخت آرایه داده‌ها با حفظ مقادیر قبلی =====
+        $data = [
+            'name' => $req['name'],
+            'user_name' => $req['user_name'],
+            'email' => $req['email'],
+            'phon' => $req['phon']
+        ];
+
+        // ===== مدیریت پسورد (فقط در صورتی که پر شده باشد) =====
+        if (!empty($req['password'])) {
+            $data['password'] = password_hash($req['password'], PASSWORD_DEFAULT);
+        } else {
+            // ===== حفظ پسورد قبلی =====
+            $data['password'] = $currentUser['password'];
+        }
+
+        // ===== مدیریت تصویر =====
+        if (isset($req['img']['tmp_name']) && $req['img']['tmp_name'] != null) {
+            // حذف تصویر قبلی
+            if (!empty($currentUser['img'])) {
+                $this->removeImage($currentUser['img']);
+            }
+            
+            $rand = rand(1, 2000000);
+            $savedImage = $this->saveImage($req['img'], $rand . '-userprofile');
+            if ($savedImage) {
+                $data['img'] = $savedImage;
+            }
+        } else {
+            // ===== حفظ تصویر قبلی =====
+            if (isset($currentUser['img']) && !empty($currentUser['img'])) {
+                $data['img'] = $currentUser['img'];
+            }
+        }
+
+        // ===== به‌روزرسانی =====
+        $result = $db->update('users', $id, array_keys($data), array_values($data));
+
+        if ($result) {
+            // ===== به‌روزرسانی session =====
+            if (isset($_SESSION['id']) && $_SESSION['id'] == $id) {
+                $_SESSION['name'] = $data['name'];
+                $_SESSION['user_name'] = $data['user_name'];
+                if (isset($data['img'])) {
+                    $_SESSION['img'] = $data['img'];
+                }
+            }
+            
+            flash('saveuser', 'اطلاعات با موفقیت بروز شد');
+        } else {
+            flash('msg', 'خطا در به‌روزرسانی اطلاعات');
+        }
+
+        $this->redirectBacked();
     }
 }

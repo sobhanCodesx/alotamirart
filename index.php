@@ -4,9 +4,9 @@ define('BASE_PATH', __DIR__);
 define("CURRENT_DOMAIN", currentdomain() . "/");
 define('DISPLAY_ERROR', true);
 define('DB_HOST', 'localhost');
-define('BD_NAME', 'kuhhfwsd_amir');
-define('DB_USERNAME', 'kuhhfwsd_amir');
-define('DB_PASSWORD', 'DG@vxd-.83gP');
+define('BD_NAME', 'mbziliwc_danesh');
+define('DB_USERNAME', 'mbziliwc_danesh');
+define('DB_PASSWORD', 'fV7+Qjy[RU5S');
 
 /// reqir
 require_once './database/DataBase.php';
@@ -22,6 +22,7 @@ require_once "./classes/admin/settings/Seo.php";
 require_once "./classes/admin/settings/Header.php";
 require_once "./classes/admin/settings/Footer.php";
 require_once "./classes/admin/link.php";
+require_once './classes/app/Cities.php';
 ///// app ///
 require_once './classes/app/Hom.php';
 require_once './classes/app/SiteMap.php';
@@ -209,5 +210,4 @@ function unsetUsers()
 require_once './router/admin.php';
 require_once './router/panel.php';
 require_once './router/them.php';
-echo '<div class="alert-danger p-5 text-center">صفحه مورد نظر پیدا نشد</div>';
-
+require_once '404.php';

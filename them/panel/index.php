@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>پنل مدیریت | داشبورد <?= getByUser('name') ?></title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <?php include BASE_PATH . '/them/admin/layout/head.php' ?>
 </head>
 <body class="hold-transition sidebar-mini">
@@ -114,7 +115,7 @@
     </div>
     <!-- /.content-wrapper -->
     <footer class="main-footer bg-info">
-        <strong>CopyLeft &copy; 2023 <a href="http://github.com/hesammousavi/">مدیریت امیر حسین باجلان</a>.</strong>
+        
     </footer>
 
     <!-- Control Sidebar -->
