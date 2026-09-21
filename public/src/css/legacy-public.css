@@ -1,0 +1,14 @@
+.legacy-service-page{margin:0!important;padding:0!important;background:var(--pn-bg)!important;color:var(--pn-ink)!important;font-family:Vazir,Tahoma,sans-serif!important}
+.legacy-service-page .legacy-service-main{padding:42px 0 10px}
+.legacy-service-page .legacy-service-main>.container{width:min(1100px,calc(100% - 28px))!important;max-width:1100px!important;margin:0 auto!important;padding:clamp(18px,4vw,34px)!important;background:#fff!important;border:1px solid var(--pn-line)!important;border-radius:26px!important;box-shadow:0 12px 42px rgba(15,23,42,.07)!important}
+.legacy-service-page .legacy-service-main .header{padding:8px 0 28px!important;margin-bottom:26px!important;border-bottom:1px solid var(--pn-line)!important}
+.legacy-service-page .legacy-service-main .header h1{font-size:clamp(1.75rem,4vw,2.75rem)!important;line-height:1.5!important;color:#101828!important}.legacy-service-page .legacy-service-main .header .highlight{color:var(--pn-brand-2)!important}
+.legacy-service-page .legacy-service-main .header p{color:var(--pn-muted)!important}.legacy-service-page .legacy-service-main .header .badge{background:#eef2ff!important;color:var(--pn-brand-2)!important}
+.legacy-service-page .legacy-service-main .info-box{background:#f8fafc!important;border:1px solid var(--pn-line)!important;border-radius:20px!important;box-shadow:none!important}
+.legacy-service-page .legacy-service-main .info-box h2,.legacy-service-page .legacy-service-main .info-box h3{color:#101828!important}
+.legacy-service-page .legacy-service-main .info-box p,.legacy-service-page .legacy-service-main .info-box li{color:#475467!important;line-height:2!important}
+.legacy-service-page .legacy-service-main .service-list li{background:#fff!important;border:1px solid var(--pn-line)!important;color:#344054!important}
+.legacy-service-page .legacy-service-main .operator-section{background:linear-gradient(135deg,#111827,#172554)!important;border:0!important;border-radius:20px!important;box-shadow:none!important}
+.legacy-service-page .legacy-service-main .other-services{background:#f8fafc!important;border:1px solid var(--pn-line)!important;box-shadow:none!important}
+.legacy-service-page .legacy-service-main .other-services a{border-color:var(--pn-line)!important}.legacy-service-page .legacy-service-main .contact-row .btn{border-radius:13px!important}.legacy-service-page .site-footer{margin-top:52px}
+@media(max-width:620px){.legacy-service-page .legacy-service-main{padding-top:22px}.legacy-service-page .legacy-service-main>.container{width:min(100% - 20px,1100px)!important;padding:16px!important;border-radius:19px!important}.legacy-service-page .legacy-service-main .info-box{padding:18px!important}.legacy-service-page .legacy-service-main .other-services{padding:20px 14px!important}}
