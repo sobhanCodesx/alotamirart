@@ -1,3 +1,4 @@
+<?php http_response_code(404); ?>
 <!doctype html><html lang="fa" dir="rtl"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>صفحه پیدا نشد</title><link rel="stylesheet" href="<?= assets('public/src/css/bootstrap.rtl.min.css') ?>"><link rel="stylesheet" href="<?= assets('public/src/css/site.css') ?>"><meta name="robots" content="noindex,follow">
