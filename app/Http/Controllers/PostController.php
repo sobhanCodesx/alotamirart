@@ -26,11 +26,11 @@ class PostController extends Controller
         $offset = ($page - 1) * $perPage;
 
         $posts = $this->db->fetchAll(
-            'SELECT * FROM posts WHERE category_id = ? AND status = 1 ORDER BY created_at DESC LIMIT ' . $offset . ', ' . $perPage,
+            'SELECT * FROM posts WHERE post_id = ? AND status = 1 ORDER BY created_at DESC LIMIT ' . $offset . ', ' . $perPage,
             [$id]
         );
         $total = (int) $this->db->value(
-            'SELECT COUNT(*) FROM posts WHERE category_id = ? AND status = 1',
+            'SELECT COUNT(*) FROM posts WHERE post_id = ? AND status = 1',
             [$id]
         );
         $category = $this->db->find('menu', $id);
