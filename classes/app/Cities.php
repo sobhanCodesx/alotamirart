@@ -9,59 +9,72 @@ class Cities
         $this->db = new DataBase();
     }
 
-    // ===== لیست همه شهرها =====
-    public function index()
+    private function shared()
     {
-        $cities = $this->db->select("SELECT * FROM cities WHERE status = 1 ORDER BY name ASC")->fetchAll();
-        
-        // ===== اگر شهری وجود نداشت =====
-        if (!$cities) {
-            $cities = [];
-        }
-        
-        // ===== شامل کردن فایل ویو =====
-        $viewPath = BASE_PATH . '/them/app/cities/index.php';
-        if (file_exists($viewPath)) {
-            require_once $viewPath;
-        } else {
-            // ===== نمایش مستقیم لیست شهرها اگر فایل ویو وجود نداشت =====
-            echo "<!DOCTYPE html><html dir='rtl'><head><meta charset='UTF-8'><title>شهرهای تحت پوشش</title>";
-            echo "<style>body{font-family:Tahoma;padding:20px;background:#f0f0f0;direction:rtl;}";
-            echo ".box{max-width:1000px;margin:0 auto;background:#fff;padding:30px;border-radius:16px;}";
-            echo "h1{text-align:center;color:#0f172a;border-bottom:3px solid #facc15;padding-bottom:15px;}";
-            echo ".city{display:inline-block;background:#f8fafc;border:2px solid #e9edf2;padding:15px 25px;margin:8px;border-radius:12px;}";
-            echo ".city a{text-decoration:none;color:#1a1a2e;font-weight:700;}";
-            echo ".city a:hover{color:#facc15;}</style></head><body>";
-            echo "<div class='box'><h1>🏙️ شهرهای تحت پوشش</h1>";
-            echo "<div style='text-align:center;'>";
-            if (!empty($cities)) {
-                foreach ($cities as $city) {
-                    echo "<div class='city'><a href='/city/" . $city['slug'] . "'>🏙️ " . $city['name'] . "</a></div>";
-                }
-            } else {
-                echo "<p style='text-align:center;color:#999;'>هیچ شهری یافت نشد</p>";
-            }
-            echo "</div></div></body></html>";
-        }
+        return [
+            'dataSeo' => $this->db->getLastInsert('seo'),
+            'dataHeader' => $this->db->getLastInsert('header'),
+            'dataFooter' => $this->db->getLastInsert('footer'),
+            'menu' => $this->db->select('SELECT * FROM menu WHERE NOT id = 5 ORDER BY sort')->fetchAll(),
+        ];
     }
 
-    // ===== نمایش یک شهر =====
+    private function city($slug)
+    {
+        return $this->db->select("SELECT * FROM cities WHERE slug = ? AND status = 1", $slug)->fetch();
+    }
+
+    public function index()
+    {
+        extract($this->shared());
+        $cities = $this->db->select("SELECT * FROM cities WHERE status = 1 ORDER BY name ASC")->fetchAll();
+        if (!$cities) $cities = [];
+        require BASE_PATH . '/them/app/cities/index.php';
+    }
+
     public function show($slug)
     {
-        $city = $this->db->select("SELECT * FROM cities WHERE slug = ? AND status = 1", $slug)->fetch();
-        
+        extract($this->shared());
+        $city = $this->city($slug);
         if (!$city) {
             http_response_code(404);
-            echo "شهر مورد نظر یافت نشد";
+            require BASE_PATH . '/404.php';
             return;
         }
-        
-        $viewPath = BASE_PATH . '/them/app/cities/show.php';
-        if (file_exists($viewPath)) {
-            require_once $viewPath;
-        } else {
-            echo "<h1>🏙️ " . $city['name'] . "</h1>";
-            echo "<p>شهر " . $city['name'] . " در سیستم ثبت شده است.</p>";
+        require BASE_PATH . '/them/app/cities/show.php';
+    }
+
+    public function services($slug)
+    {
+        extract($this->shared());
+        $city = $this->city($slug);
+        if (!$city) {
+            http_response_code(404);
+            require BASE_PATH . '/404.php';
+            return;
         }
+        require BASE_PATH . '/show-city.php';
+    }
+
+    public function serviceDetail($slug)
+    {
+        extract($this->shared());
+        $city = $this->city($slug);
+        if (!$city) {
+            http_response_code(404);
+            require BASE_PATH . '/404.php';
+            return;
+        }
+
+        $path = trim((string)parse_url(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '', PHP_URL_PATH), '/');
+        $serviceSlug = 'refrigerator';
+        foreach (['washing-machine','air-conditioner','dishwasher','refrigerator','tv','oven'] as $candidate) {
+            if (strpos($path, $candidate . '-repair-in-') === 0) {
+                $serviceSlug = $candidate;
+                break;
+            }
+        }
+
+        require BASE_PATH . '/service-city.php';
     }
 }
