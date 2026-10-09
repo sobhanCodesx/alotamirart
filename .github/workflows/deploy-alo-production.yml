@@ -26,6 +26,7 @@ jobs:
           php -l api/deploy.php
           php tests/article-mcp-contract.php
           php tests/deploy-contract.php
+          php tests/env-loader.php
           python3 -m py_compile scripts/alo_deploy.py
           php tests/legacy-compatibility.php
           php tests/admin-panel-contract.php
