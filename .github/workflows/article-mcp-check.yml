@@ -1,21 +1,32 @@
-name: Article MCP checks
+name: Article MCP and deployment checks
 on:
   push:
     paths:
       - 'api/mcp.php'
+      - 'api/deploy.php'
+      - 'scripts/alo_deploy.py'
       - 'tests/article-mcp-contract.php'
+      - 'tests/deploy-contract.php'
       - '.github/workflows/article-mcp-check.yml'
+      - '.github/workflows/deploy-alo-production.yml'
   pull_request:
     paths:
       - 'api/mcp.php'
+      - 'api/deploy.php'
+      - 'scripts/alo_deploy.py'
       - 'tests/article-mcp-contract.php'
+      - 'tests/deploy-contract.php'
       - '.github/workflows/article-mcp-check.yml'
+      - '.github/workflows/deploy-alo-production.yml'
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verify PHP syntax and MCP contract
+      - name: Validate both MCP and deploy agents
         run: |
           php -l api/mcp.php
+          php -l api/deploy.php
           php tests/article-mcp-contract.php
+          php tests/deploy-contract.php
+          python3 -m py_compile scripts/alo_deploy.py
