@@ -1,0 +1,21 @@
+name: Article MCP checks
+on:
+  push:
+    paths:
+      - 'api/mcp.php'
+      - 'tests/article-mcp-contract.php'
+      - '.github/workflows/article-mcp-check.yml'
+  pull_request:
+    paths:
+      - 'api/mcp.php'
+      - 'tests/article-mcp-contract.php'
+      - '.github/workflows/article-mcp-check.yml'
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify PHP syntax and MCP contract
+        run: |
+          php -l api/mcp.php
+          php tests/article-mcp-contract.php
