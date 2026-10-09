@@ -6,6 +6,9 @@
  */
 declare(strict_types=1);
 
+require_once dirname(__DIR__) . '/app/Support/env.php';
+aloLoadEnv(dirname(__DIR__) . '/.env');
+
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
