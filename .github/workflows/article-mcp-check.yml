@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'api/mcp.php'
+      - 'api/content-tools.php'
       - 'api/deploy.php'
       - 'scripts/alo_deploy.py'
       - 'tests/article-mcp-contract.php'
@@ -26,6 +27,7 @@ jobs:
       - name: Validate both MCP and deploy agents
         run: |
           php -l api/mcp.php
+          php -l api/content-tools.php
           php -l api/deploy.php
           php tests/article-mcp-contract.php
           php tests/deploy-contract.php
