@@ -1,3 +1,8 @@
+## Prevent HTTP access to project-root .env files.
+<FilesMatch "(?i)^\.env(?:\..*)?$">
+    Require all denied
+</FilesMatch>
+
 RewriteEngine On
 RewriteBase /
 
