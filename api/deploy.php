@@ -5,6 +5,8 @@
  * PHP 8.1+, ZipArchive. Never deploys config/database.php, .env, or user uploads.
  */
 declare(strict_types=1);
+require_once dirname(__DIR__) . '/app/Support/env.php';
+aloLoadEnv();
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
