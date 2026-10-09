@@ -22,6 +22,7 @@ jobs:
       - name: Check PHP syntax and compatibility
         run: |
           php -l api/mcp.php
+          php -l api/content-tools.php
           php -l api/deploy.php
           php tests/article-mcp-contract.php
           php tests/deploy-contract.php
