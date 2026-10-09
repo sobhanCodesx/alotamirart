@@ -49,3 +49,36 @@ After connection, ask ChatGPT: "دسته‌بندی‌های مقالات الو
 - This is a minimal JSON-RPC MCP tool endpoint with legacy `initialize` and `tools/list`/`tools/call` support, not a complete Streamable HTTP session/SSE implementation. Verify connector compatibility before relying on it.
 - Existing `game-shop` implementation uses Laravel and additional read-only GraphQL intelligence. This PHP v1 intentionally limits scope to article management.
 - No production deployment or live integration test has been performed.
+
+## Expanded content tools (v2)
+
+The MCP entrypoint now also loads `api/content-tools.php`, which adds typed content-management tools corresponding to the existing PHP admin form fields.
+
+| type | DB table | Supported form fields |
+|---|---|---|
+| `article` | `posts` | title, slug, content, description, keyword, tags, contact_number, post_id |
+| `brand_article` | `post_brand` | title, slug (ASCII), content, des, tags, contact_number, brand_id |
+| `brand` | `items_brands` | name, des |
+| `category` | `menu` | title, description, sort |
+
+The optional `image_base64` field in `create_content` and `update_content` accepts a base64-encoded JPEG/PNG/WebP image (maximum decoded size 2.5MB). It is stored under the same `them/admin/dist/img/` structure used by the legacy admin interface. Image uploads to new brand and brand-article records are mandatory, reflecting their admin forms. Article featured images are optional.
+
+Tools:
+- `describe_content_fields`: discover available types and allowed fields
+- `list_content`: list available records by type and IDs
+- `get_content`: read full record (including all stored fields)
+- `create_content`: create draft article/brand article or explicitly confirmed public brand/category
+- `update_content`: modify a draft; public records require `confirm_public=true`
+- `set_content_published`: explicitly publish or unpublish article or brand article; publishing also requires `MCP_ALLOW_PUBLISH=1`
+
+Example tool call (draft):
+
+```json
+{"jsonrpc":"2.0","id":10,"method":"tools/call","params":{"name":"create_content","arguments":{"type":"article","fields":{"title":"راهنمای تعمیر یخچال","content":"<h2>مقدمه</h2><p>متن مقاله</p>","description":"خلاصه برای نتایج جستجو","keyword":"تعمیر یخچال","tags":"یخچال, تعمیر","contact_number":"02100000000","post_id":1}}}}
+```
+
+Use `list_content` with `type=category` to find existing `post_id`; for brand articles, list `type=brand` to resolve `brand_id`. The caller must provide an image for creating a brand article and should verify the published URL and image after real deployment.
+
+The endpoint discovers real columns using `SHOW COLUMNS` so unsupported fields are rejected, not silently inserted. Only explicitly allowlisted form fields may be written; author and publication status cannot be spoofed via `fields`.
+
+**Limits:** This implements all fields identified in these four existing admin content forms, not all modules on the site. City management is disabled in the current legacy admin implementation and requires separate design. It does not auto-generate images, autonomously assess SEO quality, scrape sources, or expose arbitrary database writes. The AI can compose rich HTML and SEO metadata before calling the tool. A separate MCP connection must be configured and tested on the deployed HTTPS endpoint; a GitHub-only connection cannot directly call this PHP MCP.
