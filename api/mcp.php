@@ -2,7 +2,7 @@
 /**
  * Private MCP endpoint for AloTamirArt article management.
  * POST /api/mcp.php (served directly as a real file by existing .htaccess).
- * PHP 7.4+; Apache + MySQL; no framework or daemon required.
+ * PHP 8.1+; Apache + MySQL; no framework or daemon required.
  */
 declare(strict_types=1);
 
@@ -63,6 +63,8 @@ function mcpMenuExists(PDO $db, int $id): bool {
     $st->execute([$id]);
     return (bool) $st->fetchColumn();
 }
+require_once __DIR__ . '/content-tools.php';
+
 function mcpTools(): array {
     $fields = [
         'title' => ['type' => 'string', 'maxLength' => 200],
@@ -72,16 +74,17 @@ function mcpTools(): array {
         'tags' => ['type' => 'string', 'maxLength' => 1000],
         'post_id' => ['type' => 'integer', 'minimum' => 1, 'description' => 'Existing menu/category id'],
     ];
-    return [
+    return array_merge([
         ['name' => 'list_article_categories', 'description' => 'List categories from the existing menu table.', 'inputSchema' => ['type' => 'object', 'properties' => new stdClass()]],
         ['name' => 'list_articles', 'description' => 'List latest articles, including drafts.', 'inputSchema' => ['type' => 'object', 'properties' => ['limit' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 50]]]],
         ['name' => 'get_article', 'description' => 'Read one article.', 'inputSchema' => ['type' => 'object', 'properties' => ['id' => ['type' => 'integer', 'minimum' => 1]], 'required' => ['id']]],
         ['name' => 'create_article_draft', 'description' => 'Create an unpublished draft; never publishes immediately.', 'inputSchema' => ['type' => 'object', 'properties' => $fields, 'required' => ['title', 'content', 'post_id']]],
         ['name' => 'update_article_draft', 'description' => 'Edit an existing UNPUBLISHED draft only.', 'inputSchema' => ['type' => 'object', 'properties' => array_merge(['id' => ['type' => 'integer', 'minimum' => 1]], $fields), 'required' => ['id']]],
         ['name' => 'publish_article', 'description' => 'Explicitly publish a draft ONLY after user approval; requires MCP_ALLOW_PUBLISH=1.', 'inputSchema' => ['type' => 'object', 'properties' => ['id' => ['type' => 'integer', 'minimum' => 1], 'confirm' => ['type' => 'boolean', 'const' => true]], 'required' => ['id', 'confirm']]],
-    ];
+    ], aloContentTools());
 }
 function mcpExecute(string $name, array $a): array {
+    if (in_array($name, ['describe_content_fields','list_content','get_content','create_content','update_content','set_content_published'], true)) return aloContentExecute($name, $a);
     if ($name === 'publish_article' && getenv('MCP_ALLOW_PUBLISH') !== '1') {
         throw new InvalidArgumentException('Publishing disabled by MCP_ALLOW_PUBLISH.');
     }
@@ -157,8 +160,8 @@ if (!is_string($secret) || strlen($secret) < 32 || !preg_match('/^Bearer\s+(.+)$
     mcpRespond(null, null, ['code' => -32001, 'message' => 'Unauthorized.'], 401);
 }
 if (stripos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== 0) mcpRespond(null, null, ['code' => -32600, 'message' => 'JSON content type required.'], 415);
-if ((int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 180000) mcpRespond(null, null, ['code' => -32600, 'message' => 'Request too large.'], 413);
-$raw = file_get_contents('php://input', false, null, 0, 180001);
+if ((int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 4000000) mcpRespond(null, null, ['code' => -32600, 'message' => 'Request too large.'], 413);
+$raw = file_get_contents('php://input', false, null, 0, 4000001);
 if (strlen($raw) > 180000) mcpRespond(null, null, ['code' => -32600, 'message' => 'Request too large.'], 413);
 $p = json_decode($raw, true);
 if (!is_array($p) || array_is_list($p) || ($p['jsonrpc'] ?? '') !== '2.0' || !is_string($p['method'] ?? null)) {
