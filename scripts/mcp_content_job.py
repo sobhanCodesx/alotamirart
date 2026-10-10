@@ -30,14 +30,15 @@ def tool(name, arguments):
         ENDPOINT, data=data, method="POST",
         headers={"Authorization": "Bearer " + TOKEN,
                  "Content-Type": "application/json",
-                 "Accept": "application/json",
-                 "User-Agent": "AloTamiratchi-Content/1.0"},
+                 "Accept": "application/json"},
     )
     try:
         with urllib.request.urlopen(req, timeout=40) as response:
             output = json.load(response)
     except urllib.error.HTTPError as e:
-        raise RuntimeError(f"MCP HTTP error {e.code}") from None
+        snippet = e.read(350).decode("utf-8", "replace")
+        snippet = " ".join(snippet.split())
+        raise RuntimeError(f"MCP HTTP error {e.code}: {snippet[:230]}") from None
     except urllib.error.URLError as e:
         raise RuntimeError(f"MCP connection failed: {e.reason}") from None
     if "error" in output:
