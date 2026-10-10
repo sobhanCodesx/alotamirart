@@ -11,6 +11,10 @@ on:
       - '.env.example'
       - 'tests/env-loader.php'
       - 'tests/mcp-image-payload-contract.php'
+      - 'tests/playnexus-mcp-architecture.php'
+      - 'api/mcp/index.php'
+      - 'scripts/mcp_content_job.py'
+      - '.github/workflows/mcp-content-publish.yml'
       - 'api/content-tools.php'
       - 'api/deploy.php'
       - 'scripts/alo_deploy.py'
@@ -29,6 +33,10 @@ on:
       - '.env.example'
       - 'tests/env-loader.php'
       - 'tests/mcp-image-payload-contract.php'
+      - 'tests/playnexus-mcp-architecture.php'
+      - 'api/mcp/index.php'
+      - 'scripts/mcp_content_job.py'
+      - '.github/workflows/mcp-content-publish.yml'
       - 'api/deploy.php'
       - 'scripts/alo_deploy.py'
       - 'tests/article-mcp-contract.php'
@@ -52,5 +60,8 @@ jobs:
           php -l bootstrap/app.php
           php tests/env-loader.php
           php tests/mcp-image-payload-contract.php
+          php tests/playnexus-mcp-architecture.php
+          php -l api/mcp/index.php
+          python3 -m py_compile scripts/mcp_content_job.py
           php tests/legacy-compatibility.php
           python3 -m py_compile scripts/alo_deploy.py
