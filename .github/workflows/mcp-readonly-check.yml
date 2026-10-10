@@ -20,122 +20,16 @@ jobs:
         with:
           fetch-depth: 2
           persist-credentials: false
-      - name: Identify content requests without network calls
-        id: content_change
+      - name: Detect content request in this commit
+        id: changes
         run: |
-          if git diff --diff-filter=AM --name-only HEAD^ HEAD -- content-requests | grep -q '^content-requests/.*\.json
-        env:
-          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
-          MCP_ENDPOINT: https://alotamiratchi.ir/api/mcp.php
-        run: |
-          python3 - <<'PY'
-          import json
-          import os
-          import sys
-          import urllib.error
-          import urllib.request
-
-          endpoint = os.getenv("MCP_ENDPOINT", "")
-          token = os.getenv("MCP_API_TOKEN", "")
-          if len(token) < 32:
-              sys.exit("MCP_API_TOKEN is missing in GitHub Actions secrets (minimum 32 characters)")
-          if not endpoint.startswith("https://"):
-              sys.exit("MCP endpoint must use HTTPS")
-
-          def call_tool(tool, arguments, request_id):
-              payload = {
-                  "jsonrpc": "2.0",
-                  "id": request_id,
-                  "method": "tools/call",
-                  "params": {"name": tool, "arguments": arguments},
-              }
-              request = urllib.request.Request(
-                  endpoint,
-                  data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-                  headers={
-                      "Authorization": "Bearer " + token,
-                      "Content-Type": "application/json",
-                      "Accept": "application/json",
-                  },
-                  method="POST",
-              )
-              try:
-                  with urllib.request.urlopen(request, timeout=25) as response:
-                      output = json.load(response)
-              except urllib.error.HTTPError as exc:
-                  sys.exit("MCP returned HTTP " + str(exc.code))
-              except urllib.error.URLError as exc:
-                  sys.exit("Unable to reach MCP endpoint: " + str(exc.reason))
-
-              if "error" in output:
-                  sys.exit("MCP JSON-RPC error: " + str(output["error"].get("message", "unknown")))
-              result = output.get("result", {})
-              if result.get("isError"):
-                  sys.exit("MCP tool error: " + str(result.get("content", []))[:500])
-              data = result.get("structuredContent")
-              if not isinstance(data, dict):
-                  content = result.get("content", [])
-                  if content and content[0].get("type") == "text":
-                      data = json.loads(content[0]["text"])
-              if not isinstance(data, dict):
-                  sys.exit("MCP returned an unexpected response shape")
-              return data
-
-          for index, kind in enumerate(("article", "brand_article", "brand", "category"), start=1):
-              data = call_tool("list_content", {"type": kind, "limit": 50}, index)
-              records = data.get("records", [])
-              if not isinstance(records, list):
-                  sys.exit("MCP returned non-list records")
-              print("TYPE", kind, "SAMPLE_COUNT", len(records), "(max 50)")
-              for entry in records:
-                  row_id = entry.get("id")
-                  status = entry.get("status")
-                  # GitHub Actions logs in public repositories can be public.
-                  # Never print titles of unpublished drafts.
-                  if status is not None and str(status) != "1":
-                      print(json.dumps({"id": row_id, "status": status, "title": "[unpublished]"}))
-                  else:
-                      title = str(entry.get("title", entry.get("name", "")))
-                      print(json.dumps({"id": row_id, "status": status, "title": title}, ensure_ascii=False))
-          print("MCP_READ_ONLY_CHECK_OK")
-          PY
-      - name: Check publishing client request compatibility (read-only)
-        if: steps.content_change.outputs.publish_requested != 'true'
-        env:
-          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
-        run: |
-          python3 - <<'PY'
-          import sys
-          sys.path.insert(0, "scripts")
-          import mcp_content_job
-          data = mcp_content_job.tool("list_content", {"type": "article", "limit": 1})
-          assert isinstance(data.get("records"), list)
-          print("PUBLISHING_CLIENT_READ_ONLY_OK", len(data["records"]))
-          PY
-      - name: Publish user-approved content requests via the verified MCP runner
-        if: steps.content_change.outputs.publish_requested == 'true'
-        env:
-          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          mapfile -t REQUESTS < <(git diff --diff-filter=AM --name-only HEAD^ HEAD -- content-requests)
-          if [ "${#REQUESTS[@]}" -eq 0 ]; then
-            echo "No article publication request in this commit"
-            exit 0
-          fi
-          for request in "${REQUESTS[@]}"; do
-            case "$request" in
-              content-requests/*.json) python3 scripts/mcp_content_job.py "$request" ;;
-              *) echo "Skipping unexpected path" ;;
-            esac
-          done
-; then
-            echo "publish_requested=true" >> "$GITHUB_OUTPUT"
+          if git diff --diff-filter=AM --name-only HEAD^ HEAD -- content-requests | grep -q "^content-requests/"; then
+            echo "requested=true" >> "$GITHUB_OUTPUT"
           else
-            echo "publish_requested=false" >> "$GITHUB_OUTPUT"
+            echo "requested=false" >> "$GITHUB_OUTPUT"
           fi
       - name: Query website MCP without modifying content
-        if: steps.content_change.outputs.publish_requested != 'true'
+        if: steps.changes.outputs.requested != 'true'
         env:
           MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
           MCP_ENDPOINT: https://alotamiratchi.ir/api/mcp.php
@@ -212,6 +106,7 @@ jobs:
           print("MCP_READ_ONLY_CHECK_OK")
           PY
       - name: Check publishing client request compatibility (read-only)
+        if: steps.changes.outputs.requested != 'true'
         env:
           MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
         run: |
@@ -224,7 +119,7 @@ jobs:
           print("PUBLISHING_CLIENT_READ_ONLY_OK", len(data["records"]))
           PY
       - name: Publish user-approved content requests via the verified MCP runner
-        if: github.event_name == 'push'
+        if: steps.changes.outputs.requested == 'true'
         env:
           MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
         run: |
