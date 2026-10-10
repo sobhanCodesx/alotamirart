@@ -70,7 +70,7 @@ jobs:
           ALO_DEPLOY_URL: ${{ secrets.ALO_DEPLOY_URL || 'https://alotamiratchi.ir/api/deploy.php' }}
           BEFORE_SHA: ${{ github.event.before }}
         run: |
-          if [ -z "${BEFORE_SHA:-}" ]; then
-            export BEFORE_SHA="$(git rev-parse HEAD^)"
-          fi
+          # One-time re-sync of the MCP code changes that failed to reach cPanel.
+          # The signed receiver still enforces its strict per-file allowlist.
+          export BEFORE_SHA="1ff56365d60718ad836b3076ac27edb91d27bcce"
           python3 scripts/alo_deploy.py
