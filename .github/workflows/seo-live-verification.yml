@@ -1,0 +1,79 @@
+name: AloTamiratchi live homepage SEO verification
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/seo-live-verification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-site-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify live canonical host and rendered homepage signals
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from urllib.error import HTTPError
+          import json, re, time
+          from urllib.request import Request, build_opener, HTTPRedirectHandler, urlopen
+
+          HOST = "https://www.alotamiratchi.ir/"
+          class NoRedirect(HTTPRedirectHandler):
+              def redirect_request(self, request, fp, code, msg, headers, newurl):
+                  return None
+
+          headers={"User-Agent":"AloTamiratchi-Live-SEO-Verification/1.0","Accept":"text/html"}
+          bare=Request("https://alotamiratchi.ir/",headers=headers)
+          for attempt in range(3):
+              try:
+                  response=build_opener(NoRedirect).open(bare,timeout=25)
+                  status=response.status; target=response.headers.get("Location","")
+                  response.close()
+              except HTTPError as error:
+                  status=error.code;target=error.headers.get("Location","")
+              if status in (301,308): break
+              time.sleep(3)
+          print("NON_WWW_STATUS",status,"TARGET",target)
+          assert status in (301,308) and target==HOST, "Bare homepage must 301/308 directly to canonical www HTTPS host"
+          with urlopen(Request(HOST,headers=headers),timeout=25) as response:
+              markup=response.read(900000).decode("utf-8","replace")
+              print("WWW_HOME_STATUS",response.status,"BYTES",len(markup))
+              assert response.status==200
+          class SEO(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.title=""; self.in_title=False; self.meta={}; self.links=[];self.h1=0;self.jsonld=[];self.in_ld=False
+              def handle_starttag(self,tag,attrs):
+                  a=dict(attrs)
+                  if tag=="title": self.in_title=True
+                  if tag=="h1": self.h1+=1
+                  if tag=="meta":self.meta[a.get("name") or a.get("property") or ""]=a.get("content")
+                  if tag=="link":self.links.append(a)
+                  if tag=="script" and a.get("type")=="application/ld+json":self.in_ld=True
+              def handle_data(self,data):
+                  if self.in_title:self.title+=data
+                  if self.in_ld:self.jsonld.append(data)
+              def handle_endtag(self,tag):
+                  if tag=="title":self.in_title=False
+                  if tag=="script":self.in_ld=False
+          parsed=SEO(); parsed.feed(markup)
+          print("TITLE",parsed.title,"H1_COUNT",parsed.h1)
+          print("CANONICAL_LINKS",[a.get("href") for a in parsed.links if a.get("rel")=="canonical"])
+          print("OG_IMAGE",parsed.meta.get("og:image"))
+          assert "خدمات تعمیر لوازم خانگی" in parsed.title, "Old short homepage title"
+          assert 30<=len(parsed.title)<=90, "Homepage title unreasonable"
+          assert "تعمیر" in (parsed.meta.get("description") or ""), "Homepage description still off-topic"
+          assert parsed.h1==1, "Homepage H1 count wrong"
+          assert [a.get("href") for a in parsed.links if a.get("rel")=="canonical"]==[HOST], "Canonical differs from live host"
+          assert (parsed.meta.get("og:image") or "").startswith("https://"), "OG image is missing"
+          assert any(a.get("rel")=="apple-touch-icon" for a in parsed.links), "Apple icon missing"
+          assert parsed.jsonld and any(n.get("@type")=="Organization" for n in json.loads(parsed.jsonld[0]).get("@graph",[])), "Organization JSON-LD missing"
+          assert "تبلیغات گوگل" not in markup, "Old unrelated marketing copy still rendered"
+          print("ALO_LIVE_SEO_VERIFIED_OK")
+          PY
