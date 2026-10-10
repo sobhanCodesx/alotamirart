@@ -21,7 +21,7 @@ foreach ($cases as $from => $to) {
     typeAssert($actual === $to, "Mismatch: " . $from . " -> " . $actual);
     typeAssert(aloPersianTypography($actual) === $actual, "Idempotence failed: " . $from);
 }
-typeAssert(strpos(file_get_contents(dirname(__DIR__).'/index.php'),"aloPersianTypography(\$text)")!==false,
+typeAssert(strpos(file_get_contents(dirname(__DIR__).'/index.php'),"aloPersianTypography(trim(\$text))")!==false,
            'Global clean_display_text integration missing');
 $home = file_get_contents(dirname(__DIR__).'/them/app/index.php');
 typeAssert(strpos($home,'hreflang="fa-IR"')!==false, 'Persian homepage hreflang missing');
