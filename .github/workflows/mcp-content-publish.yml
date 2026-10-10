@@ -1,0 +1,43 @@
+name: Publish approved content via MCP (no deployment)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content-requests/*.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alotamiratchi-content-publishing
+  cancel-in-progress: false
+
+jobs:
+  publish-via-mcp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Publish the newly requested article via authenticated MCP
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          mapfile -t NEW_REQUESTS < <(git diff --diff-filter=A --name-only HEAD^ HEAD -- content-requests)
+          if [ "${#NEW_REQUESTS[@]}" -eq 0 ]; then
+            echo "No newly created content request files"
+            exit 0
+          fi
+          for request in "${NEW_REQUESTS[@]}"; do
+            case "$request" in
+              content-requests/*.json)
+                python3 scripts/mcp_content_job.py "$request"
+                ;;
+              *)
+                echo "Ignoring unexpected request path"
+                ;;
+            esac
+          done
