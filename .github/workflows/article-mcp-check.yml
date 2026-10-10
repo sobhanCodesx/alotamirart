@@ -18,6 +18,7 @@ on:
       - 'api/content-tools.php'
       - 'api/deploy.php'
       - 'scripts/alo_deploy.py'
+      - 'scripts/alo_deploy_ftps.py'
       - 'tests/article-mcp-contract.php'
       - 'tests/deploy-contract.php'
       - '.github/workflows/article-mcp-check.yml'
@@ -39,6 +40,7 @@ on:
       - '.github/workflows/mcp-content-publish.yml'
       - 'api/deploy.php'
       - 'scripts/alo_deploy.py'
+      - 'scripts/alo_deploy_ftps.py'
       - 'tests/article-mcp-contract.php'
       - 'tests/deploy-contract.php'
       - '.github/workflows/article-mcp-check.yml'
@@ -64,4 +66,4 @@ jobs:
           php -l api/mcp/index.php
           python3 -m py_compile scripts/mcp_content_job.py
           php tests/legacy-compatibility.php
-          python3 -m py_compile scripts/alo_deploy.py
+          python3 -m py_compile scripts/alo_deploy.py scripts/alo_deploy_ftps.py
