@@ -64,7 +64,7 @@ def locate_root(ftp: ftplib.FTP_TLS) -> str:
             ftp.cwd(candidate)
             verify_site_root(ftp)
             return ftp.pwd()
-        except (ftplib.all_errors, RuntimeError):
+        except ftplib.all_errors + (RuntimeError,):
             continue
     raise RuntimeError(
         "FTP account cannot locate site root containing api/deploy.php and index.php; "
