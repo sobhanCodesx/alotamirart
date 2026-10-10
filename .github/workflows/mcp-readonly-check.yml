@@ -1,4 +1,5 @@
 name: Read-only MCP content connectivity
+# Fresh workflow run after adding the MCP repository secret; reruns may use old secret snapshots.
 on:
   push:
     paths:
