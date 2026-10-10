@@ -1,0 +1,26 @@
+name: Alo production TTFB benchmark
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ttfb-benchmark.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Measure anonymous TTFB from an external runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          for route in / /post/490 /cities; do
+            echo "ROUTE=$route"
+            for attempt in 1 2 3 4 5 6; do
+              curl -sS --max-time 25 -o /dev/null -H 'Accept: text/html' -A 'AloSEO-TTFB-Audit/1.0' \
+                -w 'SAMPLE=%{http_code} DNS=%{time_namelookup} TCP=%{time_connect} TLS=%{time_appconnect} TTFB=%{time_starttransfer} TOTAL=%{time_total} REMOTE=%{remote_ip}\n' \
+                "https://alotamiratchi.ir$route"
+            done
+          done
