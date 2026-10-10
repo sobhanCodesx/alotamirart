@@ -19,7 +19,7 @@ jobs:
           import http.client, statistics, time
           host="alotamiratchi.ir"
           connection=http.client.HTTPSConnection(host,timeout=28)
-          def request(mode):
+          def request(mode, warmup=False):
               h={"Accept":"text/html","User-Agent":"AloSEO-Performance-Benchmark/1.0"}
               if mode=="uncached":h["Cache-Control"]="no-cache"
               beginning=time.perf_counter()
@@ -31,11 +31,11 @@ jobs:
               length=len(r.read())
               print("RESULT",mode,"status",status,"cache",marker,"first_byte_ms",round(elapsed,1),"body_bytes",length,"connection_open",connection.sock is not None,flush=True)
               assert status==200 and length>15000
-              if mode=="cached":assert marker=="HIT","expected anonymous cache hit"
+              if mode=="cached" and not warmup:assert marker=="HIT","expected anonymous cache hit"
               if mode=="uncached":assert marker!="HIT","explicit no-cache request must bypass cache"
               return elapsed
           # Warm up the guest cache and establish the TLS connection.
-          request("cached")
+          request("cached",warmup=True)
           cached=[];uncached=[]
           for i in range(8):
               uncached.append(request("uncached"))
