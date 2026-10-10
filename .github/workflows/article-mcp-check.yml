@@ -10,6 +10,7 @@ on:
       - '.gitignore'
       - '.env.example'
       - 'tests/env-loader.php'
+      - 'tests/mcp-image-payload-contract.php'
       - 'api/content-tools.php'
       - 'api/deploy.php'
       - 'scripts/alo_deploy.py'
@@ -27,6 +28,7 @@ on:
       - '.gitignore'
       - '.env.example'
       - 'tests/env-loader.php'
+      - 'tests/mcp-image-payload-contract.php'
       - 'api/deploy.php'
       - 'scripts/alo_deploy.py'
       - 'tests/article-mcp-contract.php'
@@ -49,5 +51,6 @@ jobs:
           php -l config/database.php
           php -l bootstrap/app.php
           php tests/env-loader.php
+          php tests/mcp-image-payload-contract.php
           php tests/legacy-compatibility.php
           python3 -m py_compile scripts/alo_deploy.py
