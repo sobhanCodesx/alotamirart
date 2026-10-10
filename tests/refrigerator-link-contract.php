@@ -50,7 +50,7 @@ $changed=$db->query('SELECT * FROM posts WHERE id=82')->fetch(PDO::FETCH_ASSOC);
 fridgeAssert(strpos($changed['content'],'https://o3am.ir/a?b=2')!==false, 'path kept');
 fridgeAssert(strpos($changed['content'],'https://www.o3am.ir/b')!==false, 'www kept');
 fridgeAssert(strpos($changed['description'],'https://o3am.ir/info')!==false, 'description updated');
-fridgeAssert($changed['contact_number']==='09169522521' && $changed['status']==='1', 'phone and status unchanged');
+fridgeAssert($changed['contact_number']==='09169522521' && (int)$changed['status']===1, 'phone and status unchanged');
 $unrelated=$db->query('SELECT * FROM posts WHERE id=101')->fetch(PDO::FETCH_ASSOC);
 fridgeAssert(strpos($unrelated['content'],'https://o3am.com/untouched')!==false, 'unrelated category untouched');
 $similar=$db->query('SELECT * FROM posts WHERE id=102')->fetch(PDO::FETCH_ASSOC);
