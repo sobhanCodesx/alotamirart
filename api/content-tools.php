@@ -153,6 +153,7 @@ function aloContentTools(): array {
     return [
         ['name'=>'describe_content_fields','description'=>'Read allowed content types and form-field names, including article, brand article, brand and category.','inputSchema'=>['type'=>'object','properties'=>new stdClass()]],
         ['name'=>'list_content','description'=>'List records of the selected content type, including drafts.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'limit'=>['type'=>'integer','minimum'=>1,'maximum'=>50]],'required'=>['type']]],
+        ['name'=>'find_content','description'=>'Find exact article slug to prevent duplicate publication.', 'inputSchema'=>['type'=>'object','properties'=>['type'=>['type'=>'string','enum'=>['article','brand_article']],'slug'=>['type'=>'string','maxLength'=>220]],'required'=>['type','slug']]],
         ['name'=>'get_content','description'=>'Get all existing fields of a record.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'id'=>$id],'required'=>['type','id']]],
         ['name'=>'create_content','description'=>'Create content using all supported form fields; status-bearing records become unpublished drafts; image_base64 can attach JPEG/PNG/WebP. Non-status records require confirm_public=true.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'fields'=>$fields,'image_base64'=>['type'=>'string','description'=>'Optional base64 encoded image data, without data URL prefix'],'image_url'=>['type'=>'string','description'=>'Vetted Wikimedia Commons image URL; stored as local featured image'],'confirm_public'=>['type'=>'boolean']],'required'=>['type','fields']]],
         ['name'=>'update_content','description'=>'Update existing content fields; published records require confirm_public=true.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'id'=>$id,'fields'=>$fields,'image_base64'=>['type'=>'string'],'image_url'=>['type'=>'string'],'confirm_public'=>['type'=>'boolean']],'required'=>['type','id','fields']]],
@@ -163,6 +164,14 @@ function aloContentExecute(string $name,array $args): array {
     if ($name==='describe_content_fields') return ['models'=>aloContentSchema()];
     $model=aloContentModel($args);
     $db=mcpDb();$table=$model['table'];
+    if ($name==='find_content') {
+        if (!in_array($table,['posts','post_brand'],true)) throw new InvalidArgumentException('Only articles support exact slug lookup.');
+        $slug=$args['slug'] ?? null;
+        if (!is_string($slug) || trim($slug)==='' || strlen($slug)>220) throw new InvalidArgumentException('Invalid exact slug.');
+        $st=$db->prepare('SELECT * FROM '.$table.' WHERE slug=? ORDER BY id DESC LIMIT 1');
+        $st->execute([$slug]);
+        return ['record'=>$st->fetch() ?: null];
+    }
     if ($name==='list_content') {
         $limit=$args['limit']??20;
         if (!is_int($limit)||$limit<1||$limit>50) throw new InvalidArgumentException('Invalid limit.');
