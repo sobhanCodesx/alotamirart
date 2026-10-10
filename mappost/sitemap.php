@@ -1,13 +1,18 @@
-<?php header('Content-type: application/xml;charset="utf-8"', true); ?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">"
-    <?php foreach ($get as $date) { ?>
-        <url>
-            <loc><?= assets('post/'.$date['id']) ?></loc>
-            <lastmod><?= date('Y-m-d', time()); ?></lastmod>
-            <priority>0.64</priority>
-        </url>
-    <?php } ?>
+<?php
+header('Content-Type: application/xml; charset=UTF-8');
+echo '<?xml version="1.0" encoding="UTF-8"?>';
+?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<?php foreach ($get as $entry):
+    $url = 'https://www.alotamiratchi.ir/post/' . (int)$entry['id'];
+    $dateValue = $entry['updated_at'] ?? $entry['created_at'] ?? '';
+    $lastmod = $dateValue !== '' ? strtotime((string)$dateValue) : false;
+?>
+  <url>
+    <loc><?= htmlspecialchars($url, ENT_XML1, 'UTF-8') ?></loc>
+<?php if ($lastmod !== false && $lastmod > 0): ?>
+    <lastmod><?= date('Y-m-d', $lastmod) ?></lastmod>
+<?php endif; ?>
+  </url>
+<?php endforeach; ?>
 </urlset>

@@ -22,6 +22,7 @@ if($found && !empty($post['contact_number'])) {
     $contactLabel = 'تماس با پشتیبانی';
 }
 $contactHref = $contact !== '' ? preg_replace('/[^\d+]/','',$contact) : '';
+$canonicalBrandSlug = $found ? trim((string)($post['slug'] ?? ''), '/') : '';
 ?>
 <!doctype html>
 <html lang="fa" dir="rtl">
@@ -31,6 +32,7 @@ $contactHref = $contact !== '' ? preg_replace('/[^\d+]/','',$contact) : '';
 <title><?= htmlspecialchars($title,ENT_QUOTES,'UTF-8') ?> | <?= htmlspecialchars(isset($dataSeo['title'])?clean_display_text($dataSeo['title']):'الو تعمیراتچی',ENT_QUOTES,'UTF-8') ?></title>
 <?php if($description!==''): ?><meta name="description" content="<?= htmlspecialchars($description,ENT_QUOTES,'UTF-8') ?>"><?php endif; ?>
 <meta name="robots" content="<?= $found?'index,follow':'noindex,follow' ?>">
+<?php if ($found && $canonicalBrandSlug !== ''): ?><link rel="canonical" href="https://www.alotamiratchi.ir/<?= htmlspecialchars(rawurlencode($canonicalBrandSlug), ENT_QUOTES, 'UTF-8') ?>/<?= (int)$post['id'] ?>"><?php endif; ?>
 <?php if($found): ?>
 <meta property="og:type" content="article">
 <meta property="og:title" content="<?= htmlspecialchars($title,ENT_QUOTES,'UTF-8') ?>">

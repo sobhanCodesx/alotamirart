@@ -1,2 +1,5 @@
-Sitemap  : https://damavandservice.com /post/sitemap;
-Sitemap  : https://damavandservice.com /brand/sitemap;
+User-agent: *
+Allow: /
+
+Sitemap: https://www.alotamiratchi.ir/post/sitemap
+Sitemap: https://www.alotamiratchi.ir/brand/sitemap
