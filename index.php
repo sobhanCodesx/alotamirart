@@ -8,6 +8,7 @@ if (strtolower((string)($_SERVER['HTTP_HOST'] ?? '')) === 'www.alotamiratchi.ir'
     exit;
 }
 session_start();
+require_once __DIR__ . '/app/Support/persian-typography.php';
 define('BASE_PATH', __DIR__);
 define("CURRENT_DOMAIN", currentdomain() . "/");
 define('DISPLAY_ERROR', true);
@@ -63,7 +64,7 @@ function clean_display_text($value)
     $text = strip_tags($text);
     $text = str_replace("\xC2\xA0", ' ', $text);
     $text = preg_replace('/[\r\n\t ]+/u', ' ', $text);
-    return trim($text);
+    return aloPersianTypography(trim($text));
 }
 
 function excerpt_text($value, $word_limit = 25)

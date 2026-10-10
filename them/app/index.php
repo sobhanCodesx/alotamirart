@@ -27,6 +27,7 @@ $homeSchema = [
   <title><?= htmlspecialchars($homeSeoTitle, ENT_QUOTES, 'UTF-8') ?></title>
   <?php if ($siteDescription !== ''): ?><meta name="description" content="<?= htmlspecialchars($siteDescription, ENT_QUOTES, 'UTF-8') ?>"><?php endif; ?>
   <link rel="canonical" href="<?= $homeCanonical ?>">
+  <link rel="alternate" hreflang="fa-IR" href="<?= $homeCanonical ?>">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="fa_IR">
   <meta property="og:site_name" content="الو تعمیراتچی">

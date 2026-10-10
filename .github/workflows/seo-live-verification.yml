@@ -50,8 +50,10 @@ jobs:
                   super().__init__()
                   self.title=""; self.in_title=False; self.meta={}; self.links=[];self.h1=0;self.jsonld=[];self.in_ld=False
                   self.heading_count=0; self.images=[]; self.anchors=[]; self.paragraphs=[]; self.in_paragraph=False
+                  self.skip_text=0; self.visible_persian_nodes=[]
               def handle_starttag(self,tag,attrs):
                   a=dict(attrs)
+                  if tag in ("script","style","svg","template","noscript"):self.skip_text+=1
                   if tag=="title": self.in_title=True
                   if tag=="h1": self.h1+=1
                   if re.fullmatch(r"h[1-6]",tag): self.heading_count+=1
@@ -62,10 +64,12 @@ jobs:
                   if tag=="link":self.links.append(a)
                   if tag=="script" and a.get("type")=="application/ld+json":self.in_ld=True
               def handle_data(self,data):
+                  if not self.skip_text and re.search("[\\u0600-\\u06FF]",data):self.visible_persian_nodes.append(" ".join(data.split()))
                   if self.in_title:self.title+=data
                   if self.in_paragraph:self.paragraphs[-1]+=data
                   if self.in_ld:self.jsonld.append(data)
               def handle_endtag(self,tag):
+                  if tag in ("script","style","svg","template","noscript") and self.skip_text:self.skip_text-=1
                   if tag=="title":self.in_title=False
                   if tag=="script":self.in_ld=False
                   if tag=="p":self.in_paragraph=False
@@ -78,6 +82,7 @@ jobs:
           assert "تعمیر" in (parsed.meta.get("description") or ""), "Homepage description still off-topic"
           assert parsed.h1==1, "Homepage H1 count wrong"
           assert [a.get("href") for a in parsed.links if a.get("rel")=="canonical"]==[HOST], "Canonical differs from live host"
+          assert len([a for a in parsed.links if a.get("rel")=="alternate" and a.get("hreflang")=="fa-IR" and a.get("href")==HOST])==1, "fa-IR hreflang missing or inconsistent with non-www canonical"
           assert (parsed.meta.get("og:image") or "").startswith("https://"), "OG image is missing"
           with urlopen(Request(parsed.meta["og:image"],headers={"User-Agent":headers["User-Agent"]}),timeout=25) as picture:
               media_type=picture.headers.get("Content-Type","")
@@ -99,5 +104,11 @@ jobs:
               assert 60<=count<=105, "editorial paragraph not between 60 and 105 words"
               assert not re.search(r"\s+[،.]",para), "space before punctuation"
               assert not re.search(r"[،.](?=\S)",para), "punctuation lacks following space"
+          issues=[]
+          for node in parsed.visible_persian_nodes:
+              if re.search(r"\\s+[،.]|[،.](?!\\s|$)",node): issues.append(node[:180])
+          print("VISIBLE_PERSIAN_NODES",len(parsed.visible_persian_nodes),"PUNCTUATION_ERRORS",len(issues))
+          if issues:print("PUNCTUATION_SAMPLES",issues[:12])
+          assert not issues, "Homepage still has unspaced Persian commas or periods"
           print("ALO_LIVE_SEO_VERIFIED_OK")
           PY

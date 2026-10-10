@@ -10,6 +10,7 @@ homepageAssert(strpos($index,"'www.alotamiratchi.ir'")!==false, 'www to bare red
 homepageAssert(strpos($index,"header('Location: https://alotamiratchi.ir'")!==false, 'www to bare permanent redirect missing');
 homepageAssert(strpos(file_get_contents($root.'/.htaccess'),'RewriteEngine On')!==false,'cPanel htaccess preserved');
 $source=file_get_contents($root.'/them/app/index.php');
+homepageAssert(strpos($source,'hreflang="fa-IR"')!==false, 'Persian hreflang not rendered by homepage template');
 homepageAssert(strpos($source,'<meta property="og:image"')!==false,'OG image missing');
 homepageAssert(strpos($source,'application/ld+json')!==false,'structured data missing');
 homepageAssert(strpos(file_get_contents($root.'/them/app/layout/heading.php'),'apple-touch-icon')!==false,'Apple touch icon missing');
@@ -36,6 +37,8 @@ $xp=new DOMXPath($doc);
 $title=$doc->getElementsByTagName('title')->item(0);
 homepageAssert($title!==null && mb_strlen($title->textContent)>20 && strpos($title->textContent,'خدمات تعمیر لوازم خانگی')!==false,'SEO title short or off-topic');
 homepageAssert($doc->getElementsByTagName('h1')->length===1,'homepage must have one H1');
+$hreflang=$xp->query('//link[@rel="alternate" and @hreflang="fa-IR" and @href="https://alotamiratchi.ir/"]');
+homepageAssert($hreflang->length===1,'Homepage self-referencing fa-IR hreflang missing or invalid');
 $canonical=$xp->query('//link[@rel="canonical"]');
 homepageAssert($canonical->length===1 && $canonical->item(0)->getAttribute('href')==='https://alotamiratchi.ir/','canonical mismatch');
 $image=$xp->query('//meta[@property="og:image"]');

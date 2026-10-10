@@ -1,5 +1,5 @@
 <?php
-$footerAbout = isset($dataFooter['about_description']) ? trim(strip_tags((string)$dataFooter['about_description'])) : '';
+$footerAbout = isset($dataFooter['about_description']) ? clean_display_text($dataFooter['about_description']) : '';
 $footerPhone = isset($dataFooter['phon']) ? trim(strip_tags((string)$dataFooter['phon'])) : '';
 $footerEmail = isset($dataFooter['email']) ? trim(strip_tags((string)$dataFooter['email'])) : '';
 $footerInstagram = isset($dataFooter['instagram']) ? trim(strip_tags((string)$dataFooter['instagram'])) : '';
@@ -8,7 +8,7 @@ $footerPhoneHref = preg_replace('/[^\d+]/', '', $footerPhone);
 <footer class="site-footer">
   <div class="site-container site-footer__main">
     <div>
-      <h2><?= htmlspecialchars(isset($dataSeo['title']) ? $dataSeo['title'] : 'الو تعمیراتچی', ENT_QUOTES, 'UTF-8') ?></h2>
+      <h2><?= htmlspecialchars(isset($dataSeo['title']) ? clean_display_text($dataSeo['title']) : 'الو تعمیراتچی', ENT_QUOTES, 'UTF-8') ?></h2>
       <div class="site-footer__about"><?= htmlspecialchars($footerAbout !== '' ? $footerAbout : 'راهنمای انتخاب خدمات و دسترسی سریع به محتوای تخصصی تعمیرات لوازم خانگی.', ENT_QUOTES, 'UTF-8') ?></div>
     </div>
 

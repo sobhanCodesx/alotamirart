@@ -71,6 +71,8 @@ jobs:
           php -l them/app/index.php
           php -l them/app/layout/heading.php
           php tests/seo-homepage-contract.php
+          php -l app/Support/persian-typography.php
+          php tests/persian-typography-contract.php
           php -l them/app/layout/header.php
           php -l them/app/layout/footer.php
           node --check public/src/js/site.js
