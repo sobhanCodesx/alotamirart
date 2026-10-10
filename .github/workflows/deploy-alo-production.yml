@@ -74,6 +74,7 @@ jobs:
           php tests/admin-panel-contract.php
           python3 -m py_compile scripts/alo_deploy_playnexus.py scripts/alo_release.py scripts/mcp_content_job.py
           python3 -m unittest discover -s tests -p 'test_alo_release.py'
+          python3 -m unittest discover -s tests -p 'test_mcp_context_job.py'
 
   bootstrap:
     needs: tests

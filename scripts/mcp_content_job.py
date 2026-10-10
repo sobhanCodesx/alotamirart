@@ -66,9 +66,17 @@ def tool(name, arguments):
     return parsed
 
 
+def media_args(request):
+    sources=[key for key in ("image_url","image_base64") if request.get(key)]
+    if len(sources)>1:
+        raise ValueError("Only one featured image source is permitted")
+    return {sources[0]:request[sources[0]]} if sources else {}
+
+
 def publish(path):
     request = json.loads(path.read_text(encoding="utf-8"))
     fields = request["fields"]
+    media = media_args(request)
     slug = fields["slug"]
     if request.get("type") != "article" or not fields.get("post_id"):
         raise ValueError("This workflow supports normal articles with an existing category")
@@ -90,11 +98,11 @@ def publish(path):
         if not existing.get("img"):
             existing = tool("update_content", {
                 "type": "article", "id": article_id,
-                "fields": {"title": existing["title"]}, "image_url": request["image_url"]
+                "fields": {"title": existing["title"]}, **media
             })["record"]
     else:
         created = tool("create_content", {
-            "type": "article", "fields": fields, "image_url": request["image_url"]
+            "type": "article", "fields": fields, **media
         })
         existing = created["record"]
         article_id = int(existing["id"])
@@ -121,6 +129,81 @@ def publish(path):
     print("PUBLISH_VERIFIED_OK")
 
 
+def manage_content(path):
+    """Handle typed CRUD publication jobs; changes always use MCP allowlists."""
+    request=json.loads(path.read_text(encoding="utf-8"))
+    content_type=request.get("type","article")
+    action=request.get("action","publish")
+    if content_type not in ("article","brand_article","brand","category"):
+        raise ValueError("Invalid managed content type")
+    if action=="publish" and content_type=="article":
+        publish(path)
+        return
+    media=media_args(request)
+    fields=request.get("fields")
+    if action in ("draft","create","publish"):
+        if not isinstance(fields,dict):
+            raise ValueError("Create requires fields object")
+        if content_type in ("brand","category"):
+            if action!="create":
+                raise ValueError("Brands/categories require explicit create action")
+            item=tool("create_content",{
+                "type":content_type,"fields":fields,"confirm_public":True,**media
+            })["record"]
+            print("PUBLIC_CONTENT_CREATED",content_type,item["id"])
+            return
+        if content_type=="article":
+            slug=fields.get("slug")
+            existing=(tool("find_content",{"type":"article","slug":slug})["record"]
+                      if isinstance(slug,str) and slug else None)
+            item=existing or tool("create_content",{
+                "type":"article","fields":fields,**media
+            })["record"]
+            if action=="draft":
+                print("ARTICLE_DRAFT_ID",item["id"])
+                return
+        else:
+            slug=fields.get("slug")
+            if not isinstance(slug,str) or not slug:
+                raise ValueError("Brand article slug required")
+            existing=tool("find_content",{"type":"brand_article","slug":slug})["record"]
+            item=existing or tool("create_content",{
+                "type":"brand_article","fields":fields,**media
+            })["record"]
+            if action=="draft":
+                print("BRAND_ARTICLE_DRAFT_ID",item["id"])
+                return
+        if int(item.get("status") or 0)!=1:
+            item=tool("set_content_published",{
+                "type":content_type,"id":int(item["id"]),"published":True,"confirm":True
+            })["record"]
+        if int(item.get("status") or 0)!=1:
+            raise RuntimeError("MCP did not verify published state")
+        print("PUBLISHED",content_type,item["id"])
+        return
+    if action in ("update","unpublish"):
+        item_id=request.get("id")
+        if not isinstance(item_id,int) or isinstance(item_id,bool) or item_id<1:
+            raise ValueError("A positive record id is required")
+        if action=="unpublish":
+            if content_type not in ("article","brand_article"):
+                raise ValueError("Only editorial content can be unpublished")
+            item=tool("set_content_published",{
+                "type":content_type,"id":item_id,"published":False,"confirm":True
+            })["record"]
+            print("UNPUBLISHED",content_type,item["id"])
+            return
+        if not isinstance(fields,dict) or not fields and not media:
+            raise ValueError("Update requires fields or an image")
+        item=tool("update_content",{
+            "type":content_type,"id":item_id,"fields":fields or {},
+            "confirm_public":True,**media
+        })["record"]
+        print("UPDATED",content_type,item["id"])
+        return
+    raise ValueError("Unsupported content management action")
+
+
 if __name__ == "__main__":
     args = sys.argv[1:]
     if not args:
@@ -129,4 +212,4 @@ if __name__ == "__main__":
         path = (ROOT / arg).resolve()
         if path.parent != (ROOT / "content-requests").resolve() or path.suffix != ".json":
             sys.exit("Refusing request outside content-requests/*.json")
-        publish(path)
+        manage_content(path)

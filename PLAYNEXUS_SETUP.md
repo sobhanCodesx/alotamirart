@@ -76,3 +76,22 @@ python3 -m unittest discover -s tests -p 'test_alo_release.py'
 Publishing uses the same existing `MCP_API_TOKEN`; no second secret is created
 for deployment. The derived HMAC signing and deployment-auth contexts are
 different from the MCP Bearer token.
+
+## Read-before-write from the connected GitHub account
+
+The AI can create `content-queries/example.json`:
+```json
+{"tool":"query_alo_graph","arguments":{"type":"category","limit":25}}
+```
+The independent **AloTamiratchi MCP Site Context** workflow uses the private
+MCP token and prints only public published context between markers
+`ALO_PUBLIC_GRAPH_RESULT_START` and `ALO_PUBLIC_GRAPH_RESULT_END`. The
+connected GitHub app can read this response directly from Actions logs. Draft
+data is intentionally forbidden from public GitHub logs.
+
+For content jobs in `content-requests/*.json`, `type` may be
+`article`, `brand_article`, `brand` or `category`. `action` may be
+`publish`, `draft`, `create`, `update` or `unpublish` as relevant.
+Article publish preserves the existing idempotent slug workflow. Featured
+media may be an allowlisted `image_url` or `image_base64`; never both.
+Code deploy remains completely separate from both content queue directories.
