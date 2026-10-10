@@ -1,7 +1,7 @@
 <?php
 /**
  * Private MCP endpoint for AloTamirArt article management.
- * POST /api/mcp.php (served directly as a real file by existing .htaccess).
+ * POST /api/mcp (PlayNexus-style clean endpoint; /api/mcp.php remains compatible).
  * PHP 8.1+; Apache + MySQL; no framework or daemon required.
  */
 declare(strict_types=1);
@@ -87,7 +87,7 @@ function mcpTools(): array {
     ], aloContentTools());
 }
 function mcpExecute(string $name, array $a): array {
-    if (in_array($name, ['describe_content_fields','list_content','get_content','create_content','update_content','set_content_published'], true)) return aloContentExecute($name, $a);
+    if (in_array($name, ['describe_content_fields','list_content','find_content','get_content','create_content','update_content','set_content_published'], true)) return aloContentExecute($name, $a);
     if ($name === 'publish_article' && getenv('MCP_ALLOW_PUBLISH') !== '1') {
         throw new InvalidArgumentException('Publishing disabled by MCP_ALLOW_PUBLISH.');
     }
