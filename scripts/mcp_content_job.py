@@ -36,9 +36,18 @@ def tool(name, arguments):
         with urllib.request.urlopen(req, timeout=40) as response:
             output = json.load(response)
     except urllib.error.HTTPError as e:
-        snippet = e.read(350).decode("utf-8", "replace")
+        snippet = e.read(2600).decode("utf-8", "replace")
         snippet = " ".join(snippet.split())
-        raise RuntimeError(f"MCP HTTP error {e.code}: {snippet[:230]}") from None
+        # GET should return JSON 405 if PHP is reached. A 403 on GET too
+        # identifies an upstream WAF/rate-limit/IP block.
+        try:
+            urllib.request.urlopen(ENDPOINT, timeout=12).close()
+            diagnostic = "MCP GET: 200"
+        except urllib.error.HTTPError as check:
+            diagnostic = f"MCP GET: HTTP {check.code}"
+        except Exception as check:
+            diagnostic = "MCP GET unreachable: " + type(check).__name__
+        raise RuntimeError(f"MCP HTTP error {e.code}; {diagnostic}; response: {snippet[:1300]}") from None
     except urllib.error.URLError as e:
         raise RuntimeError(f"MCP connection failed: {e.reason}") from None
     if "error" in output:
