@@ -163,8 +163,21 @@ def manage_content(path):
     content_type=request.get("type","article")
     action=request.get("action","publish")
     if action == "bulk_mahshahr_contacts":
-        from mcp_mahshahr_contacts import apply_mahshahr_contacts
-        apply_mahshahr_contacts(tool, request)
+        if request.get("city") != "ماهشهر" or request.get("confirm") is not True:
+            raise ValueError("Mahshahr operation requires explicit city confirmation")
+        phone = request.get("phone")
+        if not isinstance(phone, str) or not re.fullmatch(r"09[0-9]{9}", phone):
+            raise ValueError("Invalid Iranian mobile phone")
+        result = tool("set_mahshahr_contact_numbers", {
+            "city": "ماهشهر", "phone": phone, "confirm": True,
+        })
+        if result.get("verified") is not True:
+            raise RuntimeError("Server did not verify the Mahshahr contact change")
+        counts = result.get("matched") or {}
+        total = sum(int(counts.get(t, 0)) for t in ("article", "brand_article"))
+        if total < 17:
+            raise RuntimeError("Mahshahr contact update matched fewer posts than the public inventory")
+        print("MAHSHahr_CONTACTS_VERIFIED_OK", json.dumps(result, ensure_ascii=False))
         return
     if content_type not in ("article","brand_article","brand","category"):
         raise ValueError("Invalid managed content type")
