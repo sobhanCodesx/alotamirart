@@ -24,3 +24,10 @@ foreach (['512 * 1024','multipart/form-data','deployment-manifest.sig','source_s
     if (strpos($client,$token)===false) {fwrite(STDERR,"Staged deployment client missing $token\n");exit(1);}
 }
 echo "Deploy static contract passed\n";
+
+$release=file_get_contents($root.'/scripts/alo_release.py');
+foreach ([$release,$agent] as $policySource) {
+    if (strpos($policySource,"'.htaccess'") === false && strpos($policySource,'".htaccess"') === false) {
+        fwrite(STDERR,"Narrow root .htaccess deploy allowlist is missing\n"); exit(1);
+    }
+}
