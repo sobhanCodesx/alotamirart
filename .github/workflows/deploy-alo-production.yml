@@ -69,7 +69,9 @@ jobs:
           MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
           ALO_DEPLOY_AGENT_URL: https://www.alotamiratchi.ir/api/deployment-agent/
           BEFORE_SHA: ${{ github.event.before }}
-          ALO_DEPLOY_BASE_SHA: ${{ vars.ALO_DEPLOY_BASE_SHA }}
+          # Initial catch-up includes MCP code merged while the legacy uploader was blocked.
+          # Remove this fallback after the first verified production deployment.
+          ALO_DEPLOY_BASE_SHA: ${{ vars.ALO_DEPLOY_BASE_SHA || '1ff56365d60718ad836b3076ac27edb91d27bcce' }}
         run: |
           set -euo pipefail
           if [ -z "${BEFORE_SHA:-}" ]; then
