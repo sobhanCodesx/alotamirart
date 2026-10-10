@@ -1,67 +1,39 @@
-# Deployment automation for AloTamirArt (bootstrap required)
+# AloTamiratchi deployment — PlayNexus architecture on PHP 8.2/cPanel
 
-This implementation follows the high-level **game-shop** deployment pattern: changes from GitHub `main` pass CI, and a signed HTTPS deployment agent receives and applies an allowlisted package on a shared PHP/Apache host without SSH.
+This implementation follows the source of `sobhanCodesx/game-shop`, adapted to the existing PHP 8.2/MySQL site. It does **not** use FTP, SFTP, SSH, Laravel, Composer, or the old single-request ZIP sender.
 
-## Current status
+## Same deployment lifecycle as PlayNexus
 
-The signed `api/deploy.php` receiver is already installed and authenticated on both `alotamiratchi.ir` and `www.alotamiratchi.ir`. GitHub confirmed unauthenticated POST = HTTP 401 and an authenticated, intentionally invalid ZIP = HTTP 422. However, BitNinja returns HTTP 403 when the valid signed archive contains real PHP source. The newer MCP code in `main` is **not yet confirmed deployed**. A verified-TLS FTP fallback is now available but needs one-time private GitHub Secrets, after which pending MCP code can be sent by GitHub without manual file uploads.
+1. GitHub `main` code change (NOT `content-requests/*.json`) triggers `.github/workflows/deploy-alo-production.yml`.
+2. PHP syntax and deployment/security contract checks must pass.
+3. `scripts/alo_deploy_playnexus.py` signs a manifest listing the exact commit SHA, allowed file paths and per-file SHA-256 digests. It creates a ZIP of the changed application code.
+4. GitHub uploads via `multipart/form-data` in 512 KiB chunks, and receives an operation id.
+5. The new receiver completes the upload, verifies the signed manifest, files and allowlist, then applies changes in distinct backup, switch and health-check stages. Failed switches restore file backups.
+6. GitHub confirms the final deployment status and matching commit SHA via authenticated health check, then probes the public homepage.
 
-## Security prerequisites — MUST complete first
+### PHP shared-host endpoint
 
-1. **Rotate exposed DB passwords** currently present in tracked `config/database.php` and move credentials into protected server-only configuration. Git history already contains secrets; merely editing the file is insufficient. Review the tracked `error_log` for any sensitive data.
-2. Make a full production file and database backup from the host panel and verify restore access.
-3. Confirm hosting supports PHP 8.1+, PDO MySQL, mbstring and ZipArchive. Ensure `sys_get_temp_dir()` is writable and `MCP_API_TOKEN` can be read through `getenv()`.
-4. Configure `MCP_API_TOKEN` as a private, strong random root secret at the hosting environment; use the identical value as a GitHub Actions secret of the same name. Never put secrets in the repo or share them in chat. The deployment endpoint derives a separate deployment bearer and package-signing HMAC from the root.
-5. Set `ALO_DEPLOY_ENABLED=1` in the hosting environment only when ready. Never expose a deployment endpoint without HTTPS and network rate limits/WAF.
-6. Set GitHub Actions secret `ALO_DEPLOY_URL=https://YOUR-HOST/api/deploy.php`.
-7. Optionally require reviewers in the GitHub `production` environment and protect the `main` branch; require passing checks before merge.
+In lieu of PlayNexus's Laravel router, PHP's DirectoryIndex serves the same stages at:
 
-## One-time bootstrap
+`/api/deployment-agent/?action=upload/chunk`
+`/api/deployment-agent/?action=upload/complete`
+`/api/deployment-agent/?action={id}/verify`
+`/api/deployment-agent/?action={id}/apply`
+`/api/deployment-agent/?action={id}/status`
+`/api/deployment-agent/?action=health`
 
-Existing PHP hosting cannot receive signed deploy requests until the receiver file has been installed **once**. Upload `api/deploy.php` manually to the existing document root, preserving paths. Do **not** upload a ZIP across the whole live site or replace the database config. Check it returns HTTP 405 to an unauthenticated GET and HTTP 401 to an unauthenticated POST. Enable hosting environment variables **after** credential rotation and testing.
+The receiver is `api/deployment-agent/index.php`. The deployment Bearer secret and manifest signing key are HMAC-derived from the existing private `MCP_API_TOKEN`; credentials are never stored in Git or printed. Files go to a private temporary directory; paths containing secrets, uploads, symlinks and database configuration are rejected. The workflow does not deploy for MCP article updates.
 
-Once the new PR passes CI and is merged to `main`, `.github/workflows/deploy-alo-production.yml` runs on future pushes to `main`. If GitHub secrets or the endpoint are not configured, deployment will fail closed rather than silently succeeding. Manual `workflow_dispatch` can retry the latest commit's diff (from its immediate parent).
+### Initial receiver installation remains necessary
 
-## Deployment safety model
+The **old** `api/deploy.php` receiver is already live and its signed authentication works. It only accepts a monolithic raw ZIP, however, and BitNinja returns HTTP 403 for ZIPs containing PHP application files, even when the signature is correct. The new staged receiver is not yet live and cannot be invoked until its PHP file is installed.
 
-- Only code from `refs/heads/main` can be uploaded via the GitHub sender.
-- GitHub uses its committed exact commit SHA; package is signed with HMAC SHA-256 and sent over HTTPS.
-- Server verifies derived bearer token, signature and allowed file extensions/paths; disallows traversals, symlink ZIP entries, secrets, logs and user uploads. Database migrations and file deletions are NOT automated.
-- Existing affected files are copied to a temporary backup, then staged files are installed; on an installation error the receiver attempts to restore previously changed files.
-- Concurrent deployments are refused using `flock`, and package size/file count are capped.
-- Keep a manual file/database restore path. **Rollback is best-effort**, not transactional or guaranteed across process crashes/power failures. There is no automatic DB rollback. This is a lightweight receiver, not full parity with game-shop's mature deployment manager.
-- This v1 deploys changed files only. A server that has drifted from GitHub may still contain unrelated local files. Before first production use, compare live files with repo, verify permissions, and test on staging. Do not use for a full initial synchronization.
-- Changes to root `index.php`, `.htaccess`, root-level PHP entry files, tracked database credential files and paths outside the allowlist are intentionally excluded from automatic deployment. They require separately reviewed/manual installation.
-- If production responds with a non-JSON error or a server-side 5xx, review host error logs and recover from the last known backup. Do not retry blindly.
+A new GitHub commit **cannot by itself bootstrap this new HTTP endpoint** through a legacy receiver blocked by the hosting firewall. A one-time scoped host permission for the signed old receiver, or installation of `api/deployment-agent/index.php` using an authorized hosting operation, is required to bridge that gap. Do **not** disable site-wide security protections. Once installed, all future code releases use the PlayNexus-style multipart workflow with no manual uploads.
 
-## Deployment trigger and result
+For the first catch-up release, GitHub Actions variable `ALO_DEPLOY_BASE_SHA` can temporarily designate the reviewed SHA prior to the failed legacy deployments. Remove that variable after successful catch-up so later commits only deploy their own code changes.
 
-A merge or push to `main` triggers the workflow. The user can ask ChatGPT in this conversation to edit code and prepare a PR; with the connected GitHub app, after explicit authorization, ChatGPT can merge the approved PR, triggering GitHub Actions. It can inspect workflow status afterwards. **The GitHub app by itself cannot upload files to private hosting or make the custom MCP tool available in ChatGPT.** That depends on installing this receiver and separately registering the MCP HTTPS endpoint in a supported ChatGPT environment.
+## Tests
 
-## Test commands in CI
+`.github/workflows/playnexus-deployment-contract.yml` runs an integration test against a real local PHP 8.2 HTTP server, covering auth, chunk upload, manifest verification, backup, apply, final status, signed health check and public smoke check. This **does not** prove the receiving endpoint is already installed on the live domain.
 
-```sh
-php -l api/deploy.php
-php tests/deploy-contract.php
-python3 -m py_compile scripts/alo_deploy.py
-```
-
-**No production deploy has been initiated by this PR.**
-
-## Automatic fallback via FTPS (no second manual code upload)
-
-GitHub Actions first attempts the HMAC-signed HTTPS deployment receiver. If BitNinja blocks a legitimate PHP ZIP with HTTP 403 and a recognized blocking page, the deploy sender automatically uses **explicit FTPS with TLS certificate verification** instead.
-
-Configure these values privately under **GitHub repository → Settings → Secrets and variables → Actions → Repository secrets**:
-
-- `ALO_FTPS_HOST` — the hosting FTP server name from cPanel **Configure FTP Client**, without `ftp://`
-- `ALO_FTPS_USERNAME` — the full username of a dedicated FTP account restricted to this website
-- `ALO_FTPS_PASSWORD` — that FTP account's private password
-
-Optional GitHub Actions repository **variable**: `ALO_FTPS_ROOT`. When omitted, the sender tests the FTP account root, `public_html`, and `www`; it refuses to upload until it verifies both the existing `index.php` and the AloTamirArt `api/deploy.php` receiver.
-
-Use explicit TLS/FTPS on port 21 and a host name with a matching valid certificate. No secrets belong in the repository or in a chat. The sender only deploys changed, allowlisted application paths from `main`; it cannot upload `.env`, local database credentials, user uploads, images stored on the host, caches, or log files. A temporary/backup file for PHP keeps the `.php` extension so the web server does not expose PHP source code.
-
-**Important:** Successful GitHub syntax checks do not establish live FTPS connectivity; a real deployment must be attempted after secrets are configured. Since older MCP application changes failed to deploy over HTTPS, they also require a one-time **GitHub-triggered catch-up deployment** with a reviewed baseline before normal incremental pushes resume. The catch-up must be returned to regular `github.event.before` tracking immediately after successful installation.
-
-Publishing articles via MCP is independent of this code deployment process and does not trigger a new site deployment.
+The old `api/deploy.php` and old sender remain in the repository solely for compatibility/bootstrap; the new production workflow does not use FTP/FTPS or the old monolithic ZIP transfer.
