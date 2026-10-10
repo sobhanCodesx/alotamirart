@@ -99,8 +99,11 @@ def transfer(ftp: ftplib.FTP_TLS, root: str, root_path: Path, path: str, commit:
             ftp.mkd(segment)
             ftp.cwd(segment)
     name = parts[-1]
-    tmp = f"{name}.upload-{commit[:10]}-{secrets.token_hex(4)}"
-    backup = f"{name}.backup-{secrets.token_hex(5)}"
+    # Preserve the executable extension on temporary/backup PHP copies:
+    # Apache must never expose raw PHP source through extensionless temp URLs.
+    suffix = Path(name).suffix
+    tmp = f"{name}.upload-{commit[:10]}-{secrets.token_hex(4)}{suffix}"
+    backup = f"{name}.backup-{secrets.token_hex(5)}{suffix}"
     old_moved = False
     tmp_uploaded = False
     try:
