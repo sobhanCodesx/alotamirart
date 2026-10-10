@@ -4,7 +4,7 @@ This implementation follows the high-level **game-shop** deployment pattern: cha
 
 ## Current status
 
-Code is on a feature branch / draft PR. **NOT deployed or connected to the production host.** GitHub checks are not a substitute for the first live integration test.
+The signed `api/deploy.php` receiver is already installed and authenticated on both `alotamiratchi.ir` and `www.alotamiratchi.ir`. GitHub confirmed unauthenticated POST = HTTP 401 and an authenticated, intentionally invalid ZIP = HTTP 422. However, BitNinja returns HTTP 403 when the valid signed archive contains real PHP source. The newer MCP code in `main` is **not yet confirmed deployed**. A verified-TLS FTP fallback is now available but needs one-time private GitHub Secrets, after which pending MCP code can be sent by GitHub without manual file uploads.
 
 ## Security prerequisites — MUST complete first
 
@@ -47,3 +47,21 @@ python3 -m py_compile scripts/alo_deploy.py
 ```
 
 **No production deploy has been initiated by this PR.**
+
+## Automatic fallback via FTPS (no second manual code upload)
+
+GitHub Actions first attempts the HMAC-signed HTTPS deployment receiver. If BitNinja blocks a legitimate PHP ZIP with HTTP 403 and a recognized blocking page, the deploy sender automatically uses **explicit FTPS with TLS certificate verification** instead.
+
+Configure these values privately under **GitHub repository → Settings → Secrets and variables → Actions → Repository secrets**:
+
+- `ALO_FTPS_HOST` — the hosting FTP server name from cPanel **Configure FTP Client**, without `ftp://`
+- `ALO_FTPS_USERNAME` — the full username of a dedicated FTP account restricted to this website
+- `ALO_FTPS_PASSWORD` — that FTP account's private password
+
+Optional GitHub Actions repository **variable**: `ALO_FTPS_ROOT`. When omitted, the sender tests the FTP account root, `public_html`, and `www`; it refuses to upload until it verifies both the existing `index.php` and the AloTamirArt `api/deploy.php` receiver.
+
+Use explicit TLS/FTPS on port 21 and a host name with a matching valid certificate. No secrets belong in the repository or in a chat. The sender only deploys changed, allowlisted application paths from `main`; it cannot upload `.env`, local database credentials, user uploads, images stored on the host, caches, or log files. A temporary/backup file for PHP keeps the `.php` extension so the web server does not expose PHP source code.
+
+**Important:** Successful GitHub syntax checks do not establish live FTPS connectivity; a real deployment must be attempted after secrets are configured. Since older MCP application changes failed to deploy over HTTPS, they also require a one-time **GitHub-triggered catch-up deployment** with a reviewed baseline before normal incremental pushes resume. The catch-up must be returned to regular `github.event.before` tracking immediately after successful installation.
+
+Publishing articles via MCP is independent of this code deployment process and does not trigger a new site deployment.
