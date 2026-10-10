@@ -26,9 +26,9 @@ jobs:
           MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
         run: |
           set -euo pipefail
-          mapfile -t NEW_REQUESTS < <(git diff --diff-filter=A --name-only HEAD^ HEAD -- content-requests)
+          mapfile -t NEW_REQUESTS < <(git diff --diff-filter=AM --name-only HEAD^ HEAD -- content-requests)
           if [ "${#NEW_REQUESTS[@]}" -eq 0 ]; then
-            echo "No newly created content request files"
+            echo "No new or modified content request files"
             exit 0
           fi
           for request in "${NEW_REQUESTS[@]}"; do
