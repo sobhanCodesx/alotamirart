@@ -1,0 +1,91 @@
+name: Read-only MCP content connectivity
+on:
+  push:
+    paths:
+      - '.github/workflows/mcp-readonly-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  read-only-mcp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Query website MCP without modifying content
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+          MCP_ENDPOINT: https://alotamiratchi.ir/api/mcp.php
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+          import urllib.error
+          import urllib.request
+
+          endpoint = os.getenv("MCP_ENDPOINT", "")
+          token = os.getenv("MCP_API_TOKEN", "")
+          if len(token) < 32:
+              sys.exit("MCP_API_TOKEN is missing in GitHub Actions secrets (minimum 32 characters)")
+          if not endpoint.startswith("https://"):
+              sys.exit("MCP endpoint must use HTTPS")
+
+          def call_tool(tool, arguments, request_id):
+              payload = {
+                  "jsonrpc": "2.0",
+                  "id": request_id,
+                  "method": "tools/call",
+                  "params": {"name": tool, "arguments": arguments},
+              }
+              request = urllib.request.Request(
+                  endpoint,
+                  data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+                  headers={
+                      "Authorization": "Bearer " + token,
+                      "Content-Type": "application/json",
+                      "Accept": "application/json",
+                  },
+                  method="POST",
+              )
+              try:
+                  with urllib.request.urlopen(request, timeout=25) as response:
+                      output = json.load(response)
+              except urllib.error.HTTPError as exc:
+                  sys.exit("MCP returned HTTP " + str(exc.code))
+              except urllib.error.URLError as exc:
+                  sys.exit("Unable to reach MCP endpoint: " + str(exc.reason))
+
+              if "error" in output:
+                  sys.exit("MCP JSON-RPC error: " + str(output["error"].get("message", "unknown")))
+              result = output.get("result", {})
+              if result.get("isError"):
+                  sys.exit("MCP tool error: " + str(result.get("content", []))[:500])
+              data = result.get("structuredContent")
+              if not isinstance(data, dict):
+                  content = result.get("content", [])
+                  if content and content[0].get("type") == "text":
+                      data = json.loads(content[0]["text"])
+              if not isinstance(data, dict):
+                  sys.exit("MCP returned an unexpected response shape")
+              return data
+
+          for index, kind in enumerate(("article", "brand_article", "brand", "category"), start=1):
+              data = call_tool("list_content", {"type": kind, "limit": 50}, index)
+              records = data.get("records", [])
+              if not isinstance(records, list):
+                  sys.exit("MCP returned non-list records")
+              print("TYPE", kind, "SAMPLE_COUNT", len(records), "(max 50)")
+              for entry in records:
+                  row_id = entry.get("id")
+                  status = entry.get("status")
+                  # GitHub Actions logs in public repositories can be public.
+                  # Never print titles of unpublished drafts.
+                  if status is not None and str(status) != "1":
+                      print(json.dumps({"id": row_id, "status": status, "title": "[unpublished]"}))
+                  else:
+                      title = str(entry.get("title", entry.get("name", "")))
+                      print(json.dumps({"id": row_id, "status": status, "title": title}, ensure_ascii=False))
+          print("MCP_READ_ONLY_CHECK_OK")
+          PY
