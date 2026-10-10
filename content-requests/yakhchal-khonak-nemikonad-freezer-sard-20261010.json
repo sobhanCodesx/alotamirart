@@ -12,6 +12,6 @@
     "tags": "خنک نکردن یخچال,فریزر سرد یخچال گرم,خرابی فن اواپراتور,دیفراست یخچال,دمپر یخچال,عیب‌یابی یخچال,تعمیر یخچال",
     "post_id": 9
   },
-  "retry_attempt": 8,
-  "integration_test": "2026-10-10: live MCP article publishing requested by site owner"
+  "retry_attempt": 9,
+  "integration_test": "2026-10-10: retry after optional legacy-schema compatibility correction"
 }
