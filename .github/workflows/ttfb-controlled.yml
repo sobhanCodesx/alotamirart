@@ -1,0 +1,47 @@
+name: Compare cached and uncached homepage latency
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ttfb-controlled.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Measure cached vs no-cache over the same HTTPS connection
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import http.client, statistics, time
+          host="alotamiratchi.ir"
+          connection=http.client.HTTPSConnection(host,timeout=28)
+          def request(mode):
+              h={"Accept":"text/html","User-Agent":"AloSEO-Performance-Benchmark/1.0"}
+              if mode=="uncached":h["Cache-Control"]="no-cache"
+              beginning=time.perf_counter()
+              connection.request("GET","/",headers=h)
+              r=connection.getresponse()
+              elapsed=(time.perf_counter()-beginning)*1000
+              marker=r.getheader("X-Alo-Page-Cache","-")
+              status=r.status
+              length=len(r.read())
+              print("RESULT",mode,"status",status,"cache",marker,"first_byte_ms",round(elapsed,1),"body_bytes",length,"connection_open",connection.sock is not None,flush=True)
+              assert status==200 and length>15000
+              if mode=="cached":assert marker=="HIT","expected anonymous cache hit"
+              if mode=="uncached":assert marker!="HIT","explicit no-cache request must bypass cache"
+              return elapsed
+          # Warm up the guest cache and establish the TLS connection.
+          request("cached")
+          cached=[];uncached=[]
+          for i in range(8):
+              uncached.append(request("uncached"))
+              cached.append(request("cached"))
+          print("SUMMARY_CACHE_HIT_MEDIAN_MS",round(statistics.median(cached),1))
+          print("SUMMARY_UNCACHED_MEDIAN_MS",round(statistics.median(uncached),1))
+          print("SUMMARY_SERVER_SAVINGS_MS",round(statistics.median(uncached)-statistics.median(cached),1))
+          connection.close()
+          PY
