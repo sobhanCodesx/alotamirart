@@ -95,7 +95,7 @@ def publish(path):
 
     # Idempotent re-runs: publishing a draft after a disabled publish attempt
     # must NOT create another copy of the article.
-    records = tool("list_content", {"type": "article", "limit": 50})["records"]
+    records = tool("list_content", {"type": "article", "limit": 1})["records"]
     existing = None
     for record in records:
         if record.get("title") != fields["title"]:
