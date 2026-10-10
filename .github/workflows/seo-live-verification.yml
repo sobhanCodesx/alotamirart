@@ -29,6 +29,17 @@ jobs:
                   return None
 
           headers={"User-Agent":"AloTamiratchi-Live-SEO-Verification/1.0","Accept":"text/html"}
+          www_request=Request("https://www.alotamiratchi.ir/",headers=headers)
+          try:
+              www_reply=build_opener(NoRedirect).open(www_request,timeout=25)
+              www_status=www_reply.status
+              www_destination=www_reply.headers.get("Location","")
+              www_reply.close()
+          except HTTPError as error:
+              www_status=error.code
+              www_destination=error.headers.get("Location","")
+          print("WWW_TO_BARE_STATUS",www_status,"LOCATION",www_destination)
+          assert www_status==301 and www_destination==HOST, "www must redirect permanently to the bare domain"
           with urlopen(Request(HOST, headers=headers), timeout=25) as response:
               markup=response.read(900000).decode("utf-8","replace")
               final_url=response.geturl()
@@ -38,19 +49,26 @@ jobs:
               def __init__(self):
                   super().__init__()
                   self.title=""; self.in_title=False; self.meta={}; self.links=[];self.h1=0;self.jsonld=[];self.in_ld=False
+                  self.heading_count=0; self.images=[]; self.anchors=[]; self.paragraphs=[]; self.in_paragraph=False
               def handle_starttag(self,tag,attrs):
                   a=dict(attrs)
                   if tag=="title": self.in_title=True
                   if tag=="h1": self.h1+=1
+                  if re.fullmatch(r"h[1-6]",tag): self.heading_count+=1
+                  if tag=="img": self.images.append(a)
+                  if tag=="a": self.anchors.append(a)
+                  if tag=="p": self.in_paragraph=True; self.paragraphs.append("")
                   if tag=="meta":self.meta[a.get("name") or a.get("property") or ""]=a.get("content")
                   if tag=="link":self.links.append(a)
                   if tag=="script" and a.get("type")=="application/ld+json":self.in_ld=True
               def handle_data(self,data):
                   if self.in_title:self.title+=data
+                  if self.in_paragraph:self.paragraphs[-1]+=data
                   if self.in_ld:self.jsonld.append(data)
               def handle_endtag(self,tag):
                   if tag=="title":self.in_title=False
                   if tag=="script":self.in_ld=False
+                  if tag=="p":self.in_paragraph=False
           parsed=SEO(); parsed.feed(markup)
           print("TITLE",parsed.title,"H1_COUNT",parsed.h1)
           print("CANONICAL_LINKS",[a.get("href") for a in parsed.links if a.get("rel")=="canonical"])
@@ -68,5 +86,18 @@ jobs:
           assert any(a.get("rel")=="apple-touch-icon" for a in parsed.links), "Apple icon missing"
           assert parsed.jsonld and any(n.get("@type")=="Organization" for n in json.loads(parsed.jsonld[0]).get("@graph",[])), "Organization JSON-LD missing"
           assert "تبلیغات گوگل" not in markup, "Old unrelated marketing copy still rendered"
+          print("HEADING_COUNT",parsed.heading_count,"IMAGES",len(parsed.images),"PARAGRAPHS",len(parsed.paragraphs))
+          print("EXTERNAL_FOLLOW_LINKS",[a.get("href") for a in parsed.anchors if (a.get("href") or "").startswith("https://www.energy.gov/") and "nofollow" not in (a.get("rel") or "")])
+          assert parsed.heading_count<=16, "too many semantic headings"
+          assert parsed.images and all((a.get("alt") or "").strip() for a in parsed.images), "visible image without descriptive alt"
+          assert any((a.get("href") or "").startswith("https://www.energy.gov/") and "nofollow" not in (a.get("rel") or "") for a in parsed.anchors), "official external dofollow resource absent"
+          assert not re.search(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}",markup), "raw contact email exposed to scrapers"
+          assert len(parsed.paragraphs)==1, "homepage should have one coherent editorial paragraph"
+          for para in parsed.paragraphs:
+              count=len(para.split())
+              print("EDITORIAL_PARAGRAPH_WORDS",count)
+              assert 60<=count<=105, "editorial paragraph not between 60 and 105 words"
+              assert not re.search(r"\s+[،.]",para), "space before punctuation"
+              assert not re.search(r"[،.](?=\S)",para), "punctuation lacks following space"
           print("ALO_LIVE_SEO_VERIFIED_OK")
           PY

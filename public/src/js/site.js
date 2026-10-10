@@ -52,6 +52,16 @@
     sync();window.addEventListener("scroll",sync,{passive:true});
     backTop.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"});});
   }
+  // Delay construction of mailto: until a visitor clicks. This reduces basic
+  // address scraping; it is not a substitute for anti-spam protection.
+  document.querySelectorAll("[data-email-encoded]").forEach(function(button){
+    button.addEventListener("click",function(){
+      try{
+        const address=window.atob(button.getAttribute("data-email-encoded")||"");
+        if(/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(address)) window.location.href="mailto:"+address;
+      }catch(e){/* Invalid legacy email; never expose untrusted URLs. */}
+    });
+  });
   const reveal=document.querySelectorAll("[data-reveal]");
   if("IntersectionObserver" in window&&reveal.length){
     const obs=new IntersectionObserver(function(entries){

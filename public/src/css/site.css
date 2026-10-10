@@ -1457,3 +1457,16 @@ button{cursor:pointer}
 .content-card__summary{font-size:.88rem;line-height:1.8;color:var(--pn-muted);margin:0 0 14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:4.75em;overflow-wrap:anywhere}
 .content-card__link .content-card__body{display:flex;flex:1;flex-direction:column}
 @media(max-width:620px){.content-card__summary{min-height:0;-webkit-line-clamp:2;margin-bottom:12px}}
+
+
+/* Homepage SEO content: concise heading hierarchy, readable source references. */
+.content-card__title{display:block;font-size:1.03rem;line-height:1.75;margin:0 0 9px;font-weight:900;color:var(--pn-ink);overflow-wrap:anywhere}
+.content-card__link:hover .content-card__title{color:var(--pn-brand-2)}
+.seo-editorial-paragraph{max-width:960px;color:var(--pn-muted);line-height:2.1;margin:0}
+.seo-editorial-paragraph a{font-weight:800;color:var(--pn-brand-2);text-decoration:underline;text-underline-offset:3px}
+.site-footer__about{font-size:.86rem;color:#98a2b3;margin:0;max-width:480px}
+.feature-card__content>div{margin:0;color:#e5e7eb;font-size:.9rem}
+.cta-panel>div>div{margin:0;color:#cbd5e1}
+.email-contact-action{background:none;color:inherit;border:0;padding:0;text-align:inherit;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.email-contact-action:hover,.email-contact-action:focus-visible{color:var(--pn-accent)}
+@media(max-width:620px){.content-card__title{font-size:1rem;line-height:1.65;margin-bottom:7px}}

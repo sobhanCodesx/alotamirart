@@ -20,7 +20,7 @@ $userAvatar = !empty($_SESSION['img']) ? (string)$_SESSION['img'] : 'them/admin/
   <div class="site-container site-topbar__inner">
     <div class="site-topbar__group">
       <?php if ($phone !== ''): ?><a href="tel:<?= htmlspecialchars($phoneHref, ENT_QUOTES, 'UTF-8') ?>">مشاوره و پشتیبانی: <?= htmlspecialchars($phone, ENT_QUOTES, 'UTF-8') ?></a><?php endif; ?>
-      <?php if ($email !== ''): ?><a href="mailto:<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?></a><?php endif; ?>
+      <?php if ($email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL)): ?><button type="button" class="email-contact-action" data-email-encoded="<?= htmlspecialchars(base64_encode($email), ENT_QUOTES, 'UTF-8') ?>" aria-label="ارسال ایمیل به پشتیبانی">ارسال ایمیل</button><?php endif; ?>
     </div>
     <div class="site-topbar__group"><span>خدمات تخصصی تعمیر لوازم خانگی</span></div>
   </div>

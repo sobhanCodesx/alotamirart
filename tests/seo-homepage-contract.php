@@ -6,6 +6,8 @@ function homepageAssert(bool $condition,string $message): void {
 }
 $index=file_get_contents($root.'/index.php');
 homepageAssert(strpos($index,"\$incomingHost === 'alotamiratchi.ir'")===false, 'bare domain must never redirect to www');
+homepageAssert(strpos($index,"'www.alotamiratchi.ir'")!==false, 'www to bare redirect condition missing');
+homepageAssert(strpos($index,"header('Location: https://alotamiratchi.ir'")!==false, 'www to bare permanent redirect missing');
 homepageAssert(strpos(file_get_contents($root.'/.htaccess'),'RewriteEngine On')!==false,'cPanel htaccess preserved');
 $source=file_get_contents($root.'/them/app/index.php');
 homepageAssert(strpos($source,'<meta property="og:image"')!==false,'OG image missing');
@@ -20,7 +22,7 @@ function excerpt_text($v,$n=25){return mb_substr(trim(strip_tags((string)$v)),0,
 function flash($k){return '';}
 $dataSeo=['title'=>'الو تعمیراتچی','description'=>'تبلیغات گوگل','title_h1'=>'تبلیغات گوگل','title_h2'=>'تبلیغات گوگل','logo'=>'public/src/img/logo.png'];
 $dataHeader=['title_one'=>'تبلیغات گوگل','title_two'=>'تبلیغات گوگل','title_tree'=>'تبلیغات گوگل'];
-$dataFooter=['phon'=>'09933493049','email'=>'','about_description'=>'','instagram'=>''];
+$dataFooter=['phon'=>'09933493049','email'=>'support@example.com','about_description'=>'','instagram'=>''];
 $menu=[];
 $post=[['id'=>490,'title'=>'چرا یخچال سرد نمی‌کند؟','img'=>'a.webp','content'=>'مطلب درباره تعمیر یخچال']];
 $brands=[['id'=>377,'slug'=>'sample-brand-repair','title'=>'تعمیرات یخچال یک برند','img'=>'b.webp','content'=>'راهنمای تعمیر']];
@@ -47,4 +49,25 @@ homepageAssert($xp->query('//a[@href="https://alotamiratchi.ir/sample-brand-repa
 $h3=[];foreach ($doc->getElementsByTagName('h3') as $node) $h3[]=trim($node->textContent);
 homepageAssert(count($h3)===count(array_unique($h3)),'duplicate homepage H3');
 homepageAssert(strpos($html,'تبلیغات گوگل')===false,'obsolete advertising copy in homepage');
-echo "Homepage SEO contract passed\n";
+$headings=$xp->query('//h1|//h2|//h3|//h4|//h5|//h6');
+homepageAssert($headings->length<=16,'homepage excessive heading tags');
+$missingAlt=$xp->query('//img[not(@alt) or normalize-space(@alt)=""]');
+homepageAssert($missingAlt->length===0,'homepage image alt missing or empty');
+$external=$xp->query('//a[starts-with(@href,"https://www.energy.gov/") and not(contains(concat(" ",normalize-space(@rel)," ")," nofollow "))]');
+homepageAssert($external->length>=1,'relevant followed official external source missing');
+homepageAssert(strpos($html,'support@example.com')===false && strpos($html,'mailto:')===false,'raw public email address exposed');
+homepageAssert(strpos($html,base64_encode('support@example.com'))!==false,'click-to-email mechanism lost');
+homepageAssert(strpos(file_get_contents($root.'/public/src/js/site.js'),'data-email-encoded')!==false,'email action handler not present');
+$para=$xp->query('//p[contains(concat(" ",normalize-space(@class)," ")," seo-editorial-paragraph ")]');
+homepageAssert($para->length===1,'editorial paragraph missing');
+$plain=trim($para->item(0)->textContent);
+$words=preg_split('/\\s+/u',$plain,-1,PREG_SPLIT_NO_EMPTY);
+homepageAssert(count($words)>=60 && count($words)<=105,'main paragraph should be substantial but concise');
+$sentences=preg_split('/[.!؟]+/u',$plain,-1,PREG_SPLIT_NO_EMPTY);
+foreach ($sentences as $sentence) {
+    $sentenceWords=preg_split('/\\s+/u',trim($sentence),-1,PREG_SPLIT_NO_EMPTY);
+    homepageAssert(count($sentenceWords)<=20,'homepage editorial sentence too long');
+}
+homepageAssert(!preg_match('/\\s+[،.]/u',$plain),'space before punctuation');
+homepageAssert(!preg_match('/[،.](?=\\S)/u',$plain),'punctuation stuck to next word');
+echo "Homepage SEO contract passed\\n";

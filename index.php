@@ -1,4 +1,12 @@
 <?php
+// Preserve alotamiratchi.ir without www as the ONLY public canonical host.
+// Applies to routed pages; leave the cPanel-controlled .htaccess intact.
+if (strtolower((string)($_SERVER['HTTP_HOST'] ?? '')) === 'www.alotamiratchi.ir') {
+    $uri = (string)($_SERVER['REQUEST_URI'] ?? '/');
+    if ($uri === '' || $uri[0] !== '/' || preg_match('/[\r\n]/', $uri)) $uri = '/';
+    header('Location: https://alotamiratchi.ir' . $uri, true, 301);
+    exit;
+}
 session_start();
 define('BASE_PATH', __DIR__);
 define("CURRENT_DOMAIN", currentdomain() . "/");

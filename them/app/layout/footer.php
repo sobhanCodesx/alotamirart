@@ -9,7 +9,7 @@ $footerPhoneHref = preg_replace('/[^\d+]/', '', $footerPhone);
   <div class="site-container site-footer__main">
     <div>
       <h2><?= htmlspecialchars(isset($dataSeo['title']) ? $dataSeo['title'] : 'الو تعمیراتچی', ENT_QUOTES, 'UTF-8') ?></h2>
-      <p><?= htmlspecialchars($footerAbout !== '' ? $footerAbout : 'راهنمای انتخاب خدمات و دسترسی سریع به محتوای تخصصی تعمیرات لوازم خانگی.', ENT_QUOTES, 'UTF-8') ?></p>
+      <div class="site-footer__about"><?= htmlspecialchars($footerAbout !== '' ? $footerAbout : 'راهنمای انتخاب خدمات و دسترسی سریع به محتوای تخصصی تعمیرات لوازم خانگی.', ENT_QUOTES, 'UTF-8') ?></div>
     </div>
 
     <div>
@@ -26,7 +26,7 @@ $footerPhoneHref = preg_replace('/[^\d+]/', '', $footerPhone);
       <h2>ارتباط با ما</h2>
       <div class="footer-contact">
         <?php if ($footerPhone !== ''): ?><a href="tel:<?= htmlspecialchars($footerPhoneHref, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($footerPhone, ENT_QUOTES, 'UTF-8') ?></a><?php endif; ?>
-        <?php if ($footerEmail !== ''): ?><a href="mailto:<?= htmlspecialchars($footerEmail, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($footerEmail, ENT_QUOTES, 'UTF-8') ?></a><?php endif; ?>
+        <?php if ($footerEmail !== '' && filter_var($footerEmail, FILTER_VALIDATE_EMAIL)): ?><button type="button" class="email-contact-action" data-email-encoded="<?= htmlspecialchars(base64_encode($footerEmail), ENT_QUOTES, 'UTF-8') ?>" aria-label="ارسال ایمیل به الو تعمیراتچی">ارسال ایمیل</button><?php endif; ?>
         <?php if ($footerInstagram !== ''): ?><span>اینستاگرام: @<?= htmlspecialchars(ltrim($footerInstagram, '@'), ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
       </div>
     </div>

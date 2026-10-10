@@ -71,6 +71,9 @@ jobs:
           php -l them/app/index.php
           php -l them/app/layout/heading.php
           php tests/seo-homepage-contract.php
+          php -l them/app/layout/header.php
+          php -l them/app/layout/footer.php
+          node --check public/src/js/site.js
           php tests/article-title-lookup-contract.php
           php -l api/refrigerator-links.php
           php tests/refrigerator-link-contract.php
