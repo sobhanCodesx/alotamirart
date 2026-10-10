@@ -12,7 +12,7 @@ import urllib.error
 import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-ENDPOINT = "https://alotamiratchi.ir/api/mcp"
+ENDPOINT = "https://alotamiratchi.ir/api/mcp/"
 IMAGE_HOST = "https://upload.wikimedia.org/wikipedia/commons/"
 TOKEN = os.environ.get("MCP_API_TOKEN", "")
 if len(TOKEN) < 32:
