@@ -1,0 +1,62 @@
+name: PlayNexus-style Deployment Protocol Contract
+on:
+  push:
+    branches:
+      - feature/playnexus-deployment-protocol
+    paths:
+      - 'api/deployment-agent/**'
+      - 'scripts/alo_deploy_playnexus.py'
+      - '.github/workflows/playnexus-deployment-contract.yml'
+  pull_request:
+    paths:
+      - 'api/deployment-agent/**'
+      - 'scripts/alo_deploy_playnexus.py'
+      - '.github/workflows/playnexus-deployment-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  staged-deployment-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare PHP 8.2 with Zip and OpenSSL
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: zip, openssl
+      - name: Lint and static contracts
+        run: |
+          set -euo pipefail
+          php -l api/deployment-agent/index.php
+          python3 -m py_compile scripts/alo_deploy_playnexus.py
+          php tests/deploy-contract.php
+      - name: Integration test signed upload, verify, staged apply and health
+        env:
+          MCP_API_TOKEN: "ci-test-deployment-token-0123456789abcdef0123456789abcdef"
+          ALO_DEPLOY_ENABLED: '1'
+        run: |
+          set -euo pipefail
+          php -S 127.0.0.1:8765 -t . > "$RUNNER_TEMP/alo-local-server.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --silent --output /dev/null http://127.0.0.1:8765/; then break; fi
+            sleep 1
+          done
+          code=$(curl -s -o /dev/null -w '%{http_code}' 'http://127.0.0.1:8765/api/deployment-agent/?action=health')
+          test "$code" = 401
+          git fetch -q origin main
+          BASE_SHA=$(git merge-base HEAD origin/main)
+          test -n "$BASE_SHA"
+          export BEFORE_SHA="$BASE_SHA"
+          export GITHUB_REF=refs/heads/main
+          export GITHUB_SHA="$(git rev-parse HEAD)"
+          export GITHUB_RUN_ID=123456789
+          export ALO_DEPLOY_AGENT_URL="http://127.0.0.1:8765/api/deployment-agent/"
+          python3 scripts/alo_deploy_playnexus.py
