@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   read-only-mcp:
+    environment: production
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
