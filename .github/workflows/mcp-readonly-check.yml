@@ -1,10 +1,9 @@
-name: MCP content connectivity and approved publishing
+name: Read-only MCP content connectivity
 # Fresh workflow run after adding the MCP repository secret; reruns may use old secret snapshots.
 on:
   push:
     paths:
       - '.github/workflows/mcp-readonly-check.yml'
-      - 'content-requests/*.json'
   workflow_dispatch:
 
 permissions:
@@ -18,18 +17,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
           persist-credentials: false
-      - name: Detect content request in this commit
-        id: changes
-        run: |
-          if git diff --diff-filter=AM --name-only HEAD^ HEAD -- content-requests | grep -q "^content-requests/"; then
-            echo "requested=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "requested=false" >> "$GITHUB_OUTPUT"
-          fi
       - name: Query website MCP without modifying content
-        if: steps.changes.outputs.requested != 'true'
         env:
           MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
           MCP_ENDPOINT: https://alotamiratchi.ir/api/mcp.php
@@ -106,7 +95,6 @@ jobs:
           print("MCP_READ_ONLY_CHECK_OK")
           PY
       - name: Check publishing client request compatibility (read-only)
-        if: steps.changes.outputs.requested != 'true'
         env:
           MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
         run: |
@@ -118,20 +106,3 @@ jobs:
           assert isinstance(data.get("records"), list)
           print("PUBLISHING_CLIENT_READ_ONLY_OK", len(data["records"]))
           PY
-      - name: Publish user-approved content requests via the verified MCP runner
-        if: steps.changes.outputs.requested == 'true'
-        env:
-          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          mapfile -t REQUESTS < <(git diff --diff-filter=AM --name-only HEAD^ HEAD -- content-requests)
-          if [ "${#REQUESTS[@]}" -eq 0 ]; then
-            echo "No article publication request in this commit"
-            exit 0
-          fi
-          for request in "${REQUESTS[@]}"; do
-            case "$request" in
-              content-requests/*.json) python3 scripts/mcp_content_job.py "$request" ;;
-              *) echo "Skipping unexpected path" ;;
-            esac
-          done
