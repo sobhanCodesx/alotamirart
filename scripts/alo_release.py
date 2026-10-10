@@ -144,6 +144,8 @@ def build_bootstrap(output: Path, root: Path = ROOT) -> tuple[int, int]:
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as z:
         for path in paths:
             z.write(root / path, path)
+        if (root / ".env.example").is_file():
+            z.write(root / ".env.example", ".env.example")
         z.writestr("BOOTSTRAP-README.txt",
                    "AloTamiratchi one-time cPanel bootstrap.\n"
                    "Extract the CONTENTS of this ZIP into the existing website root, "

@@ -1,80 +1,126 @@
-name: Deploy AloTamirArt Production (PlayNexus Protocol)
-# Production deployment must only react to edits to website application files.
-# Running the MCP read-only workflow, editing documentation/tests, or publishing
-# content via the MCP endpoint does not create a production deployment.
+name: Deploy AloTamiratchi Production (signed HTTPS, no SSH/FTP)
+
 on:
   push:
     branches: [main]
     paths:
-      - 'api/**/*.php'
-      - 'app/**/*.php'
-      - 'bootstrap/**/*.php'
-      - 'classes/**/*.php'
-      - 'database/**/*.php'
+      - '.htaccess'
+      - 'index.php'
+      - '404.php'
+      - 'robots.txt'
+      - 'city-services.php'
+      - 'service-city.php'
+      - 'service-refrigerator.php'
+      - 'service-washing-machine.php'
+      - 'show-city.php'
+      - 'api/**'
+      - 'app/**'
+      - 'bootstrap/**'
+      - 'classes/**'
+      - 'config/**'
+      - 'database/**'
       - 'public/**'
-      - 'reqires/**/*.php'
-      - 'router/**/*.php'
+      - 'reqires/**'
+      - 'router/**'
+      - 'routes/**'
       - 'them/**'
-      - 'assets/**'
-      - 'css/**'
-      - 'js/**'
-      - 'images/**'
-      - 'img/**'
-      - 'fonts/**'
-      # Exclude runtime uploads, logs and non-code documentation even if nested.
-      - '!**/*.md'
-      - '!**/*.txt'
-      - '!**/error_log'
-      - '!**/upload/**'
-      - '!**/uploads/**'
+      - 'mapbrand/**'
+      - 'mappost/**'
+      - 'scripts/alo_release.py'
+      - 'scripts/alo_deploy_playnexus.py'
+      - '.github/workflows/deploy-alo-production.yml'
+      - '!them/admin/dist/img/**'
       - '!**/storage/**'
-      - '!**/cache/**'
-      - '!**/log/**'
+      - '!**/uploads/**'
       - '!**/logs/**'
-      - '!**/vendor/**'
-      - '!**/node_modules/**'
+      - '!**/error_log'
+  workflow_dispatch:
+    inputs:
+      build_only:
+        description: 'Only build one-time installation ZIP, do not deploy'
+        required: false
+        type: boolean
+        default: false
+
 permissions:
   contents: read
 concurrency:
-  group: alotamirart-production
+  group: alotamiratchi-production-https
   cancel-in-progress: false
+
 jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check PHP syntax and compatibility
+      - name: Set up PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, zip, openssl, pdo_mysql
+      - name: Syntax, source contracts and release policy tests
+        shell: bash
         run: |
+          set -euo pipefail
           php -l api/mcp.php
           php -l api/content-tools.php
-          php -l api/deploy.php
+          php -l api/site-graph.php
           php -l api/deployment-agent/index.php
+          php tests/alo-site-graph-contract.php
+          php tests/playnexus-mcp-architecture.php
           php tests/article-mcp-contract.php
           php tests/deploy-contract.php
-          php tests/env-loader.php
-          python3 -m py_compile scripts/alo_deploy.py scripts/alo_deploy_playnexus.py
           php tests/legacy-compatibility.php
           php tests/admin-panel-contract.php
-  production:
+          python3 -m py_compile scripts/alo_deploy_playnexus.py scripts/alo_release.py scripts/mcp_content_job.py
+          python3 -m unittest discover -s tests -p 'test_alo_release.py'
+
+  bootstrap:
     needs: tests
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build complete first-install archive from versioned app files
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/alo_release.py bootstrap --output "$RUNNER_TEMP/alotamiratchi-bootstrap.zip"
+          sha256sum "$RUNNER_TEMP/alotamiratchi-bootstrap.zip"
+          echo "### One-time cPanel installation package" >> "$GITHUB_STEP_SUMMARY"
+          echo "Download the artifact \`alotamiratchi-bootstrap-${GITHUB_SHA}\` and extract its **contents** into the current website root next to index.php." >> "$GITHUB_STEP_SUMMARY"
+          echo "No FTP, SSH, terminal, CMD, or Composer needed on the host. Existing .env and production uploads are excluded." >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: alotamiratchi-bootstrap-${{ github.sha }}
+          path: ${{ runner.temp }}/alotamiratchi-bootstrap.zip
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
+  production:
+    needs: [tests, bootstrap]
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || inputs.build_only != true)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: PlayNexus-style staged multipart deployment via HTTPS
+      - name: Deploy using the signed multipart HTTPS receiver after manual bootstrap
         env:
           MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
           ALO_DEPLOY_AGENT_URL: https://www.alotamiratchi.ir/api/deployment-agent/
           BEFORE_SHA: ${{ github.event.before }}
-          # Initial catch-up includes MCP code merged while the legacy uploader was blocked.
-          # Remove this fallback after the first verified production deployment.
-          ALO_DEPLOY_BASE_SHA: ${{ vars.ALO_DEPLOY_BASE_SHA || '1ff56365d60718ad836b3076ac27edb91d27bcce' }}
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        shell: bash
         run: |
           set -euo pipefail
-          if [ -z "${BEFORE_SHA:-}" ]; then
-            export BEFORE_SHA="$(git rev-parse HEAD^)"
+          if [ -z "${BEFORE_SHA:-}" ] || [ "${BEFORE_SHA}" = "0000000000000000000000000000000000000000" ]; then
+            BEFORE_SHA="$(git rev-parse HEAD^)"
+            export BEFORE_SHA
           fi
           python3 scripts/alo_deploy_playnexus.py

@@ -67,6 +67,7 @@ function mcpMenuExists(PDO $db, int $id): bool {
     return (bool) $st->fetchColumn();
 }
 require_once __DIR__ . '/content-tools.php';
+require_once __DIR__ . '/site-graph.php';
 
 function mcpTools(): array {
     $fields = [
@@ -84,9 +85,10 @@ function mcpTools(): array {
         ['name' => 'create_article_draft', 'description' => 'Create an unpublished draft; never publishes immediately.', 'inputSchema' => ['type' => 'object', 'properties' => $fields, 'required' => ['title', 'content', 'post_id']]],
         ['name' => 'update_article_draft', 'description' => 'Edit an existing UNPUBLISHED draft only.', 'inputSchema' => ['type' => 'object', 'properties' => array_merge(['id' => ['type' => 'integer', 'minimum' => 1]], $fields), 'required' => ['id']]],
         ['name' => 'publish_article', 'description' => 'Explicitly publish a draft ONLY after user approval; requires MCP_ALLOW_PUBLISH=1.', 'inputSchema' => ['type' => 'object', 'properties' => ['id' => ['type' => 'integer', 'minimum' => 1], 'confirm' => ['type' => 'boolean', 'const' => true]], 'required' => ['id', 'confirm']]],
-    ], aloContentTools());
+    ], aloContentTools(), aloGraphTools());
 }
 function mcpExecute(string $name, array $a): array {
+    if (in_array($name, ['describe_alo_graph','query_alo_graph'], true)) return aloGraphExecute($name,$a);
     if (in_array($name, ['describe_content_fields','list_content','find_content','get_content','create_content','update_content','set_content_published'], true)) return aloContentExecute($name, $a);
     if ($name === 'publish_article' && getenv('MCP_ALLOW_PUBLISH') !== '1') {
         throw new InvalidArgumentException('Publishing disabled by MCP_ALLOW_PUBLISH.');
