@@ -58,13 +58,15 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: mbstring, zip, openssl, pdo_mysql
+          extensions: mbstring, zip, openssl, pdo_mysql, pdo_sqlite
       - name: Syntax, source contracts and release policy tests
         shell: bash
         run: |
           set -euo pipefail
           php -l api/mcp.php
           php -l api/content-tools.php
+          php -l api/city-contact.php
+          php tests/city-contact-contract.php
           php -l api/site-graph.php
           php -l api/deployment-agent/index.php
           php -l them/app/posts/article-contact-helper.php
