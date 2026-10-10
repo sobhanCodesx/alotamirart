@@ -70,8 +70,7 @@ jobs:
           ALO_DEPLOY_URL: ${{ secrets.ALO_DEPLOY_URL || 'https://alotamiratchi.ir/api/deploy.php' }}
           BEFORE_SHA: ${{ github.event.before }}
         run: |
-          # One-time MCP architecture catch-up: includes files merged before
-          # the first attempted deploy of this revision. Only application
-          # files are allowlisted by the signed receiver.
-          export BEFORE_SHA="1ff56365d60718ad836b3076ac27edb91d27bcce"
+          if [ -z "${BEFORE_SHA:-}" ]; then
+            export BEFORE_SHA="$(git rev-parse HEAD^)"
+          fi
           python3 scripts/alo_deploy.py
