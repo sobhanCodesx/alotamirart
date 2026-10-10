@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   read-only-mcp:
-    environment: production
+    # Use repository Actions secrets directly; no environment configuration needed.
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
