@@ -30,7 +30,11 @@ def tool(name, arguments):
         ENDPOINT, data=data, method="POST",
         headers={"Authorization": "Bearer " + TOKEN,
                  "Content-Type": "application/json",
-                 "Accept": "application/json"},
+                 "Accept": "application/json",
+                 "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/131.0 Safari/537.36",
+                 "Accept-Language": "fa-IR,fa;q=0.9,en;q=0.8",
+                 "Origin": "https://alotamiratchi.ir",
+                 "Referer": "https://alotamiratchi.ir/"},
     )
     try:
         with urllib.request.urlopen(req, timeout=40) as response:
