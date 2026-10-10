@@ -162,6 +162,10 @@ def manage_content(path):
     request=json.loads(path.read_text(encoding="utf-8"))
     content_type=request.get("type","article")
     action=request.get("action","publish")
+    if action == "bulk_mahshahr_contacts":
+        from mcp_mahshahr_contacts import apply_mahshahr_contacts
+        apply_mahshahr_contacts(tool, request)
+        return
     if content_type not in ("article","brand_article","brand","category"):
         raise ValueError("Invalid managed content type")
     if action=="publish" and content_type=="article":
