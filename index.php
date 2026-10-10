@@ -7,6 +7,9 @@ if (strtolower((string)($_SERVER['HTTP_HOST'] ?? '')) === 'www.alotamiratchi.ir'
     header('Location: https://alotamiratchi.ir' . $uri, true, 301);
     exit;
 }
+// Serve a short-lived guest homepage snapshot before expensive PHP/MySQL boot.
+require_once __DIR__ . '/app/Support/public-home-cache.php';
+if (aloHomeCacheStart($_SERVER, __DIR__)) exit;
 session_start();
 require_once __DIR__ . '/app/Support/persian-typography.php';
 define('BASE_PATH', __DIR__);
