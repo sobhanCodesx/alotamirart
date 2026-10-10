@@ -51,7 +51,7 @@ jobs:
           php tests/article-mcp-contract.php
           php tests/deploy-contract.php
           php tests/env-loader.php
-          python3 -m py_compile scripts/alo_deploy.py
+          python3 -m py_compile scripts/alo_deploy.py scripts/alo_deploy_ftps.py
           php tests/legacy-compatibility.php
           php tests/admin-panel-contract.php
   production:
@@ -64,14 +64,17 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Upload signed changes over HTTPS
+      - name: Deploy signed changes over HTTPS, or verified-TLS FTPS if WAF blocks
         env:
           MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
           ALO_DEPLOY_URL: ${{ secrets.ALO_DEPLOY_URL || 'https://www.alotamiratchi.ir/api/deploy.php' }}
-          ALO_DEPLOY_SPLIT: '1'
+          ALO_FTPS_HOST: ${{ secrets.ALO_FTPS_HOST }}
+          ALO_FTPS_USERNAME: ${{ secrets.ALO_FTPS_USERNAME }}
+          ALO_FTPS_PASSWORD: ${{ secrets.ALO_FTPS_PASSWORD }}
+          ALO_FTPS_ROOT: ${{ vars.ALO_FTPS_ROOT }}
           BEFORE_SHA: ${{ github.event.before }}
         run: |
-          # One-time re-sync of the MCP code changes that failed to reach cPanel.
-          # The signed receiver still enforces its strict per-file allowlist.
-          export BEFORE_SHA="1ff56365d60718ad836b3076ac27edb91d27bcce"
+          if [ -z "${BEFORE_SHA:-}" ]; then
+            export BEFORE_SHA="$(git rev-parse HEAD^)"
+          fi
           python3 scripts/alo_deploy.py
