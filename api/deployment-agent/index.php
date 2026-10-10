@@ -331,7 +331,8 @@ if (strlen($token)<32)pnFail(503,'Deployment credential not configured.');
 $expected=hash_hmac('sha256','alotamirart/deployment-auth/v1',$token);
 $bearer=$_SERVER['HTTP_AUTHORIZATION']??$_SERVER['REDIRECT_HTTP_AUTHORIZATION']??'';
 if (!preg_match('/^Bearer ([a-f0-9]{64})$/i',$bearer,$match)||!hash_equals($expected,strtolower($match[1])))pnFail(401,'Unauthorized.');
-if (getenv('ALO_DEPLOY_ENABLED')!=='1')pnFail(503,'Deployment disabled.');
+// A valid HMAC-derived deployment credential is the sole deployment gate;
+// no separate production enable flag is required (PlayNexus parity).
 $action=(string)($_GET['action']??'');
 $method=$_SERVER['REQUEST_METHOD']??'GET';
 if ($method==='GET'&&$action==='ready') {

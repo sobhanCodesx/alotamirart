@@ -39,7 +39,7 @@ CMD, FTP/FTPS, Composer on the server, cron daemon, or long-running worker.
    values in cPanel File Manager. Do not paste credentials into chat/GitHub.
    Set the same long `MCP_API_TOKEN` as the existing GitHub Actions secret,
    valid `MCP_AUTHOR_USER_ID`, `MCP_ALLOW_PUBLISH=1` only if desired, and
-   `ALO_DEPLOY_ENABLED=1` to enable future code releases.
+   no other deployment secret or deployment enable switch is required.
 5. Verify site pages and `GET /api/mcp` returns HTTP 405 (not HTML).
    `GET /api/deployment-agent/?action=ready` should return HTTP 401 without
    a token. After that, any future code change in GitHub on `main` runs

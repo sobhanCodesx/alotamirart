@@ -61,7 +61,7 @@ return false;
             port=s.getsockname()[1]
         key="ci-test-deployment-token-0123456789abcdef0123456789abcdef"
         env=os.environ.copy()
-        env.update({"MCP_API_TOKEN":key,"ALO_DEPLOY_ENABLED":"1"})
+        env.update({"MCP_API_TOKEN":key,"ALO_DEPLOY_ENABLED":"0"})
         server=subprocess.Popen(["php","-S",f"127.0.0.1:{port}","-t",str(root),str(root/"ci-router.php")],
             env=env,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
         try:
