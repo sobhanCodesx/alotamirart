@@ -106,7 +106,7 @@ jobs:
               assert not re.search(r"[،.](?=\S)",para), "punctuation lacks following space"
           issues=[]
           for node in parsed.visible_persian_nodes:
-              if re.search(r"\\s+[،.]|[،.](?!\\s|$)",node): issues.append(node[:180])
+              if re.search(r"\s+[،.]|[،.](?!\s|$)",node): issues.append(node[:180])
           print("VISIBLE_PERSIAN_NODES",len(parsed.visible_persian_nodes),"PUNCTUATION_ERRORS",len(issues))
           if issues:print("PUNCTUATION_SAMPLES",issues[:12])
           assert not issues, "Homepage still has unspaced Persian commas or periods"
