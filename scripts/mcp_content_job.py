@@ -7,6 +7,7 @@ never edits website code, pushes to main, or calls the deployment endpoint.
 import json
 import os
 import pathlib
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -73,6 +74,28 @@ def media_args(request):
     return {sources[0]:request[sources[0]]} if sources else {}
 
 
+
+def create_content_with_optional_field_fallback(content_type, fields, media, **kwargs):
+    """Skip only unavailable optional columns on legacy live databases."""
+    remaining = dict(fields)
+    removable = {"keyword", "tags", "contact_number"}
+    for _ in range(len(removable) + 1):
+        try:
+            return tool("create_content", {
+                "type": content_type, "fields": remaining, **media, **kwargs
+            })
+        except RuntimeError as error:
+            match = re.fullmatch(
+                r"Unknown/unavailable content field: ([a-z_]+)", str(error)
+            )
+            field = match.group(1) if match else None
+            if field not in removable or field not in remaining:
+                raise
+            del remaining[field]
+            print("OPTIONAL_LEGACY_COLUMN_SKIPPED", field)
+    raise RuntimeError("Could not match optional columns")
+
+
 def publish(path):
     request = json.loads(path.read_text(encoding="utf-8"))
     fields = request["fields"]
@@ -101,9 +124,7 @@ def publish(path):
                 "fields": {"title": existing["title"]}, **media
             })["record"]
     else:
-        created = tool("create_content", {
-            "type": "article", "fields": fields, **media
-        })
+        created = create_content_with_optional_field_fallback("article", fields, media)
         existing = created["record"]
         article_id = int(existing["id"])
         print("DRAFT_CREATED", article_id)
@@ -156,9 +177,7 @@ def manage_content(path):
             slug=fields.get("slug")
             existing=(tool("find_content",{"type":"article","slug":slug})["record"]
                       if isinstance(slug,str) and slug else None)
-            item=existing or tool("create_content",{
-                "type":"article","fields":fields,**media
-            })["record"]
+            item=existing or create_content_with_optional_field_fallback("article", fields, media)["record"]
             if action=="draft":
                 print("ARTICLE_DRAFT_ID",item["id"])
                 return
