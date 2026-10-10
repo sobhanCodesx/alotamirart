@@ -1,0 +1,45 @@
+name: Audit Persian punctuation in live homepage
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/seo-punctuation-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Report malformed Persian punctuation in live visible text
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from urllib.request import Request, urlopen
+          import re
+          class TextAudit(HTMLParser):
+              def __init__(self):
+                  super().__init__(convert_charrefs=True)
+                  self.skip=0;self.errors=[];self.texts=[]
+              def handle_starttag(self,tag,attrs):
+                  if tag in ('script','style','svg','noscript','template'):
+                      self.skip+=1
+              def handle_endtag(self,tag):
+                  if tag in ('script','style','svg','noscript','template') and self.skip:
+                      self.skip-=1
+              def handle_data(self,data):
+                  if self.skip or not re.search('[\u0600-\u06FF]',data):return
+                  text=' '.join(data.split())
+                  if not text:return
+                  self.texts.append(text)
+                  for match in re.finditer(r'(?<![\dA-Za-z./])\s+[،.]|[،.](?!\s|$)',text):
+                      self.errors.append((match.group(),text[:240]))
+          with urlopen(Request('https://alotamiratchi.ir/',headers={'User-Agent':'AloTypographyAudit/1'}),timeout=30) as r:
+              page=r.read(700000).decode('utf-8','replace')
+          audit=TextAudit();audit.feed(page)
+          print('VISIBLE_PERSIAN_NODES',len(audit.texts),'SUSPECT_PUNCTUATION',len(audit.errors))
+          for problem in audit.errors[:70]:print('PUNCTUATION_SUSPECT',repr(problem))
+          for example in audit.texts[:18]:print('NODE',repr(example[:200]))
+          PY
