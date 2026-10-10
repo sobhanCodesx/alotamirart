@@ -67,6 +67,8 @@ jobs:
           php -l api/content-tools.php
           php -l api/site-graph.php
           php -l api/deployment-agent/index.php
+          php -l them/app/posts/article-contact-helper.php
+          php tests/article-contact-contract.php
           php tests/alo-site-graph-contract.php
           php tests/playnexus-mcp-architecture.php
           php tests/article-mcp-contract.php

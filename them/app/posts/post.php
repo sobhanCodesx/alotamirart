@@ -3,8 +3,11 @@ $found = isset($err) && $err === true && !empty($post);
 $title = $found && isset($post['title']) ? clean_display_text($post['title']) : 'مقاله یافت نشد';
 $description = $found && isset($post['description']) ? clean_display_text($post['description']) : '';
 $authorName = !empty($user['name']) ? clean_display_text($user['name']) : 'تحریریه';
-$authorPhone = !empty($user['phon']) ? clean_display_text($user['phon']) : '';
-$authorPhoneHref = $authorPhone !== '' ? preg_replace('/[^\d+]/', '', $authorPhone) : '';
+require_once BASE_PATH . '/them/app/posts/article-contact-helper.php';
+$selectedContact = alo_article_contact($found ? $post : [], is_array($user ?? null) ? $user : []);
+$contactPhone = $selectedContact['number'] !== '' ? clean_display_text($selectedContact['number']) : '';
+$contactPhoneHref = $selectedContact['tel'];
+$contactIsCustom = $selectedContact['custom'];
 $authorAvatar = !empty($user['img']) ? $user['img'] : 'them/admin/dist/img/avatar.png';
 $authorProfile = !empty($user['id']) && !empty($user['user_name'])
     ? assets('profile/'.$user['user_name'].'/'.(int)$user['id'])
@@ -25,7 +28,7 @@ $authorProfile = !empty($user['id']) && !empty($user['user_name'])
 <?php endif; ?>
 <?php require BASE_PATH.'/them/app/layout/heading.php'; ?>
 </head>
-<body class="detail-page detail-page--article<?= $authorPhone!==''?' detail-page--has-contact':'' ?>">
+<body class="detail-page detail-page--article<?= $contactPhone!==''?' detail-page--has-contact':'' ?>">
 <?php require BASE_PATH.'/them/app/layout/header.php'; ?>
 
 <main id="main-content" class="detail-main">
@@ -60,13 +63,13 @@ $authorProfile = !empty($user['id']) && !empty($user['user_name'])
           </div>
         </div>
 
-        <?php if($authorPhone!==''): ?>
+        <?php if($contactPhone!==''): ?>
           <div class="detail-contact-inline">
             <div class="detail-contact-inline__identity">
               <span class="detail-contact-inline__icon">☎</span>
-              <div><strong>ارتباط مستقیم با <?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?></strong><small>برای تماس، شماره زیر را لمس کنید</small></div>
+              <div><strong><?php if($contactIsCustom): ?>تماس مستقیم این مقاله<?php else: ?>ارتباط مستقیم با <?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?><?php endif; ?></strong><small>برای تماس، شماره زیر را لمس کنید</small></div>
             </div>
-            <a href="tel:<?= htmlspecialchars($authorPhoneHref,ENT_QUOTES,'UTF-8') ?>"><?= htmlspecialchars($authorPhone,ENT_QUOTES,'UTF-8') ?></a>
+            <a href="tel:<?= htmlspecialchars($contactPhoneHref,ENT_QUOTES,'UTF-8') ?>"><?= htmlspecialchars($contactPhone,ENT_QUOTES,'UTF-8') ?></a>
           </div>
         <?php endif; ?>
 
@@ -75,14 +78,14 @@ $authorProfile = !empty($user['id']) && !empty($user['user_name'])
     </article>
 
     <aside class="detail-aside">
-      <?php if($authorPhone!==''): ?>
+      <?php if($contactPhone!==''): ?>
       <div class="detail-contact-card">
         <div class="detail-contact-card__owner">
           <img src="<?= assets($authorAvatar) ?>" alt="" width="54" height="54">
           <div><span>تماس مستقیم</span><strong><?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?></strong></div>
         </div>
-        <p>برای ارتباط سریع با صاحب این مطلب، مستقیماً تماس بگیرید.</p>
-        <a class="detail-call-button" href="tel:<?= htmlspecialchars($authorPhoneHref,ENT_QUOTES,'UTF-8') ?>"><span>☎</span><strong><?= htmlspecialchars($authorPhone,ENT_QUOTES,'UTF-8') ?></strong></a>
+        <p><?= $contactIsCustom ? "برای ارتباط با شماره تماس اختصاصی این مقاله، از دکمه زیر استفاده کنید." : "برای ارتباط سریع با صاحب این مطلب، مستقیماً تماس بگیرید." ?></p>
+        <a class="detail-call-button" href="tel:<?= htmlspecialchars($contactPhoneHref,ENT_QUOTES,'UTF-8') ?>"><span>☎</span><strong><?= htmlspecialchars($contactPhone,ENT_QUOTES,'UTF-8') ?></strong></a>
         <?php if($authorProfile!==''): ?><a class="detail-profile-link" href="<?= $authorProfile ?>">مشاهده پروفایل ←</a><?php endif; ?>
       </div>
       <?php endif; ?>
@@ -95,13 +98,13 @@ $authorProfile = !empty($user['id']) && !empty($user['user_name'])
 </div>
 </main>
 
-<?php if($found && $authorPhone!==''): ?>
+<?php if($found && $contactPhone!==''): ?>
 <div class="mobile-contact-bar" role="region" aria-label="تماس سریع">
   <div class="mobile-contact-bar__owner">
     <img src="<?= assets($authorAvatar) ?>" alt="" width="42" height="42">
-    <div><span>تماس با</span><strong><?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?></strong></div>
+    <div><span><?= $contactIsCustom ? "تماس مقاله" : "تماس با" ?></span><strong><?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?></strong></div>
   </div>
-  <a href="tel:<?= htmlspecialchars($authorPhoneHref,ENT_QUOTES,'UTF-8') ?>"><span aria-hidden="true">☎</span> تماس</a>
+  <a href="tel:<?= htmlspecialchars($contactPhoneHref,ENT_QUOTES,'UTF-8') ?>"><span aria-hidden="true">☎</span> تماس</a>
 </div>
 <?php endif; ?>
 
