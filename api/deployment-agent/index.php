@@ -63,13 +63,22 @@ function pnLock() {
     return $lock;
 }
 function pnSafe(string $path): bool {
-    if ($path===''||strlen($path)>240||!preg_match('~^(?:api|app|bootstrap|classes|database|public|reqires|router|them|assets|css|js|images|img|fonts)/[A-Za-z0-9_./-]+$~D',$path)) return false;
+    if ($path===''||strlen($path)>240||!preg_match('~^[A-Za-z0-9_./-]+$~D',$path))return false;
+    $rootFiles=['.htaccess','index.php','404.php','robots.txt','city-services.php',
+        'service-city.php','service-refrigerator.php','service-washing-machine.php','show-city.php'];
+    if (in_array($path,$rootFiles,true))return true;
     $parts=explode('/',$path);
+    $roots=['api','app','bootstrap','classes','config','database','public','reqires',
+        'router','routes','them','mapbrand','mappost'];
+    if(count($parts)<2||!in_array($parts[0],$roots,true))return false;
+    $banned=['.git','.github','.idea','.env','cache','logs','log','storage','vendor',
+        'node_modules','upload','uploads','backup','backups','secrets','secret','tmp','temp'];
     foreach ($parts as $part) {
-        if ($part===''||$part==='.'||$part==='..'||str_starts_with($part,'.')||in_array(strtolower($part),['upload','uploads','storage','cache','log','logs','vendor','node_modules','backup','backups','secret','secrets'],true))return false;
+        if ($part===''||$part==='.'||$part==='..'||str_starts_with($part,'.')||in_array(strtolower($part),$banned,true))return false;
     }
-    if (in_array(strtolower(basename($path)),['database.php','config.php','error_log'],true)) return false;
-    return (bool)preg_match('~\.(?:php|css|js|json|html|htm|txt|svg|png|jpg|jpeg|webp|ico|woff2?)$~iD',$path);
+    if (str_starts_with($path,'them/admin/dist/img/'))return false;
+    if (strtolower(basename($path))==='error_log')return false;
+    return (bool)preg_match('~\\.(?:php|css|js|json|html|htm|txt|svg|png|jpg|jpeg|webp|ico|woff2?|ttf|eot|gif|xml|webmanifest)$~iD',$path);
 }
 function pnGuardTarget(string $root,string $path): string {
     if (!pnSafe($path)) pnFail(422,'Package contains a disallowed application file.');
@@ -152,7 +161,7 @@ function pnVerify(string $id): never {
     $zip=new ZipArchive();
     $archive=pnOperation($id).'/package.zip';
     if (!is_file($archive)||$zip->open($archive,ZipArchive::RDONLY)!==true)pnFail(422,'Invalid ZIP package.');
-    if ($zip->numFiles<3||$zip->numFiles>402)pnFail(422,'Invalid entry count.');
+    if ($zip->numFiles<2||$zip->numFiles>402)pnFail(422,'Invalid entry count.');
     $raw=$zip->getFromName('deployment-manifest.json');
     $signature=$zip->getFromName('deployment-manifest.sig');
     $rootToken=(string)getenv('MCP_API_TOKEN');
@@ -161,11 +170,24 @@ function pnVerify(string $id): never {
         ||!hash_equals(hash_hmac('sha256',$raw,$key),trim($signature)))pnFail(422,'Package signature invalid.');
     $manifest=json_decode($raw,true);
     if (!is_array($manifest)||($manifest['app_id']??'')!=='alotamirart-production-v1'
-        ||($manifest['protocol_version']??0)!==1
+        ||($manifest['protocol_version']??0)!==2
         ||($manifest['git_commit']??'')!==$state['source_sha']
         ||!is_array($manifest['files']??null))pnFail(422,'Package manifest does not match deployment.');
     $files=$manifest['files'];
-    if (!$files||count($files)>400)pnFail(422,'Package contains no valid app files.');
+    $deleted=$manifest['deleted']??null;
+    $base=$manifest['base_commit']??null;
+    if (($manifest['source_ref']??'')!=='refs/heads/main'
+        ||!is_string($base)||!preg_match('/^[a-f0-9]{40}$/D',$base)
+        ||!is_array($deleted)||count($files)+count($deleted)>400
+        ||(!count($files)&&!count($deleted)))pnFail(422,'Invalid signed release plan.');
+    $seen=[];
+    foreach ($deleted as $path) {
+        if (!is_string($path)||!pnSafe($path)||isset($files[$path])||isset($seen[$path]))pnFail(422,'Invalid deleted path.');
+        $seen[$path]=true;
+    }
+    $previous=pnRoot().'/last-success.json';
+    $last=is_file($previous)?json_decode((string)file_get_contents($previous),true):null;
+    if (is_array($last)&&($last['sha']??null)!==$base)pnFail(409,'Production release base is stale.');
     $members=[];$stage=pnOperation($id).'/stage';
     if (!is_dir($stage)&&!mkdir($stage,0700))pnFail(500,'Staging directory unavailable.');
     $total=0;
@@ -189,10 +211,13 @@ function pnVerify(string $id): never {
     $root=realpath(dirname(__DIR__,2));
     if (!$root)pnFail(500,'Web root unavailable.');
     foreach ($files as $relative=>$hash)pnGuardTarget($root,(string)$relative);
+    foreach ($deleted as $relative)pnGuardTarget($root,$relative);
     $state['status']='verified';$state['stage']='verified';$state['progress']=100;
     $state['files']=$files;
+    $state['deleted']=$deleted;
+    $state['base_commit']=$base;
     $state['preflight']=[['label'=>'signature','status'=>'ok'],['label'=>'allowlist','status'=>'ok'],['label'=>'hashes','status'=>'ok']];
-    $state['diff']=['changed'=>array_keys($files),'deleted'=>[],'pending_migrations'=>[]];
+    $state['diff']=['changed'=>array_keys($files),'deleted'=>$deleted,'pending_migrations'=>[]];
     pnReply(200,pnSave($state));
 }
 function pnRestore(array $state): void {
@@ -212,11 +237,12 @@ function pnApply(string $id): never {
     $root=realpath(dirname(__DIR__,2));
     if (!$root)pnFail(500,'Website root is not readable.');
     $files=$state['files']??[];
+    $deleted=$state['deleted']??[];
     if ($state['stage']==='verified') {
         $backup=pnOperation($id).'/backup';
         if (!is_dir($backup)&&!mkdir($backup,0700))pnFail(500,'Cannot create backups.');
         $originals=[];
-        foreach ($files as $relative=>$hash) {
+        foreach (array_merge(array_keys($files),$deleted) as $relative) {
             $target=pnGuardTarget($root,$relative);
             $exists=is_file($target);
             $originals[$relative]=$exists;
@@ -240,6 +266,10 @@ function pnApply(string $id): never {
                 if (!copy($staged,$temporary)||!rename($temporary,$target))throw new RuntimeException('Unable to install staged file.');
                 $changed[]=$relative;
             }
+            foreach ($deleted as $relative) {
+                $target=pnGuardTarget($root,$relative);
+                if (is_file($target)&&!unlink($target))throw new RuntimeException('Unable to remove deleted application file.');
+            }
         } catch (Throwable $e) {
             pnRestore($state);
             $state['status']='failed';$state['error']='Deployment could not apply all staged files.';
@@ -258,7 +288,15 @@ function pnApply(string $id): never {
             pnSave($state);pnFail(500,$state['error']);
         }
     }
-    $last=['sha'=>$state['source_sha'],'at'=>gmdate('c'),'count'=>count($files),'files'=>$files];
+    foreach ($deleted as $relative) {
+        if (file_exists(pnGuardTarget($root,$relative))) {
+            pnRestore($state);
+            $state['status']='failed';$state['error']='Deleted app path remains; backup restored.';
+            pnSave($state);pnFail(500,$state['error']);
+        }
+    }
+    $last=['sha'=>$state['source_sha'],'at'=>gmdate('c'),'count'=>count($files),
+        'files'=>$files,'deleted'=>$deleted,'base_commit'=>$state['base_commit']??''];
     $raw=json_encode($last,JSON_UNESCAPED_SLASHES);
     if (file_put_contents(pnRoot().'/last-success.json',$raw,LOCK_EX)!==strlen($raw))pnFail(500,'Could not record completed deployment.');
     $state['status']='completed';$state['stage']='completed';$state['progress']=100;
@@ -277,8 +315,14 @@ function pnHealth(): never {
             $checks['files']=['ok'=>false,'blocking'=>true];break;
         }
     }
+    foreach (($last['deleted']??[]) as $relative) {
+        if (!pnSafe($relative)||file_exists($root.'/'.$relative)) {
+            $checks['deleted']=['ok'=>false,'blocking'=>true];break;
+        }
+    }
+    $checks['deleted']??=['ok'=>true,'blocking'=>true];
     $checks['files']??=['ok'=>true,'blocking'=>true];
-    $healthy=$checks['deployment']['ok']&&$checks['files']['ok'];
+    $healthy=$checks['deployment']['ok']&&$checks['files']['ok']&&$checks['deleted']['ok'];
     pnReply($healthy?200:503,['status'=>$healthy?'ok':'error','commit'=>$last['sha'],'checks'=>$checks]);
 }
 
@@ -290,6 +334,7 @@ if (!preg_match('/^Bearer ([a-f0-9]{64})$/i',$bearer,$match)||!hash_equals($expe
 if (getenv('ALO_DEPLOY_ENABLED')!=='1')pnFail(503,'Deployment disabled.');
 $action=(string)($_GET['action']??'');
 $method=$_SERVER['REQUEST_METHOD']??'GET';
+if ($method==='GET'&&$action==='ready')pnReply(200,['status'=>'ok','ready'=>true,'protocol_version'=>2]);
 if ($method==='POST'&&$action==='upload/chunk')pnUpload();
 if ($method==='POST'&&$action==='upload/complete')pnComplete();
 if ($method==='POST'&&preg_match('~^([a-f0-9]{32})/verify$~D',$action,$m))pnVerify($m[1]);

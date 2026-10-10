@@ -35,67 +35,28 @@ RUN = os.getenv("GITHUB_RUN_ID", "")
 BEFORE = os.getenv("ALO_DEPLOY_BASE_SHA") or os.getenv("BEFORE_SHA", "")
 CHUNK_SIZE = 512 * 1024
 MAX_RETRIES = 3
-ROOTS = ("api", "app", "bootstrap", "classes", "database", "public", "reqires", "router", "them",
-         "assets", "css", "js", "images", "img", "fonts")
-BANNED = {"upload", "uploads", "storage", "cache", "log", "logs", "vendor", "node_modules",
-          "backup", "backups", "secret", "secrets"}
-EXTENSIONS = {".php", ".css", ".js", ".json", ".html", ".htm", ".txt", ".svg", ".png",
-              ".jpg", ".jpeg", ".webp", ".ico", ".woff", ".woff2"}
+from alo_release import changed_files, manifest as create_manifest, allowed
 
 
 def fail(message: str):
     raise RuntimeError(message)
 
 
-def allowed(name: str) -> bool:
-    parts = name.split("/")
-    return (
-        bool(re.fullmatch(r"[A-Za-z0-9_./-]{1,240}", name))
-        and len(parts) > 1
-        and parts[0] in ROOTS
-        and all(p and p not in (".", "..") and not p.startswith(".") and p.lower() not in BANNED
-                for p in parts)
-        and parts[-1].lower() not in {"database.php", "config.php", "error_log"}
-        and Path(name).suffix.lower() in EXTENSIONS
-    )
-
-
 def git(*args: str) -> str:
     return subprocess.check_output(["git", *args], cwd=ROOT).decode("utf-8").strip()
 
 
-def collect_changes() -> list[str]:
+def collect_changes() -> tuple[list[str], list[str]]:
     if REF != "refs/heads/main" or not re.fullmatch(r"[a-f0-9]{40}", SHA):
-        fail("Only reviewed main commits can deploy")
+        fail("Only reviewed main commits may deploy")
     if not re.fullmatch(r"[a-f0-9]{40}", BEFORE) or BEFORE == "0" * 40:
-        fail("Missing valid previous commit for signed release")
-    git("cat-file", "-e", BEFORE + "^{commit}")
-    deleted = git("diff", "--name-only", "--diff-filter=D", BEFORE, SHA)
-    if any(allowed(path) for path in deleted.splitlines()):
-        fail("Deletion of application files requires a reviewed migration")
-    changed = git("diff", "--name-only", "--diff-filter=ACMRT", BEFORE, SHA)
-    files = sorted(set(p for p in changed.splitlines() if allowed(p)))
-    if len(files) > 400:
-        fail("More than 400 changed application files")
-    for p in files:
-        full = ROOT / p
-        if full.is_symlink() or not full.is_file() or full.stat().st_size > 3 * 1024 * 1024:
-            fail("Disallowed application source file: " + p)
-    return files
+        fail("Missing previous commit for signed release")
+    return changed_files(BEFORE, SHA, ROOT)
 
 
-def release(files: list[str]) -> bytes:
-    hashes: dict[str, str] = {}
-    for p in files:
-        hashes[p] = hashlib.sha256((ROOT / p).read_bytes()).hexdigest()
-    manifest = {
-        "app_id": "alotamirart-production-v1",
-        "protocol_version": 1,
-        "git_commit": SHA,
-        "source_ref": REF,
-        "files": hashes,
-    }
-    data = json.dumps(manifest, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+def release(files: list[str], deleted: list[str]) -> bytes:
+    payload = create_manifest(SHA, BEFORE, files, deleted, ROOT)
+    data = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     key = hmac.new(TOKEN.encode(), b"alotamirart/deployment-package/v1", hashlib.sha256).hexdigest()
     signature = hmac.new(key.encode(), data, hashlib.sha256).hexdigest()
     buffer = io.BytesIO()
@@ -104,10 +65,10 @@ def release(files: list[str]) -> bytes:
             z.write(ROOT / path, path)
         z.writestr("deployment-manifest.json", data)
         z.writestr("deployment-manifest.sig", signature)
-    payload = buffer.getvalue()
-    if len(payload) > 20 * 1024 * 1024:
-        fail("Deployment ZIP exceeds 20 MB")
-    return payload
+    archive = buffer.getvalue()
+    if len(archive) > 20 * 1024 * 1024:
+        fail("Deployment ZIP exceeds 20 MiB")
+    return archive
 
 
 def request(
@@ -196,14 +157,25 @@ def main() -> None:
         fail("MCP_API_TOKEN GitHub repository secret is missing")
     if not RUN.isdigit():
         fail("Invalid GitHub Actions run id")
-    files = collect_changes()
-    if not files:
+    files, deleted = collect_changes()
+    if not files and not deleted:
         print("No deployable website code changed; MCP content does not deploy")
         return
-    archive = release(files)
+    # No manual server command: after the one-time ZIP extraction the receiver
+    # advertises readiness. Until then the GitHub artifact remains available.
+    try:
+        ready = request("GET", "ready")
+    except RuntimeError as exc:
+        if "HTTP 404" in str(exc) or "Deployment disabled" in str(exc) or "HTTP 503" in str(exc):
+            print("ALO_BOOTSTRAP_REQUIRED: manually extract the GitHub bootstrap ZIP once")
+            return
+        raise
+    if ready.get("ready") is not True or ready.get("protocol_version") != 2:
+        fail("Production receiver does not support release protocol v2")
+    archive = release(files, deleted)
     count = math.ceil(len(archive) / CHUNK_SIZE)
     operation_id = ""
-    print(f"Deploying {len(files)} reviewed application files in {count} multipart chunks", flush=True)
+    print(f"Deploying {len(files)} changed and {len(deleted)} deleted app paths in {count} multipart chunks", flush=True)
     for i in range(count):
         chunk = archive[i * CHUNK_SIZE:(i + 1) * CHUNK_SIZE]
         meta = {
@@ -251,7 +223,7 @@ def main() -> None:
     if any(v.get("ok") is not True for v in (health.get("checks") or {}).values()):
         fail("Post-deploy server hash validation failed")
     public_health()
-    print("PLAYNEXUS_STYLE_DEPLOY_VERIFIED_OK", SHA, len(files), flush=True)
+    print("PLAYNEXUS_STYLE_DEPLOY_VERIFIED_OK", SHA, len(files), "writes", len(deleted), "deletes", flush=True)
 
 
 if __name__ == "__main__":
