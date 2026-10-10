@@ -20,7 +20,11 @@ jobs:
             echo "ROUTE=$route"
             for attempt in 1 2 3 4 5 6; do
               curl -sS --max-time 25 -o /dev/null -H 'Accept: text/html' -A 'AloSEO-TTFB-Audit/1.0' \
-                -w 'SAMPLE=%{http_code} DNS=%{time_namelookup} TCP=%{time_connect} TLS=%{time_appconnect} TTFB=%{time_starttransfer} TOTAL=%{time_total} REMOTE=%{remote_ip}\n' \
+                -w 'SAMPLE=%{http_code} CACHE=%header{x-alo-page-cache} DNS=%{time_namelookup} TCP=%{time_connect} TLS=%{time_appconnect} TTFB=%{time_starttransfer} TOTAL=%{time_total} REMOTE=%{remote_ip}\n' \
                 "https://alotamiratchi.ir$route"
             done
           done
+          echo "COOKIE_REQUEST_MUST_NOT_BE_CACHED"
+          curl -sS --max-time 25 -o /dev/null -H 'Cookie: PHPSESSID=temporary-audit-session' -A 'AloSEO-TTFB-Audit/1.0' \
+            -w 'SESSION_SAMPLE=%{http_code} CACHE=%header{x-alo-page-cache} TTFB=%{time_starttransfer}\n' \
+            'https://alotamiratchi.ir/'
