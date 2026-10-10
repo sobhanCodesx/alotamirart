@@ -40,7 +40,7 @@ $main=file_get_contents($root.'/api/mcp.php');
 check(strpos($main,"'find_content'")!==false,'MCP dispatcher cannot route exact content finder.');
 
 $publisher=file_get_contents($root.'/scripts/mcp_content_job.py');
-check(strpos($publisher,'https://alotamiratchi.ir/api/mcp"')!==false,'Publisher uses an old direct-PHP URL.');
+check(strpos($publisher,'https://alotamiratchi.ir/api/mcp/"')!==false,'Publisher uses an old direct-PHP URL.');
 check(strpos($publisher,'"image_url": request["image_url"]')!==false,'Publisher sends large base64 images instead of URL.');
 check(strpos($publisher,'"find_content"')!==false,'Publisher cannot look up existing slug.');
 $workflow=file_get_contents($root.'/.github/workflows/mcp-content-publish.yml');
