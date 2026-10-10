@@ -40,7 +40,7 @@ if len(blob)>20*1024*1024: fail("package too large")
 auth=hmac.new(secret.encode(),b"alotamirart/deployment-auth/v1","sha256").hexdigest()
 signkey=hmac.new(secret.encode(),b"alotamirart/deployment-package/v1","sha256").hexdigest()
 sig=hmac.new(signkey.encode(),(sha+"\n"+hashlib.sha256(blob).hexdigest()).encode(),"sha256").hexdigest()
-req=urllib.request.Request(url,data=blob,method="POST",headers={"Authorization":"Bearer "+auth,"X-Deploy-Sha":sha,"X-Deploy-Signature":sig,"Content-Type":"application/zip","User-Agent":"AloTamirArt-Github-Deploy/1"})
+req=urllib.request.Request(url,data=blob,method="POST",headers={"Authorization":"Bearer "+auth,"X-Deploy-Sha":sha,"X-Deploy-Signature":sig,"Content-Type":"application/octet-stream","User-Agent":"AloTamirArt-Github-Deploy/1"})
 print("Deploying",len(paths),"changed files from",sha[:12])
 try:
     with urllib.request.urlopen(req,timeout=180) as response:
