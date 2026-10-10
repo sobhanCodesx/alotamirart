@@ -27,9 +27,9 @@ check(in_array('create_content',$names,true),'Create content MCP tool is unavail
 check(in_array('update_content',$names,true),'Update content MCP tool is unavailable.');
 check(in_array('set_content_published',$names,true),'Publish content MCP tool is unavailable.');
 check(!in_array('city',$names,true) && !in_array('province',$names,true),'Location CRUD must not be exposed.');
-$create=next(array_filter($schema,static fn($x)=>$x['name']==='create_content'));
+$create=array_values(array_filter($schema,static fn($x)=>$x['name']==='create_content'))[0];
 check(isset($create['inputSchema']['properties']['image_url']),'Remote featured image input not exposed.');
-$update=next(array_filter($schema,static fn($x)=>$x['name']==='update_content'));
+$update=array_values(array_filter($schema,static fn($x)=>$x['name']==='update_content'))[0];
 check(isset($update['inputSchema']['properties']['image_url']),'Remote featured image update input not exposed.');
 
 $htaccess=file_get_contents($root.'/.htaccess');
