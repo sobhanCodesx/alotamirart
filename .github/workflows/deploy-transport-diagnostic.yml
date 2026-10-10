@@ -1,0 +1,58 @@
+name: Diagnose hosting deploy receiver routes (no changes)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-transport-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Compare WWW and apex deployment gateway responses
+        run: |
+          python3 - <<'PY'
+          import re, urllib.request, urllib.error
+
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, request, fp, code, message, headers, newurl):
+                  return None
+          opener = urllib.request.build_opener(NoRedirect())
+
+          tests = [
+              ('GET', '/api/deploy.php'),
+              ('POST', '/api/deploy.php'),
+              ('GET', '/api/mcp.php'),
+              ('GET', '/api/mcp/'),
+          ]
+          for host in ('alotamiratchi.ir', 'www.alotamiratchi.ir'):
+              print('HOST', host, flush=True)
+              for method, path in tests:
+                  url = 'https://' + host + path
+                  data = b'{}' if method == 'POST' else None
+                  req = urllib.request.Request(
+                      url, data=data, method=method,
+                      headers={'Content-Type':'application/json', 'Accept':'application/json'},
+                  )
+                  try:
+                      with opener.open(req, timeout=12) as response:
+                          status = response.status
+                          headers = response.headers
+                          body = response.read(4000)
+                  except urllib.error.HTTPError as exc:
+                      status, headers, body = exc.code, exc.headers, exc.read(4000)
+                  except Exception as exc:
+                      print(method,path,'TRANSPORT_ERROR',type(exc).__name__,str(exc)[:130],flush=True)
+                      continue
+                  text=body.decode('utf-8','replace')
+                  blocker = 'BitNinja' if ('bn403' in text or 'Blocked Page' in text) else 'none-detected'
+                  content_type = headers.get('content-type','').split(';')[0]
+                  print(method,path,'HTTP',status,'type',content_type,'blocker',blocker,
+                      'redirect',headers.get('location','-'),flush=True)
+          PY
