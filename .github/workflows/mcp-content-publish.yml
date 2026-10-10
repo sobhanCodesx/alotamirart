@@ -29,6 +29,8 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: Install image renderer
+        run: python3 -m pip install --quiet pillow
       - name: Publish approved content through authenticated MCP (no deployment)
         env:
           MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
