@@ -51,6 +51,10 @@ def collect_changes() -> tuple[list[str], list[str]]:
         fail("Only reviewed main commits may deploy")
     if not re.fullmatch(r"[a-f0-9]{40}", BEFORE) or BEFORE == "0" * 40:
         fail("Missing previous commit for signed release")
+    try:
+        git("merge-base", "--is-ancestor", BEFORE, SHA)
+    except subprocess.CalledProcessError:
+        fail("Previous production commit is not an ancestor of current main")
     return changed_files(BEFORE, SHA, ROOT)
 
 
@@ -113,7 +117,12 @@ def request(
         req = urllib.request.Request(url, data=body, headers=headers, method=method)
         try:
             with urllib.request.urlopen(req, timeout=90) as resp:
-                parsed = json.load(resp)
+                try:
+                    parsed = json.load(resp)
+                except (ValueError, UnicodeDecodeError):
+                    if action == "ready":
+                        fail("HTTP 404: deployment receiver not bootstrapped")
+                    fail("Deployment receiver did not return JSON: " + action)
                 if not isinstance(parsed, dict):
                     fail("Deployment agent returned an invalid object")
                 return parsed
@@ -157,10 +166,6 @@ def main() -> None:
         fail("MCP_API_TOKEN GitHub repository secret is missing")
     if not RUN.isdigit():
         fail("Invalid GitHub Actions run id")
-    files, deleted = collect_changes()
-    if not files and not deleted:
-        print("No deployable website code changed; MCP content does not deploy")
-        return
     # No manual server command: after the one-time ZIP extraction the receiver
     # advertises readiness. Until then the GitHub artifact remains available.
     try:
@@ -172,6 +177,16 @@ def main() -> None:
         raise
     if ready.get("ready") is not True or ready.get("protocol_version") != 2:
         fail("Production receiver does not support release protocol v2")
+    global BEFORE
+    deployed_sha = ready.get("last_commit")
+    if deployed_sha is not None:
+        if not isinstance(deployed_sha, str) or not re.fullmatch(r"[a-f0-9]{40}", deployed_sha):
+            fail("Invalid last successfully deployed Git commit")
+        BEFORE = deployed_sha
+    files, deleted = collect_changes()
+    if not files and not deleted:
+        print("No deployable website code changed since production base", BEFORE)
+        return
     archive = release(files, deleted)
     count = math.ceil(len(archive) / CHUNK_SIZE)
     operation_id = ""

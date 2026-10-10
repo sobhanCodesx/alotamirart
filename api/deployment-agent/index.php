@@ -334,7 +334,12 @@ if (!preg_match('/^Bearer ([a-f0-9]{64})$/i',$bearer,$match)||!hash_equals($expe
 if (getenv('ALO_DEPLOY_ENABLED')!=='1')pnFail(503,'Deployment disabled.');
 $action=(string)($_GET['action']??'');
 $method=$_SERVER['REQUEST_METHOD']??'GET';
-if ($method==='GET'&&$action==='ready')pnReply(200,['status'=>'ok','ready'=>true,'protocol_version'=>2]);
+if ($method==='GET'&&$action==='ready') {
+    $lastFile=pnRoot().'/last-success.json';
+    $last=is_file($lastFile)?json_decode((string)file_get_contents($lastFile),true):null;
+    pnReply(200,['status'=>'ok','ready'=>true,'protocol_version'=>2,
+        'last_commit'=>is_array($last)?($last['sha']??null):null]);
+}
 if ($method==='POST'&&$action==='upload/chunk')pnUpload();
 if ($method==='POST'&&$action==='upload/complete')pnComplete();
 if ($method==='POST'&&preg_match('~^([a-f0-9]{32})/verify$~D',$action,$m))pnVerify($m[1]);
