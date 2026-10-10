@@ -68,6 +68,13 @@ def tool(name, arguments):
 
 
 def media_args(request):
+    if request.get("banner") is not None:
+        if request.get("image_url") or request.get("image_base64"):
+            raise ValueError("Editorial banner conflicts with provided featured image")
+        from alo_banner import make_banner
+        data, size = make_banner(request["banner"])
+        print("BANNER_GENERATED_BYTES", size)
+        return {"image_base64": data}
     sources=[key for key in ("image_url","image_base64") if request.get(key)]
     if len(sources)>1:
         raise ValueError("Only one featured image source is permitted")
