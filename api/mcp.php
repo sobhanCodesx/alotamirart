@@ -175,6 +175,7 @@ $method = $p['method'];
 if ($method === 'notifications/initialized') {http_response_code(202); exit;}
 if ($method === 'ping') mcpRespond($id, new stdClass());
 if ($method === 'initialize') mcpRespond($id, ['protocolVersion' => '2025-11-25', 'capabilities' => ['tools' => new stdClass()], 'serverInfo' => ['name' => 'alotamirart-articles', 'version' => '1.0.0']]);
+if ($method === 'server/discover') mcpRespond($id, ['supportedVersions' => ['2026-07-28'], 'capabilities' => ['tools' => new stdClass()], 'ttlMs' => 3600000, 'cacheScope' => 'private']);
 if ($method === 'tools/list') mcpRespond($id, ['tools' => mcpTools()]);
 if ($method === 'tools/call') {
     $params = $p['params'] ?? [];
