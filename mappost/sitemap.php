@@ -4,7 +4,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
 ?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <?php foreach ($get as $entry):
-    $url = 'https://www.alotamiratchi.ir/post/' . (int)$entry['id'];
+    $url = 'https://alotamiratchi.ir/post/' . (int)$entry['id'];
     $dateValue = $entry['updated_at'] ?? $entry['created_at'] ?? '';
     $lastmod = $dateValue !== '' ? strtotime((string)$dateValue) : false;
 ?>

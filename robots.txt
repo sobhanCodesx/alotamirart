@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.alotamiratchi.ir/post/sitemap
-Sitemap: https://www.alotamiratchi.ir/brand/sitemap
+Sitemap: https://alotamiratchi.ir/post/sitemap
+Sitemap: https://alotamiratchi.ir/brand/sitemap

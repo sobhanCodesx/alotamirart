@@ -23,28 +23,17 @@ jobs:
           import json, re, time
           from urllib.request import Request, build_opener, HTTPRedirectHandler, urlopen
 
-          HOST = "https://www.alotamiratchi.ir/"
+          HOST = "https://alotamiratchi.ir/"
           class NoRedirect(HTTPRedirectHandler):
               def redirect_request(self, request, fp, code, msg, headers, newurl):
                   return None
 
           headers={"User-Agent":"AloTamiratchi-Live-SEO-Verification/1.0","Accept":"text/html"}
-          bare=Request("https://alotamiratchi.ir/",headers=headers)
-          for attempt in range(3):
-              try:
-                  response=build_opener(NoRedirect).open(bare,timeout=25)
-                  status=response.status; target=response.headers.get("Location","")
-                  response.close()
-              except HTTPError as error:
-                  status=error.code;target=error.headers.get("Location","")
-              if status in (301,308): break
-              time.sleep(3)
-          print("NON_WWW_STATUS",status,"TARGET",target)
-          assert status in (301,308) and target==HOST, "Bare homepage must 301/308 directly to canonical www HTTPS host"
-          with urlopen(Request(HOST,headers=headers),timeout=25) as response:
+          with urlopen(Request(HOST, headers=headers), timeout=25) as response:
               markup=response.read(900000).decode("utf-8","replace")
-              print("WWW_HOME_STATUS",response.status,"BYTES",len(markup))
-              assert response.status==200
+              final_url=response.geturl()
+              print("BARE_HOME_STATUS",response.status,"FINAL_URL",final_url,"BYTES",len(markup))
+              assert response.status==200 and final_url==HOST, "Bare domain must be available directly without redirecting to www"
           class SEO(HTMLParser):
               def __init__(self):
                   super().__init__()

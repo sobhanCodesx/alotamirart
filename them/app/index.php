@@ -2,7 +2,7 @@
 $siteTitle = isset($dataSeo['title']) ? strip_tags((string)$dataSeo['title']) : 'الو تعمیراتچی';
 $siteDescription = 'در الو تعمیراتچی خدمات تعمیر یخچال، لباسشویی، ظرفشویی، کولر گازی و سایر لوازم خانگی را در شهر خود پیدا کنید و با ارائه‌دهندگان خدمات ارتباط بگیرید.';
 $homeSeoTitle = 'الو تعمیراتچی | خدمات تعمیر لوازم خانگی در شهر شما';
-$homeCanonical = 'https://www.alotamiratchi.ir/';
+$homeCanonical = 'https://alotamiratchi.ir/';
 $heroRaw = isset($dataSeo['header']) ? (string)$dataSeo['header'] : '';
 $heroUrl = $heroRaw !== '' && preg_match('#^https?://#i', $heroRaw) ? $heroRaw : assets($heroRaw);
 $phone = isset($dataFooter['phon']) ? strip_tags((string)$dataFooter['phon']) : '';

@@ -6,7 +6,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
 <?php foreach ($get as $entry):
     $slug = trim((string)($entry['slug'] ?? ''), '/');
     if ($slug === '') continue;
-    $url = 'https://www.alotamiratchi.ir/' . rawurlencode($slug) . '/' . (int)$entry['id'];
+    $url = 'https://alotamiratchi.ir/' . rawurlencode($slug) . '/' . (int)$entry['id'];
     $dateValue = $entry['updated_at'] ?? $entry['created_at'] ?? '';
     $lastmod = $dateValue !== '' ? strtotime((string)$dateValue) : false;
 ?>
