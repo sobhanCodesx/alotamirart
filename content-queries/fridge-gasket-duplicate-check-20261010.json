@@ -1,0 +1,9 @@
+{
+  "tool": "query_alo_graph",
+  "arguments": {
+    "type": "article",
+    "query": "نوار درب",
+    "limit": 25,
+    "include_drafts": false
+  }
+}
