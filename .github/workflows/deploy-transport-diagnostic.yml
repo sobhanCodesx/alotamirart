@@ -56,3 +56,49 @@ jobs:
                   print(method,path,'HTTP',status,'type',content_type,'blocker',blocker,
                       'redirect',headers.get('location','-'),flush=True)
           PY
+      - name: Probe signed deploy receiver with intentionally invalid package (no file changes)
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import hashlib,hmac,os,io,zipfile,urllib.request,urllib.error
+          token=os.environ.get('MCP_API_TOKEN','')
+          if len(token)<32:
+              print('Missing MCP_API_TOKEN repository secret')
+              raise SystemExit(1)
+          auth=hmac.new(token.encode(),b'alotamirart/deployment-auth/v1','sha256').hexdigest()
+          invalid_body=b'NOT_A_ZIP_CONTENT_FOR_AUTH_DIAGNOSTIC'
+          sha='a'*40
+          sign_key=hmac.new(token.encode(),b'alotamirart/deployment-package/v1','sha256').hexdigest()
+          signature=hmac.new(sign_key.encode(),(sha+'\n'+hashlib.sha256(invalid_body).hexdigest()).encode(),'sha256').hexdigest()
+          archive=io.BytesIO()
+          with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED) as z:
+              z.writestr('api/test-mcp.php','<?php /* diagnostic only: unauthenticated */')
+          samples=[
+              ('unsigned-zip',archive.getvalue(),'application/zip',{}),
+              ('unsigned-octet',archive.getvalue(),'application/octet-stream',{}),
+              ('signed-invalid-zip',invalid_body,'application/zip',{
+                  'Authorization':'Bearer '+auth,
+                  'X-Deploy-Sha':sha,
+                  'X-Deploy-Signature':signature,
+              }),
+          ]
+          for host in ('alotamiratchi.ir','www.alotamiratchi.ir'):
+              for label,payload,mime,extra in samples:
+                  req=urllib.request.Request('https://'+host+'/api/deploy.php',
+                      data=payload,method='POST',headers={
+                          'Content-Type':mime,'Accept':'application/json',**extra,
+                      })
+                  try:
+                      with urllib.request.urlopen(req,timeout=18) as resp:
+                          code,body=resp.status,resp.read(1300)
+                  except urllib.error.HTTPError as e:
+                      code,body=e.code,e.read(1300)
+                  except Exception as e:
+                      print(host,label,'TRANSPORT_ERROR',type(e).__name__,flush=True)
+                      continue
+                  body=body.decode('utf-8','replace')
+                  marker='BitNinja' if 'bn403' in body or 'Blocked Page' in body else 'not-BitNinja'
+                  status='disabled' if 'Deployment disabled' in body else ('invalid-archive' if 'Invalid ZIP' in body else '-')
+                  print(host,label,'HTTP',code,marker,status,flush=True)
+          PY
