@@ -65,7 +65,21 @@ for group in groups:
             print("Deployment acknowledged:",acknowledged,"of",len(paths),"files",flush=True)
     except urllib.error.HTTPError as e:
         fragment=e.read(1500).decode("utf-8","replace")
-        label="BitNinja" if "bn403" in fragment or "Blocked Page" in fragment else "unknown"
+        bitninja=("bn403" in fragment or "Blocked Page" in fragment)
+        label="BitNinja" if bitninja else "unknown"
+        if e.code==403 and bitninja and acknowledged==0:
+            names=("ALO_FTPS_HOST","ALO_FTPS_USERNAME","ALO_FTPS_PASSWORD")
+            if all(os.getenv(n) for n in names):
+                print("Verified hosting WAF false positive; switching to verified-TLS FTPS",flush=True)
+                try:
+                    from alo_deploy_ftps import deploy_ftps
+                    deploy_ftps(paths,sha,ROOT)
+                except Exception as error:
+                    fail("FTPS fallback failed: "+type(error).__name__+": "+str(error))
+                sys.exit(0)
+            fail("BitNinja blocks signed PHP ZIP; configure GitHub Actions "
+                 "ALO_FTPS_HOST, ALO_FTPS_USERNAME, ALO_FTPS_PASSWORD for "
+                 "automatic verified-TLS FTPS fallback")
         fail("hosting returned HTTP "+str(e.code)+" (blocker="+label+
              ", already-installed="+str(acknowledged)+"/"+str(len(paths))+")")
     except urllib.error.URLError:
