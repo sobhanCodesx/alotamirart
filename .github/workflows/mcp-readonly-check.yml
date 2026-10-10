@@ -21,7 +21,7 @@ jobs:
       - name: Query website MCP without modifying content
         env:
           MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
-          MCP_ENDPOINT: https://alotamiratchi.ir/api/mcp
+          MCP_ENDPOINT: https://alotamiratchi.ir/api/mcp/
         run: |
           python3 - <<'PY'
           import json
