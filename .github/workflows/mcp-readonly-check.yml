@@ -91,3 +91,15 @@ jobs:
                       print(json.dumps({"id": row_id, "status": status, "title": title}, ensure_ascii=False))
           print("MCP_READ_ONLY_CHECK_OK")
           PY
+      - name: Check publishing client request compatibility (read-only)
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import sys
+          sys.path.insert(0, "scripts")
+          import mcp_content_job
+          data = mcp_content_job.tool("list_content", {"type": "article", "limit": 1})
+          assert isinstance(data.get("records"), list)
+          print("PUBLISHING_CLIENT_READ_ONLY_OK", len(data["records"]))
+          PY
