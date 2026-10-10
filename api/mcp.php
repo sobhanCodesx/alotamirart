@@ -165,7 +165,7 @@ if (!is_string($secret) || strlen($secret) < 32 || !preg_match('/^Bearer\s+(.+)$
 if (stripos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== 0) mcpRespond(null, null, ['code' => -32600, 'message' => 'JSON content type required.'], 415);
 if ((int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 4000000) mcpRespond(null, null, ['code' => -32600, 'message' => 'Request too large.'], 413);
 $raw = file_get_contents('php://input', false, null, 0, 4000001);
-if (strlen($raw) > 180000) mcpRespond(null, null, ['code' => -32600, 'message' => 'Request too large.'], 413);
+if (strlen($raw) > 4000000) mcpRespond(null, null, ['code' => -32600, 'message' => 'Request too large.'], 413);
 $p = json_decode($raw, true);
 if (!is_array($p) || array_is_list($p) || ($p['jsonrpc'] ?? '') !== '2.0' || !is_string($p['method'] ?? null)) {
     mcpRespond(null, null, ['code' => -32600, 'message' => 'Invalid JSON-RPC.'], 400);
