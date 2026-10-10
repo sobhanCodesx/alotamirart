@@ -1448,3 +1448,12 @@ button{cursor:pointer}
     transform:translateY(120%);
   }
 }
+
+
+/* One accessible destination per homepage content card. */
+.content-card__link{display:flex;flex:1;flex-direction:column;min-width:0;text-decoration:none;color:inherit}
+.content-card__link:hover h3{color:var(--pn-brand-2)}
+.content-card__link:focus-visible{outline:3px solid var(--pn-brand-2);outline-offset:-3px;border-radius:var(--pn-radius)}
+.content-card__summary{font-size:.88rem;line-height:1.8;color:var(--pn-muted);margin:0 0 14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:4.75em;overflow-wrap:anywhere}
+.content-card__link .content-card__body{display:flex;flex:1;flex-direction:column}
+@media(max-width:620px){.content-card__summary{min-height:0;-webkit-line-clamp:2;margin-bottom:12px}}

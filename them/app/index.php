@@ -1,23 +1,42 @@
 <?php
 $siteTitle = isset($dataSeo['title']) ? strip_tags((string)$dataSeo['title']) : 'الو تعمیراتچی';
-$siteDescription = isset($dataSeo['description']) ? strip_tags((string)$dataSeo['description']) : '';
+$siteDescription = 'در الو تعمیراتچی خدمات تعمیر یخچال، لباسشویی، ظرفشویی، کولر گازی و سایر لوازم خانگی را در شهر خود پیدا کنید و با ارائه‌دهندگان خدمات ارتباط بگیرید.';
+$homeSeoTitle = 'الو تعمیراتچی | خدمات تعمیر لوازم خانگی در شهر شما';
+$homeCanonical = 'https://www.alotamiratchi.ir/';
 $heroRaw = isset($dataSeo['header']) ? (string)$dataSeo['header'] : '';
 $heroUrl = $heroRaw !== '' && preg_match('#^https?://#i', $heroRaw) ? $heroRaw : assets($heroRaw);
 $phone = isset($dataFooter['phon']) ? strip_tags((string)$dataFooter['phon']) : '';
 $phoneHref = preg_replace('/[^\d+]/', '', $phone);
 $loginMessage = flash('login');
+$seoLogo = trim((string)($dataSeo['logo'] ?? 'public/src/img/logo.png'));
+$seoLogo = $seoLogo !== '' ? $seoLogo : 'public/src/img/logo.png';
+$homePreviewImage = preg_match('~^https?://~i', $seoLogo) ? $seoLogo : assets($seoLogo);
+$homeSchema = [
+  '@context' => 'https://schema.org',
+  '@graph' => [
+    ['@type' => 'Organization','@id' => $homeCanonical . '#organization','name' => 'الو تعمیراتچی','url' => $homeCanonical,'logo' => $homePreviewImage],
+    ['@type' => 'WebSite','@id' => $homeCanonical . '#website','name' => 'الو تعمیراتچی','url' => $homeCanonical,'inLanguage' => 'fa-IR','publisher' => ['@id' => $homeCanonical . '#organization']],
+  ],
+];
 ?>
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title><?= htmlspecialchars($siteTitle, ENT_QUOTES, 'UTF-8') ?></title>
+  <title><?= htmlspecialchars($homeSeoTitle, ENT_QUOTES, 'UTF-8') ?></title>
   <?php if ($siteDescription !== ''): ?><meta name="description" content="<?= htmlspecialchars($siteDescription, ENT_QUOTES, 'UTF-8') ?>"><?php endif; ?>
-  <link rel="canonical" href="<?= htmlspecialchars(assets('/'), ENT_QUOTES, 'UTF-8') ?>">
+  <link rel="canonical" href="<?= $homeCanonical ?>">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="<?= htmlspecialchars($siteTitle, ENT_QUOTES, 'UTF-8') ?>">
+  <meta property="og:locale" content="fa_IR">
+  <meta property="og:site_name" content="الو تعمیراتچی">
+  <meta property="og:url" content="<?= $homeCanonical ?>">
+  <meta property="og:title" content="<?= htmlspecialchars($homeSeoTitle, ENT_QUOTES, 'UTF-8') ?>">
   <?php if ($siteDescription !== ''): ?><meta property="og:description" content="<?= htmlspecialchars($siteDescription, ENT_QUOTES, 'UTF-8') ?>"><?php endif; ?>
+  <meta property="og:image" content="<?= htmlspecialchars($homePreviewImage, ENT_QUOTES, 'UTF-8') ?>">
+  <meta property="og:image:alt" content="لوگوی الو تعمیراتچی">
+  <meta name="twitter:card" content="summary">
+  <script type="application/ld+json"><?= json_encode($homeSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
   <?php require BASE_PATH . '/them/app/layout/heading.php'; ?>
 </head>
 <body>
@@ -28,8 +47,8 @@ $loginMessage = flash('login');
       <div class="hero__content">
         <?php if ($loginMessage !== ''): ?><div class="flash-message"><?= htmlspecialchars($loginMessage, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
         <span class="hero__badge">● تعمیرات تخصصی در شهر شما</span>
-        <h1><?= htmlspecialchars(isset($dataSeo['title_h1']) ? strip_tags((string)$dataSeo['title_h1']) : $siteTitle, ENT_QUOTES, 'UTF-8') ?></h1>
-        <p class="hero__lead"><?= htmlspecialchars(isset($dataSeo['title_h2']) ? strip_tags((string)$dataSeo['title_h2']) : $siteDescription, ENT_QUOTES, 'UTF-8') ?></p>
+        <h1>خدمات تعمیر لوازم خانگی در شهر شما</h1>
+        <p class="hero__lead">الو تعمیراتچی راهی برای پیدا کردن مطالب تخصصی و خدمات مرتبط با تعمیر یخچال، لباسشویی، ظرفشویی و سایر لوازم خانگی است. شهر یا برند موردنظرتان را جست‌وجو کنید و راه‌های ارتباط با ارائه‌دهندگان خدمات را ببینید.</p>
         <form method="post" action="<?= assets('search/1') ?>" class="hero-search" role="search">
           <input type="search" name="search" placeholder="نام برند، شهر یا موضوع را جستجو کنید" aria-label="جستجو در سایت" autocomplete="off">
           <button type="submit">جستجو</button>
@@ -52,19 +71,20 @@ $loginMessage = flash('login');
     <div class="section-head"><div><span class="site-eyebrow">مجله تعمیرات</span><h2 class="site-title">آخرین مقالات</h2><p class="site-subtitle">راهنماها، نکات نگهداری و پاسخ به سوالات رایج درباره لوازم خانگی.</p></div></div>
     <?php if (!empty($post) && is_array($post)): ?><div class="content-grid">
       <?php foreach ($post as $item): ?><article class="content-card" data-reveal>
-        <a class="content-card__media" href="<?= assets('post/' . (int)$item['id']) ?>"><img src="<?= assets($item['img']) ?>" alt="<?= htmlspecialchars(clean_display_text(isset($item['title']) ? $item['title'] : ''), ENT_QUOTES, 'UTF-8') ?>" width="640" height="400" loading="lazy" decoding="async"></a>
-        <div class="content-card__body"><div class="content-card__meta">مقاله آموزشی</div><h3><a href="<?= assets('post/' . (int)$item['id']) ?>"><?= htmlspecialchars(clean_display_text(isset($item['title']) ? $item['title'] : ''), ENT_QUOTES, 'UTF-8') ?></a></h3><p><?= htmlspecialchars(excerpt_text(isset($item['content']) ? $item['content'] : '', 25), ENT_QUOTES, 'UTF-8') ?></p><a class="content-card__action" href="<?= assets('post/' . (int)$item['id']) ?>">ادامه مطلب ←</a></div>
+        <a class="content-card__link" href="<?= assets('post/' . (int)$item['id']) ?>">
+          <div class="content-card__media"><img src="<?= assets($item['img']) ?>" alt="" width="640" height="400" loading="lazy" decoding="async"></div>
+          <div class="content-card__body"><span class="content-card__meta">مقاله آموزشی</span><h3><?= htmlspecialchars(clean_display_text(isset($item['title']) ? $item['title'] : ''), ENT_QUOTES, 'UTF-8') ?></h3><span class="content-card__summary"><?= htmlspecialchars(excerpt_text(isset($item['content']) ? $item['content'] : '', 25), ENT_QUOTES, 'UTF-8') ?></span><span class="content-card__action" aria-hidden="true">مطالعه مقاله ←</span></div>
+        </a>
       </article><?php endforeach; ?>
     </div><?php else: ?><div class="empty-state"><div class="empty-state__icon">⌕</div><h2>هنوز مقاله‌ای منتشر نشده است</h2><p>به‌زودی مطالب جدید در این بخش نمایش داده می‌شود.</p></div><?php endif; ?>
   </div></section>
 
   <?php
   $features = [
-    ['img' => isset($dataHeader['img_one']) ? $dataHeader['img_one'] : '', 'title' => isset($dataHeader['title_one']) ? $dataHeader['title_one'] : '', 'desc' => isset($dataHeader['description_one']) ? $dataHeader['description_one'] : ''],
-    ['img' => isset($dataHeader['img_two']) ? $dataHeader['img_two'] : '', 'title' => isset($dataHeader['title_two']) ? $dataHeader['title_two'] : '', 'desc' => isset($dataHeader['description_two']) ? $dataHeader['description_two'] : ''],
-    ['img' => isset($dataHeader['img_tree']) ? $dataHeader['img_tree'] : '', 'title' => isset($dataHeader['title_tree']) ? $dataHeader['title_tree'] : '', 'desc' => isset($dataHeader['description_tree']) ? $dataHeader['description_tree'] : '']
-  ];
-  ?>
+    ['img' => $dataHeader['img_one'] ?? '', 'title' => 'جست‌وجوی خدمات بر اساس شهر', 'desc' => 'شهر موردنظرتان را انتخاب کنید و مطالب مرتبط با تعمیرات و ارائه‌دهندگان خدمات همان منطقه را بررسی کنید.'],
+    ['img' => $dataHeader['img_two'] ?? '', 'title' => 'راهنمای عیب‌یابی لوازم خانگی', 'desc' => 'پیش از انتخاب تعمیرکار، با نشانه‌های خرابی یخچال، لباسشویی، کولر گازی و دیگر دستگاه‌ها آشنا شوید.'],
+    ['img' => $dataHeader['img_tree'] ?? '', 'title' => 'مقایسه اطلاعات برندها و خدمات', 'desc' => 'مقالات برندها، راهنمای نگهداری و شیوه‌های ارتباط با منتشرکنندگان خدمات را در یک مجموعه پیدا کنید.']
+  ];  ?>
   <section class="site-section site-section--soft"><div class="site-container">
     <div class="section-head"><div><span class="site-eyebrow">چرا ما</span><h2 class="site-title">خدماتی برای یک انتخاب مطمئن‌تر</h2></div></div>
     <div class="feature-grid"><?php foreach ($features as $feature): ?><?php $featureImage=(string)$feature['img']; $featureUrl=$featureImage!==''&&preg_match('#^https?://#i',$featureImage)?$featureImage:assets($featureImage); ?>
@@ -75,7 +95,7 @@ $loginMessage = flash('login');
   <section class="site-section site-section--dark"><div class="site-container">
     <div class="section-head"><div><span class="site-eyebrow">برندها و نمایندگی‌ها</span><h2 class="site-title">تازه‌ترین مطالب برندها</h2><p class="site-subtitle">محتوای مرتبط با برندها، خدمات و راهنمای انتخاب مرکز مناسب.</p></div></div>
     <?php if (!empty($brands) && is_array($brands)): ?><div class="content-grid"><?php foreach ($brands as $item): ?><?php $url=assets((isset($item['slug'])?$item['slug']:'').'/'.(int)$item['id']); ?>
-      <article class="content-card" data-reveal><a class="content-card__media" href="<?= $url ?>"><img src="<?= assets($item['img']) ?>" alt="<?= htmlspecialchars(clean_display_text(isset($item['title'])?$item['title']:''),ENT_QUOTES,'UTF-8') ?>" width="640" height="400" loading="lazy" decoding="async"></a><div class="content-card__body"><div class="content-card__meta">مطلب برند</div><h3><a href="<?= $url ?>"><?= htmlspecialchars(clean_display_text(isset($item['title'])?$item['title']:''),ENT_QUOTES,'UTF-8') ?></a></h3><p><?= htmlspecialchars(excerpt_text(isset($item['content'])?$item['content']:'',25),ENT_QUOTES,'UTF-8') ?></p><a class="content-card__action" href="<?= $url ?>">مشاهده مطلب ←</a></div></article>
+      <article class="content-card" data-reveal><a class="content-card__link" href="<?= $url ?>"><div class="content-card__media"><img src="<?= assets($item['img']) ?>" alt="" width="640" height="400" loading="lazy" decoding="async"></div><div class="content-card__body"><span class="content-card__meta">مطلب برند</span><h3><?= htmlspecialchars(clean_display_text(isset($item['title'])?$item['title']:''),ENT_QUOTES,'UTF-8') ?></h3><span class="content-card__summary"><?= htmlspecialchars(excerpt_text(isset($item['content'])?$item['content']:'',25),ENT_QUOTES,'UTF-8') ?></span><span class="content-card__action" aria-hidden="true">مشاهده مطلب ←</span></div></a></article>
     <?php endforeach; ?></div><?php endif; ?>
   </div></section>
 

@@ -1,4 +1,14 @@
 <?php
+// Canonicalize public routed pages without modifying cPanel's protected .htaccess.
+$incomingHost = strtolower((string)($_SERVER['HTTP_HOST'] ?? ''));
+if ($incomingHost === 'alotamiratchi.ir') {
+    $requestUri = (string)($_SERVER['REQUEST_URI'] ?? '/');
+    if ($requestUri === '' || $requestUri[0] !== '/' || preg_match('/[\r\n]/', $requestUri)) {
+        $requestUri = '/';
+    }
+    header('Location: https://www.alotamiratchi.ir' . $requestUri, true, 301);
+    exit;
+}
 session_start();
 define('BASE_PATH', __DIR__);
 define("CURRENT_DOMAIN", currentdomain() . "/");

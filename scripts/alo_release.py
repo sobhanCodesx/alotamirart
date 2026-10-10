@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 APP_ID = "alotamirart-production-v1"
 PROTOCOL = 2
 ROOT_FILES = frozenset({
-    "index.php", "404.php", "robots.txt", ".htaccess",
+    "index.php", "404.php", "robots.txt",
     "city-services.php", "service-city.php", "service-refrigerator.php",
     "service-washing-machine.php", "show-city.php",
 })

@@ -64,7 +64,7 @@ function pnLock() {
 }
 function pnSafe(string $path): bool {
     if ($path===''||strlen($path)>240||!preg_match('~^[A-Za-z0-9_./-]+$~D',$path))return false;
-    $rootFiles=['index.php','404.php','robots.txt','.htaccess','city-services.php',
+    $rootFiles=['index.php','404.php','robots.txt','city-services.php',
         'service-city.php','service-refrigerator.php','service-washing-machine.php','show-city.php'];
     if (in_array($path,$rootFiles,true))return true;
     $parts=explode('/',$path);
