@@ -12,6 +12,9 @@ def make_banner(spec):
         raise ValueError("banner must be an object")
     if spec.get("template") != "refrigerator-gasket":
         raise ValueError("Unsupported editorial banner template")
+    variant = spec.get("variant", "steps")
+    if variant not in ("steps", "not-sticking"):
+        raise ValueError("Unsupported editorial banner variant")
     from PIL import Image, ImageDraw, ImageFont
     width, height = 1200, 630
     img = Image.new("RGB", (width, height))
@@ -19,7 +22,10 @@ def make_banner(spec):
     for y in range(height):
         for x in range(width):
             t = (x / width) * .35 + (y / height) * .65
-            px[x, y] = (int(7 + 5 * t), int(29 + 33 * t), int(68 + 42 * t))
+            if variant == "not-sticking":
+                px[x, y] = (int(10 + 13 * t), int(40 + 37 * t), int(54 + 37 * t))
+            else:
+                px[x, y] = (int(7 + 5 * t), int(29 + 33 * t), int(68 + 42 * t))
     d = ImageDraw.Draw(img)
     font_base = ROOT / "public/src/fonts"
     font_bold = font_base / "Vazir-Black.ttf"
@@ -36,12 +42,20 @@ def make_banner(spec):
     for x in range(20, 1200, 60):
         d.line((x, 0, x - 70, height), fill=(17, 55, 95), width=1)
     d.rounded_rectangle((42, 43, 371, 105), radius=30, fill=(255, 158, 30))
-    rtl("راهنمای گام‌به‌گام", 343, 64, 29, (15, 34, 64))
-    rtl("مراحل تعویض", 765, 159, 79, (255, 255, 255))
-    rtl("نوار درب", 765, 263, 91, (255, 190, 53))
-    rtl("یخچال فریزر", 765, 365, 84, (255, 255, 255))
-    d.rounded_rectangle((48, 430, 772, 499), radius=19, fill=(18, 73, 119), outline=(49, 153, 215), width=2)
-    rtl("ابزار لازم  |  نصب اصولی  |  تست آب‌بندی", 739, 449, 34, (226, 244, 255), bold=False)
+    if variant == "not-sticking":
+        rtl("آموزش ویژه نوار شیاری", 343, 64, 27, (15, 34, 64))
+        rtl("در یخچال", 765, 159, 87, (255, 255, 255))
+        rtl("نمی‌چسبد؟", 765, 263, 81, (255, 190, 53))
+        rtl("بدون چسب", 765, 365, 84, (255, 255, 255))
+        d.rounded_rectangle((48, 430, 772, 499), radius=19, fill=(17, 80, 102), outline=(46, 191, 171), width=2)
+        rtl("عیب‌یابی  |  نصب نوار  |  تست آب‌بندی", 739, 449, 32, (226, 244, 255), bold=False)
+    else:
+        rtl("راهنمای گام‌به‌گام", 343, 64, 29, (15, 34, 64))
+        rtl("مراحل تعویض", 765, 159, 79, (255, 255, 255))
+        rtl("نوار درب", 765, 263, 91, (255, 190, 53))
+        rtl("یخچال فریزر", 765, 365, 84, (255, 255, 255))
+        d.rounded_rectangle((48, 430, 772, 499), radius=19, fill=(18, 73, 119), outline=(49, 153, 215), width=2)
+        rtl("ابزار لازم  |  نصب اصولی  |  تست آب‌بندی", 739, 449, 34, (226, 244, 255), bold=False)
     d.rounded_rectangle((45, 542, 766, 608), radius=21, fill=(255, 255, 255))
     rtl("الو تعمیراتچی", 726, 555, 35, (6, 43, 89))
     d.text((76, 564), "alotamiratchi.ir", font=font(28), fill=(17, 105, 163))
