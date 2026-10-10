@@ -117,10 +117,17 @@ function aloContentRemoteImage(string $url): string {
 
 function aloContentImage(array $args,string $table): ?string {
     $image=$args['image_base64'] ?? null;
-    if ($image===null) return null;
-    if (!is_string($image) || strlen($image)>4000000 || !preg_match('~^[A-Za-z0-9+/=]+$~D',$image)) throw new InvalidArgumentException('Invalid image_base64.');
-    $binary=base64_decode($image,true);
-    if ($binary===false || strlen($binary)>2500000 || strlen($binary)<24) throw new InvalidArgumentException('Image size must be under 2.5 MB.');
+    $url=$args['image_url'] ?? null;
+    if ($image!==null && $url!==null) throw new InvalidArgumentException('Use either image_url or image_base64.');
+    if ($image===null && $url===null) return null;
+    if ($url!==null) {
+        if (!is_string($url)) throw new InvalidArgumentException('image_url must be a string.');
+        $binary=aloContentRemoteImage($url);
+    } else {
+        if (!is_string($image) || strlen($image)>4000000 || !preg_match('~^[A-Za-z0-9+/=]+$~D',$image)) throw new InvalidArgumentException('Invalid image_base64.');
+        $binary=base64_decode($image,true);
+        if ($binary===false || strlen($binary)>2500000 || strlen($binary)<24) throw new InvalidArgumentException('Image size must be under 2.5 MB.');
+    }
     $info=@getimagesizefromstring($binary);
     $mimes=['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp'];
     $mime=$info['mime'] ?? '';
@@ -147,8 +154,8 @@ function aloContentTools(): array {
         ['name'=>'describe_content_fields','description'=>'Read allowed content types and form-field names, including article, brand article, brand and category.','inputSchema'=>['type'=>'object','properties'=>new stdClass()]],
         ['name'=>'list_content','description'=>'List records of the selected content type, including drafts.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'limit'=>['type'=>'integer','minimum'=>1,'maximum'=>50]],'required'=>['type']]],
         ['name'=>'get_content','description'=>'Get all existing fields of a record.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'id'=>$id],'required'=>['type','id']]],
-        ['name'=>'create_content','description'=>'Create content using all supported form fields; status-bearing records become unpublished drafts; image_base64 can attach JPEG/PNG/WebP. Non-status records require confirm_public=true.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'fields'=>$fields,'image_base64'=>['type'=>'string','description'=>'Optional base64 encoded image data, without data URL prefix'],'confirm_public'=>['type'=>'boolean']],'required'=>['type','fields']]],
-        ['name'=>'update_content','description'=>'Update existing content fields; published records require confirm_public=true.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'id'=>$id,'fields'=>$fields,'image_base64'=>['type'=>'string'],'confirm_public'=>['type'=>'boolean']],'required'=>['type','id','fields']]],
+        ['name'=>'create_content','description'=>'Create content using all supported form fields; status-bearing records become unpublished drafts; image_base64 can attach JPEG/PNG/WebP. Non-status records require confirm_public=true.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'fields'=>$fields,'image_base64'=>['type'=>'string','description'=>'Optional base64 encoded image data, without data URL prefix'],'image_url'=>['type'=>'string','description'=>'Vetted Wikimedia Commons image URL; stored as local featured image'],'confirm_public'=>['type'=>'boolean']],'required'=>['type','fields']]],
+        ['name'=>'update_content','description'=>'Update existing content fields; published records require confirm_public=true.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'id'=>$id,'fields'=>$fields,'image_base64'=>['type'=>'string'],'image_url'=>['type'=>'string'],'confirm_public'=>['type'=>'boolean']],'required'=>['type','id','fields']]],
         ['name'=>'set_content_published','description'=>'Explicitly set publication state for an article or brand article; requires enable flag for publishing.','inputSchema'=>['type'=>'object','properties'=>['type'=>['type'=>'string','enum'=>['article','brand_article']],'id'=>$id,'published'=>['type'=>'boolean'],'confirm'=>['type'=>'boolean','const'=>true]],'required'=>['type','id','published','confirm']]],
     ];
 }
@@ -185,7 +192,7 @@ function aloContentExecute(string $name,array $args): array {
     $data=aloContentValidate($db,$model,$args,$create);
     $image=null;
     try {
-        if (isset($args['image_base64'])) {
+        if (isset($args['image_base64']) || isset($args['image_url'])) {
             if (!$model['image']) throw new InvalidArgumentException('Images not supported for this content type.');
             $image=aloContentImage($args,$table);
             if ($image!==null) $data['img']=$image;
