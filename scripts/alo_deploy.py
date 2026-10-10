@@ -29,24 +29,46 @@ paths=[p for p in changed if allowed(p)]
 if not paths:
     print("No production application files changed");sys.exit(0)
 if len(paths)>400: fail("too many changed files")
-mem=io.BytesIO()
-with zipfile.ZipFile(mem,"w",zipfile.ZIP_DEFLATED,compresslevel=6) as archive:
-    for path in paths:
-        file=ROOT/path
-        if file.is_symlink() or not file.is_file() or file.stat().st_size>3*1024*1024: fail("invalid file "+path)
-        archive.write(file,path)
-blob=mem.getvalue()
-if len(blob)>20*1024*1024: fail("package too large")
-auth=hmac.new(secret.encode(),b"alotamirart/deployment-auth/v1","sha256").hexdigest()
-signkey=hmac.new(secret.encode(),b"alotamirart/deployment-package/v1","sha256").hexdigest()
-sig=hmac.new(signkey.encode(),(sha+"\n"+hashlib.sha256(blob).hexdigest()).encode(),"sha256").hexdigest()
-req=urllib.request.Request(url,data=blob,method="POST",headers={"Authorization":"Bearer "+auth,"X-Deploy-Sha":sha,"X-Deploy-Signature":sig,"Content-Type":"application/octet-stream","User-Agent":"AloTamirArt-Github-Deploy/1"})
-print("Deploying",len(paths),"changed files from",sha[:12])
-try:
-    with urllib.request.urlopen(req,timeout=180) as response:
-        import json
-        result=json.loads(response.read(16000))
-        if result.get("status")!="ok" or result.get("sha")!=sha:fail("Unexpected server verification response")
-        print("Deployment acknowledged:",result.get("count"),"files",sha[:12])
-except urllib.error.HTTPError as e:fail("hosting endpoint returned HTTP "+str(e.code))
-except urllib.error.URLError:fail("connection failed; verify endpoint bootstrap and TLS")
+# Single-item packages are opt-in for hosts whose security appliance rejects
+# multi-file compressed PHP payloads. The PHP receiver remains HMAC-verified.
+groups = [[p] for p in paths] if os.getenv("ALO_DEPLOY_SPLIT") == "1" else [paths]
+auth = hmac.new(secret.encode(),b"alotamirart/deployment-auth/v1","sha256").hexdigest()
+signkey = hmac.new(secret.encode(),b"alotamirart/deployment-package/v1","sha256").hexdigest()
+acknowledged = 0
+for group in groups:
+    mem = io.BytesIO()
+    with zipfile.ZipFile(mem,"w",zipfile.ZIP_DEFLATED,compresslevel=6) as archive:
+        for path in group:
+            file = ROOT/path
+            if file.is_symlink() or not file.is_file() or file.stat().st_size>3*1024*1024:
+                fail("invalid file "+path)
+            archive.write(file,path)
+    blob = mem.getvalue()
+    if len(blob)>20*1024*1024: fail("package too large")
+    sig = hmac.new(signkey.encode(),(sha+"\n"+hashlib.sha256(blob).hexdigest()).encode(),"sha256").hexdigest()
+    req = urllib.request.Request(
+        url,data=blob,method="POST",
+        headers={"Authorization":"Bearer "+auth,
+                 "X-Deploy-Sha":sha,"X-Deploy-Signature":sig,
+                 "Content-Type":"application/octet-stream",
+                 "User-Agent":"AloTamirArt-Github-Deploy/1"}
+    )
+    print("Deploying",len(group),"file(s),",len(blob),"bytes,",
+          group[0] if len(group)==1 else "batch",sha[:12],flush=True)
+    try:
+        with urllib.request.urlopen(req,timeout=180) as response:
+            import json
+            result=json.loads(response.read(16000))
+            if result.get("status")!="ok" or result.get("sha")!=sha or int(result.get("count",0))!=len(group):
+                fail("Unexpected server verification response")
+            acknowledged += len(group)
+            print("Deployment acknowledged:",acknowledged,"of",len(paths),"files",flush=True)
+    except urllib.error.HTTPError as e:
+        fragment=e.read(1500).decode("utf-8","replace")
+        label="BitNinja" if "bn403" in fragment or "Blocked Page" in fragment else "unknown"
+        fail("hosting returned HTTP "+str(e.code)+" (blocker="+label+
+             ", already-installed="+str(acknowledged)+"/"+str(len(paths))+")")
+    except urllib.error.URLError:
+        fail("connection failed (already-installed="+str(acknowledged)+
+             "/"+str(len(paths))+")")
+print("ALL_DEPLOYED_OK",acknowledged,"files")
