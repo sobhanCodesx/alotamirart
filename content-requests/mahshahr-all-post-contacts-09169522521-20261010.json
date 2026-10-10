@@ -2,5 +2,6 @@
   "action": "bulk_mahshahr_contacts",
   "city": "ماهشهر",
   "phone": "09169522521",
-  "confirm": true
+  "confirm": true,
+  "retry_attempt": 2
 }
