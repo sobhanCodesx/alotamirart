@@ -1,0 +1,49 @@
+name: AloTamiratchi MCP Site Context
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content-queries/*.json'
+  workflow_dispatch:
+    inputs:
+      job_path:
+        description: 'Committed content-queries/*.json file'
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: alo-public-context
+  cancel-in-progress: false
+jobs:
+  read:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Read public article/brand/category context via MCP
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+          QUEUED_JOB: ${{ inputs.job_path }}
+          BEFORE_SHA: ${{ github.event.before }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            mapfile -t REQUESTS < <(printf '%s\n' "$QUEUED_JOB")
+          else
+            before="${BEFORE_SHA:-}"
+            if ! git rev-parse --verify "$before^{commit}" >/dev/null 2>&1; then
+              before="$(git rev-parse HEAD^)"
+            fi
+            mapfile -t REQUESTS < <(git diff --diff-filter=AM --name-only "$before" HEAD -- content-queries)
+          fi
+          for job in "${REQUESTS[@]}"; do
+            case "$job" in
+              content-queries/*.json) python3 scripts/mcp_context_job.py "$job" ;;
+              *) echo "Unsupported job path" ;;
+            esac
+          done
