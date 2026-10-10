@@ -1,0 +1,88 @@
+name: Bootstrap PlayNexus Staged Receiver (One Time)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bootstrap-playnexus-agent.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alotamirart-bootstrap-staged-agent
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Bootstrap with existing authenticated receiver (no WAF bypass)
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+          DEPLOY_SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, hmac, io, json, os, pathlib, urllib.error, urllib.request, zipfile
+
+          token = os.environ.get("MCP_API_TOKEN", "")
+          commit = os.environ.get("DEPLOY_SHA", "")
+          if len(token) < 32 or len(commit) != 40:
+              raise SystemExit("Missing deployment token or commit identity")
+          relative = "api/deployment-agent/index.php"
+          source = pathlib.Path(relative)
+          if not source.is_file() or source.stat().st_size > 3 * 1024 * 1024:
+              raise SystemExit("Staged receiver source missing or oversized")
+          payload = io.BytesIO()
+          with zipfile.ZipFile(payload, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+              archive.write(source, relative)
+          body = payload.getvalue()
+          auth = hmac.new(token.encode(), b"alotamirart/deployment-auth/v1", "sha256").hexdigest()
+          sign_key = hmac.new(token.encode(), b"alotamirart/deployment-package/v1", "sha256").hexdigest()
+          signature = hmac.new(sign_key.encode(),
+              (commit + "\n" + hashlib.sha256(body).hexdigest()).encode(), "sha256").hexdigest()
+          req = urllib.request.Request(
+              "https://www.alotamiratchi.ir/api/deploy.php",
+              method="POST", data=body,
+              headers={
+                  "Authorization": "Bearer " + auth,
+                  "X-Deploy-Sha": commit,
+                  "X-Deploy-Signature": signature,
+                  "Content-Type": "application/octet-stream",
+                  "Accept": "application/json",
+                  "User-Agent": "AloTamirArt-Github-Deploy/1",
+              },
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=100) as response:
+                  result = json.load(response)
+          except urllib.error.HTTPError as error:
+              response = error.read(1600).decode("utf-8", "replace")
+              if error.code == 403 and ("bn403" in response or "Blocked Page" in response):
+                  raise SystemExit("BitNinja blocked valid signed PHP bootstrap. No changes applied.")
+              raise SystemExit("Existing receiver returned HTTP " + str(error.code))
+          if result.get("status") != "ok" or result.get("sha") != commit or result.get("count") != 1:
+              raise SystemExit("Existing receiver did not acknowledge exactly one file")
+          print("SIGNED_STAGED_AGENT_BOOTSTRAP_OK", commit)
+          health_req = urllib.request.Request(
+              "https://www.alotamiratchi.ir/api/deployment-agent/?action=health",
+              headers={"Authorization": "Bearer " + auth, "Accept": "application/json"},
+          )
+          try:
+              with urllib.request.urlopen(health_req, timeout=20) as response:
+                  json.load(response)
+          except urllib.error.HTTPError as error:
+              body = error.read(2000).decode("utf-8", "replace")
+              if error.code == 503 and '"deployment"' in body:
+                  print("STAGED_RECEIVER_INSTALLED_AND_AUTHENTICATED")
+              else:
+                  raise SystemExit("New agent health check failed: HTTP " + str(error.code))
+          else:
+              print("STAGED_RECEIVER_HEALTH_OK")
+          PY
