@@ -15,12 +15,12 @@ import alo_release as release
 class ReleaseTests(unittest.TestCase):
     def test_allows_root_routes_but_never_secrets_or_runtime_uploads(self):
         good = [
-            ".htaccess", "index.php", "404.php", "robots.txt", "config/database.php",
+            "index.php", "404.php", "robots.txt", "config/database.php",
             "api/deployment-agent/index.php", "routes/web.php",
             "mapbrand/sitemap.php", "them/admin/dist/css/style.css",
         ]
         bad = [
-            ".env", ".env.example", "info.php", "dev-router.php", "error_log",
+            ".htaccess", ".env", ".env.example", "info.php", "dev-router.php", "error_log",
             "storage/logs/run.log", "them/admin/dist/img/private.jpg",
             "them/admin/dist/img/brand/production.webp", "api/../.env",
             "config/.secrets.php", ".github/workflows/deploy.yml",
@@ -98,7 +98,8 @@ class ReleaseTests(unittest.TestCase):
             self.assertGreater(size, 0)
             with zipfile.ZipFile(output) as z:
                 self.assertIn("api/mcp.php", z.namelist())
-                self.assertIn(".htaccess", z.namelist())
+                self.assertNotIn(".htaccess", z.namelist())
+                self.assertIn("ALO-HTACCESS-RULES.txt", z.namelist())
                 self.assertNotIn(".env", z.namelist())
                 self.assertNotIn("them/admin/dist/img/production.jpg", z.namelist())
 

@@ -95,3 +95,13 @@ For content jobs in `content-requests/*.json`, `type` may be
 Article publish preserves the existing idempotent slug workflow. Featured
 media may be an allowlisted `image_url` or `image_base64`; never both.
 Code deploy remains completely separate from both content queue directories.
+
+## Prevent cPanel PHP handler loss
+
+Never replace the live root .htaccess on cPanel. The deployed PHP handler is
+often stored there. Previous one-time archives could overwrite it, leading
+to PHP 5.x parse errors despite PHP 8.2 being configured in the account.
+The protected package now supplies ALO-HTACCESS-RULES.txt for manual merging
+instead, and automatic releases refuse to replace/delete .htaccess.
+If a previous archive was extracted, re-select PHP 8.2 in MultiPHP Manager
+for the exact domain and click Apply to restore its generated PHP handler.

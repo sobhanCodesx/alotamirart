@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 APP_ID = "alotamirart-production-v1"
 PROTOCOL = 2
 ROOT_FILES = frozenset({
-    ".htaccess", "index.php", "404.php", "robots.txt",
+    "index.php", "404.php", "robots.txt",
     "city-services.php", "service-city.php", "service-refrigerator.php",
     "service-washing-machine.php", "show-city.php",
 })
@@ -133,8 +133,8 @@ def bootstrap_files(root: Path = ROOT) -> list[str]:
             selected.append(path)
     if "api/deployment-agent/index.php" not in selected or "api/mcp.php" not in selected:
         raise ValueError("Required MCP or deployment receiver missing from bootstrap.")
-    if ".htaccess" not in selected:
-        raise ValueError("Required Apache routing file is missing.")
+    if not (root / ".htaccess").is_file():
+        raise ValueError("Required Apache routing template is missing.")
     return sorted(selected)
 
 
@@ -144,12 +144,16 @@ def build_bootstrap(output: Path, root: Path = ROOT) -> tuple[int, int]:
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as z:
         for path in paths:
             z.write(root / path, path)
+        # Preserve the live cPanel PHP handler by never extracting .htaccess.
+        z.write(root / ".htaccess", "ALO-HTACCESS-RULES.txt")
         if (root / ".env.example").is_file():
             z.write(root / ".env.example", ".env.example")
         z.writestr("BOOTSTRAP-README.txt",
                    "AloTamiratchi one-time cPanel bootstrap.\n"
                    "Extract the CONTENTS of this ZIP into the existing website root, "
                    "beside index.php. Do not delete existing site media.\n"
+                   "The live .htaccess is NEVER overwritten. Manually merge rules\n"
+                   "from ALO-HTACCESS-RULES.txt while preserving the cPanel PHP handler.\n"
                    "The package intentionally excludes .env, secrets, logs, "
                    "runtime uploads and historical admin images.\n"
                    "Configure the private .env from .env.example before using MCP "

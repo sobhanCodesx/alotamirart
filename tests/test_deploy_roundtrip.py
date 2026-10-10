@@ -29,6 +29,8 @@ def main():
             target.parent.mkdir(parents=True,exist_ok=True)
             shutil.copy2(SOURCE/relative,target)
         (root/"api/fixture.php").write_text("<?php echo 'first';",encoding="utf-8")
+        handler="# php -- BEGIN cPanel-generated handler, do not edit\nAddHandler application/x-httpd-ea-php82 .php\n# php -- END cPanel-generated handler, do not edit\n"
+        (root/".htaccess").write_text(handler,encoding="utf-8")
         (root/"config").mkdir()
         (root/"config/old.php").write_text("<?php echo 'delete me';",encoding="utf-8")
         (root/"ci-router.php").write_text("""<?php
@@ -52,7 +54,7 @@ return false;
         before=git(root,"rev-parse","HEAD")
         (root/"api/fixture.php").write_text("<?php echo 'updated';",encoding="utf-8")
         (root/"config/old.php").unlink()
-        (root/".htaccess").write_text("RewriteEngine On\n",encoding="utf-8")
+        (root/".htaccess").write_text(handler+"RewriteEngine On\n",encoding="utf-8")
         git(root,"add","-A")
         git(root,"commit","-qm","change, add root and delete")
         after=git(root,"rev-parse","HEAD")
@@ -93,7 +95,7 @@ return false;
             assert "PLAYNEXUS_STYLE_DEPLOY_VERIFIED_OK" in process.stdout, process.stdout
             assert (root/"api/fixture.php").read_text()=="<?php echo 'updated';"
             assert not (root/"config/old.php").exists()
-            assert (root/".htaccess").is_file()
+            assert (root/".htaccess").read_text()==handler+"RewriteEngine On\n"
             derived=hmac.new(key.encode(),b"alotamirart/deployment-auth/v1",hashlib.sha256).hexdigest()
             ready=urllib.request.Request(
                 f"http://127.0.0.1:{port}/api/deployment-agent/?action=ready",
