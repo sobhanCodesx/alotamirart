@@ -174,7 +174,9 @@ def request(
 
 
 def public_health() -> None:
-    for url in ("https://www.alotamiratchi.ir/", "https://www.alotamiratchi.ir/api/deploy.php"):
+    parsed = urllib.parse.urlsplit(API)
+    origin = parsed.scheme + "://" + parsed.netloc
+    for url in (origin + "/", origin + "/api/deploy.php"):
         req = urllib.request.Request(url, method="GET", headers={"User-Agent": "AloTamiratchi-Deploy-Health/2.1"})
         try:
             with urllib.request.urlopen(req, timeout=25) as resp:
