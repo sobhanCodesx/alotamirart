@@ -1,0 +1,56 @@
+name: Article MCP and deployment checks
+on:
+  push:
+    paths:
+      - 'api/mcp.php'
+      - 'app/Support/env.php'
+      - 'config/database.php'
+      - 'bootstrap/app.php'
+      - '.htaccess'
+      - '.gitignore'
+      - '.env.example'
+      - 'tests/env-loader.php'
+      - 'tests/mcp-image-payload-contract.php'
+      - 'api/content-tools.php'
+      - 'api/deploy.php'
+      - 'scripts/alo_deploy.py'
+      - 'tests/article-mcp-contract.php'
+      - 'tests/deploy-contract.php'
+      - '.github/workflows/article-mcp-check.yml'
+      - '.github/workflows/deploy-alo-production.yml'
+  pull_request:
+    paths:
+      - 'api/mcp.php'
+      - 'app/Support/env.php'
+      - 'config/database.php'
+      - 'bootstrap/app.php'
+      - '.htaccess'
+      - '.gitignore'
+      - '.env.example'
+      - 'tests/env-loader.php'
+      - 'tests/mcp-image-payload-contract.php'
+      - 'api/deploy.php'
+      - 'scripts/alo_deploy.py'
+      - 'tests/article-mcp-contract.php'
+      - 'tests/deploy-contract.php'
+      - '.github/workflows/article-mcp-check.yml'
+      - '.github/workflows/deploy-alo-production.yml'
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate both MCP and deploy agents
+        run: |
+          php -l api/mcp.php
+          php -l api/content-tools.php
+          php -l api/deploy.php
+          php tests/article-mcp-contract.php
+          php tests/deploy-contract.php
+          php -l app/Support/env.php
+          php -l config/database.php
+          php -l bootstrap/app.php
+          php tests/env-loader.php
+          php tests/mcp-image-payload-contract.php
+          php tests/legacy-compatibility.php
+          python3 -m py_compile scripts/alo_deploy.py

@@ -1,0 +1,52 @@
+name: Deploy AloTamirArt Production
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: "Deploy reviewed main changes"
+        required: true
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: alotamirart-production
+  cancel-in-progress: false
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check PHP syntax and compatibility
+        run: |
+          php -l api/mcp.php
+          php -l api/content-tools.php
+          php -l api/deploy.php
+          php tests/article-mcp-contract.php
+          php tests/deploy-contract.php
+          php tests/env-loader.php
+          python3 -m py_compile scripts/alo_deploy.py
+          php tests/legacy-compatibility.php
+          php tests/admin-panel-contract.php
+  production:
+    needs: tests
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || inputs.deploy == true)
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Upload signed changes over HTTPS
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+          ALO_DEPLOY_URL: ${{ secrets.ALO_DEPLOY_URL }}
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          if [ -z "${BEFORE_SHA:-}" ]; then
+            export BEFORE_SHA="$(git rev-parse HEAD^)"
+          fi
+          python3 scripts/alo_deploy.py

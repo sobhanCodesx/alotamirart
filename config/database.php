@@ -1,39 +1,44 @@
 <?php
-
 /**
- * Single source of database configuration.
- *
- * Local development is detected automatically from the HTTP host.
- * Production keeps the historical connection values unchanged.
+ * Central database configuration for both the legacy website and the MCP.
+ * Values come from the server-only project-root .env, not committed secrets.
  */
+require_once dirname(__DIR__) . '/app/Support/env.php';
+aloLoadEnv(dirname(__DIR__) . '/.env');
+
+$env = static function (string $key, string $fallback = ''): string {
+    $value = getenv($key);
+    return $value === false ? $fallback : (string) $value;
+};
 
 $httpHost = isset($_SERVER['HTTP_HOST'])
     ? strtolower((string) $_SERVER['HTTP_HOST'])
     : (isset($_SERVER['SERVER_NAME']) ? strtolower((string) $_SERVER['SERVER_NAME']) : '');
 
-$hostName = preg_replace('/:\\d+$/', '', $httpHost);
+$hostName = preg_replace('/:\d+$/', '', $httpHost);
 $isLocal = in_array($hostName, ['localhost', '127.0.0.1', '::1'], true)
-    || getenv('APP_ENV') === 'local';
+    || $env('APP_ENV') === 'local';
 
 $local = [
-    'host' => 'localhost',
-    'name' => 'danesh',
-    'username' => 'root',
-    'password' => '',
+    'host' => $env('DB_HOST', 'localhost'),
+    'name' => $env('DB_NAME', 'danesh'),
+    'username' => $env('DB_USERNAME', 'root'),
+    'password' => $env('DB_PASSWORD'),
 ];
 
 $productionPrimary = [
-    'host' => 'localhost',
-    'name' => 'mbziliwc_danesh',
-    'username' => 'mbziliwc_danesh',
-    'password' => '9711212103',
+    'host' => $env('DB_HOST', 'localhost'),
+    'name' => $env('DB_NAME'),
+    'username' => $env('DB_USERNAME'),
+    'password' => $env('DB_PASSWORD'),
 ];
 
+// Some legacy routes historically used a second set of DB credentials.
 $productionLegacyConstants = [
-    'host' => 'localhost',
-    'name' => 'mbziliwc_danesh',
-    'username' => 'mbziliwc_danesh',
-    'password' => 'fV7+Qjy[RU5S',
+    'host' => $env('DB_LEGACY_HOST', $productionPrimary['host']),
+    'name' => $env('DB_LEGACY_NAME', $productionPrimary['name']),
+    'username' => $env('DB_LEGACY_USERNAME', $productionPrimary['username']),
+    'password' => $env('DB_LEGACY_PASSWORD', $productionPrimary['password']),
 ];
 
 return [

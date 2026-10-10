@@ -2,6 +2,10 @@
 define('BASE_PATH', dirname(__DIR__));
 define('APP_BOOTSTRAPPED', true);
 
+// Load private project-root .env before reading any application configuration.
+require_once BASE_PATH . '/app/Support/env.php';
+aloLoadEnv(BASE_PATH . '/.env');
+
 spl_autoload_register(function ($class) {
     $prefix = 'App\\';
     if (strncmp($class, $prefix, strlen($prefix)) !== 0) return;
