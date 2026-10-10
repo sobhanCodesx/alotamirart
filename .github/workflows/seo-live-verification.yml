@@ -72,6 +72,10 @@ jobs:
           assert parsed.h1==1, "Homepage H1 count wrong"
           assert [a.get("href") for a in parsed.links if a.get("rel")=="canonical"]==[HOST], "Canonical differs from live host"
           assert (parsed.meta.get("og:image") or "").startswith("https://"), "OG image is missing"
+          with urlopen(Request(parsed.meta["og:image"],headers={"User-Agent":headers["User-Agent"]}),timeout=25) as picture:
+              media_type=picture.headers.get("Content-Type","")
+              print("OG_IMAGE_STATUS",picture.status,"CONTENT_TYPE",media_type)
+              assert picture.status==200 and media_type.lower().startswith("image/"), "OG image must be a reachable actual image"
           assert any(a.get("rel")=="apple-touch-icon" for a in parsed.links), "Apple icon missing"
           assert parsed.jsonld and any(n.get("@type")=="Organization" for n in json.loads(parsed.jsonld[0]).get("@graph",[])), "Organization JSON-LD missing"
           assert "تبلیغات گوگل" not in markup, "Old unrelated marketing copy still rendered"
