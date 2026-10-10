@@ -67,6 +67,8 @@ jobs:
           php -l api/content-tools.php
           php -l api/city-contact.php
           php tests/city-contact-contract.php
+          php -l api/refrigerator-links.php
+          php tests/refrigerator-link-contract.php
           php -l api/site-graph.php
           php -l api/deployment-agent/index.php
           php -l them/app/posts/article-contact-helper.php

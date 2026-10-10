@@ -179,6 +179,20 @@ def manage_content(path):
             raise RuntimeError("Mahshahr contact update matched fewer posts than the public inventory")
         print("MAHSHahr_CONTACTS_VERIFIED_OK", json.dumps(result, ensure_ascii=False))
         return
+    if action == "replace_refrigerator_o3am_links":
+        if (request.get("category_id") != 9 or
+            request.get("from_host") != "o3am.com" or
+            request.get("to_host") != "o3am.ir" or
+            request.get("confirm") is not True):
+            raise ValueError("Explicit exact refrigerator-domain replacement request required")
+        result = tool("replace_refrigerator_o3am_links", {
+            "category_id": 9, "from_host": "o3am.com",
+            "to_host": "o3am.ir", "confirm": True,
+        })
+        if result.get("verified") is not True or result.get("category_id") != 9:
+            raise RuntimeError("Live refrigerator URL replacement verification failed")
+        print("REFRIGERATOR_LINK_SWAP_VERIFIED_OK", json.dumps(result, ensure_ascii=False))
+        return
     if content_type not in ("article","brand_article","brand","category"):
         raise ValueError("Invalid managed content type")
     if action=="publish" and content_type=="article":

@@ -8,6 +8,7 @@ $new = file_get_contents(dirname(__DIR__) . '/api/content-tools.php');
 foreach (['article','brand_article','brand','category','create_content','update_content','list_content','get_content','describe_content_fields','set_content_published','image_base64','contact_number','keyword','description','brand_id','post_id','MCP_ALLOW_PUBLISH','SHOW COLUMNS FROM'] as $required) {
     if (strpos($new,$required)===false) {fwrite(STDERR,"Missing content capability: $required\\n");exit(1);}
 }
+if (strpos($source,"require_once __DIR__ . '/refrigerator-links.php'") === false) { fwrite(STDERR,"Missing URL migration tool\n");exit(1); }
 if (strpos($source,"require_once __DIR__ . '/content-tools.php'") === false) {
     fwrite(STDERR,"Content extension is not included\\n");exit(1);
 }
