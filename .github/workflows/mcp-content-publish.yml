@@ -1,8 +1,16 @@
-name: Publish approved content via MCP (no deployment)
-# Automated content requests are now handled by the verified MCP client workflow.
-# Kept available for manual diagnostic dispatch; never launches a code deployment.
+name: AloTamiratchi MCP Content Publisher
+# PlayNexus-style queue triggers content publication, never site deployment.
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'content-requests/*.json'
   workflow_dispatch:
+    inputs:
+      job_path:
+        description: 'Previously queued content-requests/*.json job to retry'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -13,19 +21,30 @@ concurrency:
 
 jobs:
   publish-via-mcp:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
           persist-credentials: false
-      - name: Publish the newly requested article via authenticated MCP
+      - name: Publish approved content through authenticated MCP (no deployment)
         env:
           MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+          QUEUED_JOB: ${{ inputs.job_path }}
+          BEFORE_SHA: ${{ github.event.before }}
         run: |
           set -euo pipefail
-          mapfile -t NEW_REQUESTS < <(git diff --diff-filter=AM --name-only HEAD^ HEAD -- content-requests)
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            mapfile -t NEW_REQUESTS < <(printf '%s\n' "$QUEUED_JOB")
+          else
+            before="${BEFORE_SHA:-}"
+            if ! git rev-parse --verify "$before^{commit}" >/dev/null 2>&1; then
+              before="$(git rev-parse HEAD^)"
+            fi
+            mapfile -t NEW_REQUESTS < <(git diff --diff-filter=AM --name-only "$before" HEAD -- content-requests)
+          fi
           if [ "${#NEW_REQUESTS[@]}" -eq 0 ]; then
             echo "No new or modified content request files"
             exit 0

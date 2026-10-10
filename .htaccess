@@ -6,6 +6,10 @@
 RewriteEngine On
 RewriteBase /
 
+# PlayNexus-style clean MCP endpoint. Run this BEFORE the real-file rule.
+# Apache keeps the public request path /api/mcp and internally serves PHP.
+RewriteRule ^api/mcp/?$ api/mcp.php [END,QSA,NC]
+
 # Force HTTPS while keeping the original path/query.
 RewriteCond %{HTTPS} off
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]

@@ -66,12 +66,68 @@ function aloContentValidate(PDO $db,array $model,array $args,bool $create): arra
     aloContentRelation($db,$model,$result);
     return $result;
 }
+
+/**
+ * PlayNexus-style remote media: retrieve the image on the server rather than
+ * forwarding base64 inside JSON-RPC. Only allow Wikimedia Commons media URLs.
+ */
+function aloContentRemoteImage(string $url): string {
+    $p = parse_url($url);
+    if (strlen($url) > 1000 || !is_array($p)
+        || ($p['scheme'] ?? '') !== 'https'
+        || strtolower($p['host'] ?? '') !== 'upload.wikimedia.org'
+        || !str_starts_with($p['path'] ?? '', '/wikipedia/commons/')
+        || isset($p['user']) || isset($p['pass']) || isset($p['port'])
+        || isset($p['query']) || isset($p['fragment'])) {
+        throw new InvalidArgumentException('Only direct HTTPS Wikimedia Commons image URLs are accepted.');
+    }
+    $max=2500000;
+    if (function_exists('curl_init')) {
+        $ch=curl_init($url);
+        if ($ch===false) throw new RuntimeException('Image download unavailable.');
+        $binary='';
+        curl_setopt_array($ch,[
+            CURLOPT_FOLLOWLOCATION=>false,
+            CURLOPT_TIMEOUT=>25,
+            CURLOPT_CONNECTTIMEOUT=>8,
+            CURLOPT_SSL_VERIFYPEER=>true,
+            CURLOPT_SSL_VERIFYHOST=>2,
+            CURLOPT_USERAGENT=>'AloTamiratchi-MCP/1.0',
+            CURLOPT_WRITEFUNCTION=>static function($handle,string $chunk) use (&$binary,$max): int {
+                if (strlen($binary)+strlen($chunk)>$max) return 0;
+                $binary.=$chunk;
+                return strlen($chunk);
+            },
+        ]);
+        $ok=curl_exec($ch);
+        $http=(int)curl_getinfo($ch,CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($ok===false || $http!==200) throw new RuntimeException('Featured image download failed (HTTP '.$http.').');
+    } else {
+        if (!filter_var(ini_get('allow_url_fopen'), FILTER_VALIDATE_BOOLEAN)) throw new RuntimeException('PHP cURL or allow_url_fopen is required for URL images.');
+        $ctx=stream_context_create(['http'=>['timeout'=>20,'follow_location'=>0,'ignore_errors'=>true,
+            'header'=>"User-Agent: AloTamiratchi-MCP/1.0\r\nAccept: image/*\r\n"]]);
+        $binary=@file_get_contents($url,false,$ctx,0,$max+1);
+        $status=$http_response_header[0]??'';
+        if (!is_string($binary) || !preg_match('~^HTTP/\S+\s+200(?:\s|$)~',$status)) throw new RuntimeException('Featured image download failed.');
+    }
+    if (strlen($binary)<24 || strlen($binary)>$max) throw new InvalidArgumentException('Image size must be 24 bytes to 2.5 MB.');
+    return $binary;
+}
+
 function aloContentImage(array $args,string $table): ?string {
     $image=$args['image_base64'] ?? null;
-    if ($image===null) return null;
-    if (!is_string($image) || strlen($image)>4000000 || !preg_match('~^[A-Za-z0-9+/=]+$~D',$image)) throw new InvalidArgumentException('Invalid image_base64.');
-    $binary=base64_decode($image,true);
-    if ($binary===false || strlen($binary)>2500000 || strlen($binary)<24) throw new InvalidArgumentException('Image size must be under 2.5 MB.');
+    $url=$args['image_url'] ?? null;
+    if ($image!==null && $url!==null) throw new InvalidArgumentException('Use either image_url or image_base64.');
+    if ($image===null && $url===null) return null;
+    if ($url!==null) {
+        if (!is_string($url)) throw new InvalidArgumentException('image_url must be a string.');
+        $binary=aloContentRemoteImage($url);
+    } else {
+        if (!is_string($image) || strlen($image)>4000000 || !preg_match('~^[A-Za-z0-9+/=]+$~D',$image)) throw new InvalidArgumentException('Invalid image_base64.');
+        $binary=base64_decode($image,true);
+        if ($binary===false || strlen($binary)>2500000 || strlen($binary)<24) throw new InvalidArgumentException('Image size must be under 2.5 MB.');
+    }
     $info=@getimagesizefromstring($binary);
     $mimes=['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp'];
     $mime=$info['mime'] ?? '';
@@ -97,9 +153,10 @@ function aloContentTools(): array {
     return [
         ['name'=>'describe_content_fields','description'=>'Read allowed content types and form-field names, including article, brand article, brand and category.','inputSchema'=>['type'=>'object','properties'=>new stdClass()]],
         ['name'=>'list_content','description'=>'List records of the selected content type, including drafts.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'limit'=>['type'=>'integer','minimum'=>1,'maximum'=>50]],'required'=>['type']]],
+        ['name'=>'find_content','description'=>'Find exact article slug to prevent duplicate publication.', 'inputSchema'=>['type'=>'object','properties'=>['type'=>['type'=>'string','enum'=>['article','brand_article']],'slug'=>['type'=>'string','maxLength'=>220]],'required'=>['type','slug']]],
         ['name'=>'get_content','description'=>'Get all existing fields of a record.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'id'=>$id],'required'=>['type','id']]],
-        ['name'=>'create_content','description'=>'Create content using all supported form fields; status-bearing records become unpublished drafts; image_base64 can attach JPEG/PNG/WebP. Non-status records require confirm_public=true.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'fields'=>$fields,'image_base64'=>['type'=>'string','description'=>'Optional base64 encoded image data, without data URL prefix'],'confirm_public'=>['type'=>'boolean']],'required'=>['type','fields']]],
-        ['name'=>'update_content','description'=>'Update existing content fields; published records require confirm_public=true.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'id'=>$id,'fields'=>$fields,'image_base64'=>['type'=>'string'],'confirm_public'=>['type'=>'boolean']],'required'=>['type','id','fields']]],
+        ['name'=>'create_content','description'=>'Create content using all supported form fields; status-bearing records become unpublished drafts; image_base64 can attach JPEG/PNG/WebP. Non-status records require confirm_public=true.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'fields'=>$fields,'image_base64'=>['type'=>'string','description'=>'Optional base64 encoded image data, without data URL prefix'],'image_url'=>['type'=>'string','description'=>'Vetted Wikimedia Commons image URL; stored as local featured image'],'confirm_public'=>['type'=>'boolean']],'required'=>['type','fields']]],
+        ['name'=>'update_content','description'=>'Update existing content fields; published records require confirm_public=true.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'id'=>$id,'fields'=>$fields,'image_base64'=>['type'=>'string'],'image_url'=>['type'=>'string'],'confirm_public'=>['type'=>'boolean']],'required'=>['type','id','fields']]],
         ['name'=>'set_content_published','description'=>'Explicitly set publication state for an article or brand article; requires enable flag for publishing.','inputSchema'=>['type'=>'object','properties'=>['type'=>['type'=>'string','enum'=>['article','brand_article']],'id'=>$id,'published'=>['type'=>'boolean'],'confirm'=>['type'=>'boolean','const'=>true]],'required'=>['type','id','published','confirm']]],
     ];
 }
@@ -107,6 +164,14 @@ function aloContentExecute(string $name,array $args): array {
     if ($name==='describe_content_fields') return ['models'=>aloContentSchema()];
     $model=aloContentModel($args);
     $db=mcpDb();$table=$model['table'];
+    if ($name==='find_content') {
+        if (!in_array($table,['posts','post_brand'],true)) throw new InvalidArgumentException('Only articles support exact slug lookup.');
+        $slug=$args['slug'] ?? null;
+        if (!is_string($slug) || trim($slug)==='' || strlen($slug)>220) throw new InvalidArgumentException('Invalid exact slug.');
+        $st=$db->prepare('SELECT * FROM '.$table.' WHERE slug=? ORDER BY id DESC LIMIT 1');
+        $st->execute([$slug]);
+        return ['record'=>$st->fetch() ?: null];
+    }
     if ($name==='list_content') {
         $limit=$args['limit']??20;
         if (!is_int($limit)||$limit<1||$limit>50) throw new InvalidArgumentException('Invalid limit.');
@@ -136,7 +201,7 @@ function aloContentExecute(string $name,array $args): array {
     $data=aloContentValidate($db,$model,$args,$create);
     $image=null;
     try {
-        if (isset($args['image_base64'])) {
+        if (isset($args['image_base64']) || isset($args['image_url'])) {
             if (!$model['image']) throw new InvalidArgumentException('Images not supported for this content type.');
             $image=aloContentImage($args,$table);
             if ($image!==null) $data['img']=$image;

@@ -4,7 +4,6 @@
 Only a content-requests/*.json commit triggers the workflow; this script
 never edits website code, pushes to main, or calls the deployment endpoint.
 """
-import base64
 import json
 import os
 import pathlib
@@ -13,7 +12,7 @@ import urllib.error
 import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-ENDPOINT = "https://alotamiratchi.ir/api/mcp.php"
+ENDPOINT = "https://alotamiratchi.ir/api/mcp"
 IMAGE_HOST = "https://upload.wikimedia.org/wikipedia/commons/"
 TOKEN = os.environ.get("MCP_API_TOKEN", "")
 if len(TOKEN) < 32:
@@ -29,12 +28,9 @@ def tool(name, arguments):
     req = urllib.request.Request(
         ENDPOINT, data=data, method="POST",
         headers={"Authorization": "Bearer " + TOKEN,
-                 "Content-Type": "application/json",
+                 "Content-Type": "application/json; charset=utf-8",
                  "Accept": "application/json",
-                 "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/131.0 Safari/537.36",
-                 "Accept-Language": "fa-IR,fa;q=0.9,en;q=0.8",
-                 "Origin": "https://alotamiratchi.ir",
-                 "Referer": "https://alotamiratchi.ir/"},
+                 "User-Agent": "AloTamiratchi-GitHub-Publisher/2.1"},
     )
     try:
         with urllib.request.urlopen(req, timeout=40) as response:
@@ -70,22 +66,6 @@ def tool(name, arguments):
     return parsed
 
 
-def load_image(url):
-    if not isinstance(url, str) or not url.startswith(IMAGE_HOST):
-        raise ValueError("Only Wikimedia Commons image URLs are supported")
-    req = urllib.request.Request(url, headers={
-        "User-Agent": "AloTamiratchi-Content/1.0 (featured-image upload)"
-    })
-    with urllib.request.urlopen(req, timeout=30) as response:
-        mime = (response.headers.get("Content-Type") or "").lower()
-        image = response.read(2500001)
-    if not 1000 <= len(image) <= 2500000:
-        raise RuntimeError("Featured image is outside 1KB-2.5MB range")
-    if not image.startswith(b"\xff\xd8\xff"):
-        raise RuntimeError("Source featured image is not a JPEG")
-    return base64.b64encode(image).decode("ascii")
-
-
 def publish(path):
     request = json.loads(path.read_text(encoding="utf-8"))
     fields = request["fields"]
@@ -99,15 +79,7 @@ def publish(path):
 
     # Idempotent re-runs: publishing a draft after a disabled publish attempt
     # must NOT create another copy of the article.
-    records = tool("list_content", {"type": "article", "limit": 1})["records"]
-    existing = None
-    for record in records:
-        if record.get("title") != fields["title"]:
-            continue
-        row = tool("get_content", {"type": "article", "id": int(record["id"])})["record"]
-        if row.get("slug") == slug:
-            existing = row
-            break
+    existing = tool("find_content", {"type": "article", "slug": slug})["record"]
 
     if existing:
         article_id = int(existing["id"])
@@ -116,16 +88,13 @@ def publish(path):
             print("ALREADY_PUBLISHED", "https://alotamiratchi.ir/post/" + str(article_id) + "/" + slug)
             return
         if not existing.get("img"):
-            encoded = load_image(request["image_url"])
             existing = tool("update_content", {
                 "type": "article", "id": article_id,
-                "fields": {}, "image_base64": encoded
+                "fields": {"title": existing["title"]}, "image_url": request["image_url"]
             })["record"]
     else:
-        # Image is fetched and validated BEFORE inserting any content.
-        encoded = load_image(request["image_url"])
         created = tool("create_content", {
-            "type": "article", "fields": fields, "image_base64": encoded
+            "type": "article", "fields": fields, "image_url": request["image_url"]
         })
         existing = created["record"]
         article_id = int(existing["id"])
