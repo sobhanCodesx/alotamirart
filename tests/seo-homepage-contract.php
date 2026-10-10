@@ -22,7 +22,7 @@ function excerpt_text($v,$n=25){return mb_substr(trim(strip_tags((string)$v)),0,
 function flash($k){return '';}
 $dataSeo=['title'=>'الو تعمیراتچی','description'=>'تبلیغات گوگل','title_h1'=>'تبلیغات گوگل','title_h2'=>'تبلیغات گوگل','logo'=>'public/src/img/logo.png'];
 $dataHeader=['title_one'=>'تبلیغات گوگل','title_two'=>'تبلیغات گوگل','title_tree'=>'تبلیغات گوگل'];
-$dataFooter=['phon'=>'09933493049','email'=>'support@example.com','about_description'=>'','instagram'=>''];
+$dataFooter=['phon'=>'09933493049','email'=>'support@example.com','about_description'=>'','instagram'=>'support@example.com'];
 $menu=[];
 $post=[['id'=>490,'title'=>'چرا یخچال سرد نمی‌کند؟','img'=>'a.webp','content'=>'مطلب درباره تعمیر یخچال']];
 $brands=[['id'=>377,'slug'=>'sample-brand-repair','title'=>'تعمیرات یخچال یک برند','img'=>'b.webp','content'=>'راهنمای تعمیر']];

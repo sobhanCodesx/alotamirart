@@ -27,7 +27,7 @@ $footerPhoneHref = preg_replace('/[^\d+]/', '', $footerPhone);
       <div class="footer-contact">
         <?php if ($footerPhone !== ''): ?><a href="tel:<?= htmlspecialchars($footerPhoneHref, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($footerPhone, ENT_QUOTES, 'UTF-8') ?></a><?php endif; ?>
         <?php if ($footerEmail !== '' && filter_var($footerEmail, FILTER_VALIDATE_EMAIL)): ?><button type="button" class="email-contact-action" data-email-encoded="<?= htmlspecialchars(base64_encode($footerEmail), ENT_QUOTES, 'UTF-8') ?>" aria-label="ارسال ایمیل به الو تعمیراتچی">ارسال ایمیل</button><?php endif; ?>
-        <?php if ($footerInstagram !== ''): ?><span>اینستاگرام: @<?= htmlspecialchars(ltrim($footerInstagram, '@'), ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
+        <?php if ($footerInstagram !== '' && preg_match('/^[A-Za-z0-9._]{1,30}$/D', ltrim($footerInstagram, '@'))): ?><span>اینستاگرام: @<?= htmlspecialchars(ltrim($footerInstagram, '@'), ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
       </div>
     </div>
   </div>
