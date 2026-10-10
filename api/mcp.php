@@ -92,7 +92,7 @@ function mcpTools(): array {
 function mcpExecute(string $name, array $a): array {
     if ($name === 'set_mahshahr_contact_numbers') return aloCityContactExecute($a);
     if ($name === 'replace_refrigerator_o3am_links') return aloRefrigeratorLinkExecute($a);
-    if (in_array($name, ['describe_alo_graph','query_alo_graph'], true)) return aloGraphExecute($name,$a);
+    if (in_array($name, ['describe_alo_graph','query_alo_graph','get_article_titles_by_ids'], true)) return aloGraphExecute($name,$a);
     if (in_array($name, ['describe_content_fields','list_content','find_content','get_content','create_content','update_content','set_content_published'], true)) return aloContentExecute($name, $a);
     if ($name === 'publish_article' && getenv('MCP_ALLOW_PUBLISH') !== '1') {
         throw new InvalidArgumentException('Publishing disabled by MCP_ALLOW_PUBLISH.');

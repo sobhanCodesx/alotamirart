@@ -10,6 +10,11 @@ function aloGraphTools(): array {
         ['name'=>'describe_alo_graph',
          'description'=>'Describe the read-only site content graph and known relationships.',
          'inputSchema'=>['type'=>'object','properties'=>new stdClass()]],
+        ['name'=>'get_article_titles_by_ids',
+         'description'=>'Read only published refrigerator-article titles for an exact list of ids; returns no full article text or draft titles.',
+         'inputSchema'=>['type'=>'object','properties'=>[
+             'ids'=>['type'=>'array','items'=>['type'=>'integer','minimum'=>1],'minItems'=>1,'maxItems'=>50],
+         ],'required'=>['ids']]],
         ['name'=>'query_alo_graph',
          'description'=>'Search bounded published/draft article, brand and category summaries with category/brand relationships; read-only, no SQL input.',
          'inputSchema'=>['type'=>'object','properties'=>[
@@ -49,6 +54,19 @@ function aloGraphExecute(string $name,array $args,?PDO $db=null): array {
         'max_page_size'=>25,
         'usage'=>'Use query_alo_graph to discover, then get_content to inspect the complete selected record before writing.',
     ];
+    if ($name==='get_article_titles_by_ids') {
+        $ids=$args['ids']??null;
+        if (!is_array($ids) || count($ids)<1 || count($ids)>50 || count(array_unique($ids, SORT_REGULAR))!==count($ids)) {
+            throw new InvalidArgumentException('Supply 1..50 unique article ids.');
+        }
+        foreach ($ids as $id) if (!is_int($id) || $id<1) {
+            throw new InvalidArgumentException('Article ids must be positive integers.');
+        }
+        $db??=mcpDb();
+        $placeholders=implode(',',array_fill(0,count($ids),'?'));
+        $rows=aloGraphRead($db,'SELECT id,title,slug,status FROM posts WHERE post_id=9 AND status=1 AND id IN ('.$placeholders.') ORDER BY id ASC',$ids);
+        return ['articles'=>$rows,'requested_count'=>count($ids),'matched_count'=>count($rows)];
+    }
     if ($name!=='query_alo_graph')throw new InvalidArgumentException('Unknown graph tool.');
     $v=aloGraphValidate($args);
     $db??=mcpDb();

@@ -11,9 +11,19 @@ ROOT=Path(__file__).resolve().parents[1]
 URL="https://www.alotamiratchi.ir/api/mcp/"
 
 def validate(job):
-    if not isinstance(job,dict) or job.get("tool") not in ("query_alo_graph","describe_alo_graph"):
+    if not isinstance(job, dict):
+        raise ValueError("Read-only graph job must be an object")
+    name = job.get("tool")
+    if name not in ("query_alo_graph", "describe_alo_graph", "get_article_titles_by_ids"):
         raise ValueError("Only read-only graph tools are allowed")
     args=job.get("arguments",{})
+    if name == "get_article_titles_by_ids":
+        ids = args.get("ids") if isinstance(args, dict) else None
+        if (not isinstance(args, dict) or set(args) != {"ids"} or not isinstance(ids, list)
+                or not 1 <= len(ids) <= 50 or any(type(i) is not int or i < 1 for i in ids)
+                or len(set(ids)) != len(ids)):
+            raise ValueError("Only 1-50 unique positive article ids are allowed")
+        return {"name":name,"arguments":{"ids":ids}}
     if not isinstance(args,dict) or set(args)-{"type","query","limit","include_drafts"}:
         raise ValueError("Invalid public graph arguments")
     if "include_drafts" in args and args["include_drafts"] is not False:
