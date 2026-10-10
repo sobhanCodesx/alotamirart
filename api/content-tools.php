@@ -66,6 +66,55 @@ function aloContentValidate(PDO $db,array $model,array $args,bool $create): arra
     aloContentRelation($db,$model,$result);
     return $result;
 }
+
+/**
+ * PlayNexus-style remote media: retrieve the image on the server rather than
+ * forwarding base64 inside JSON-RPC. Only allow Wikimedia Commons media URLs.
+ */
+function aloContentRemoteImage(string $url): string {
+    $p = parse_url($url);
+    if (strlen($url) > 1000 || !is_array($p)
+        || ($p['scheme'] ?? '') !== 'https'
+        || strtolower($p['host'] ?? '') !== 'upload.wikimedia.org'
+        || !str_starts_with($p['path'] ?? '', '/wikipedia/commons/')
+        || isset($p['user']) || isset($p['pass']) || isset($p['port'])
+        || isset($p['query']) || isset($p['fragment'])) {
+        throw new InvalidArgumentException('Only direct HTTPS Wikimedia Commons image URLs are accepted.');
+    }
+    $max=2500000;
+    if (function_exists('curl_init')) {
+        $ch=curl_init($url);
+        if ($ch===false) throw new RuntimeException('Image download unavailable.');
+        $binary='';
+        curl_setopt_array($ch,[
+            CURLOPT_FOLLOWLOCATION=>false,
+            CURLOPT_TIMEOUT=>25,
+            CURLOPT_CONNECTTIMEOUT=>8,
+            CURLOPT_SSL_VERIFYPEER=>true,
+            CURLOPT_SSL_VERIFYHOST=>2,
+            CURLOPT_USERAGENT=>'AloTamiratchi-MCP/1.0',
+            CURLOPT_WRITEFUNCTION=>static function($handle,string $chunk) use (&$binary,$max): int {
+                if (strlen($binary)+strlen($chunk)>$max) return 0;
+                $binary.=$chunk;
+                return strlen($chunk);
+            },
+        ]);
+        $ok=curl_exec($ch);
+        $http=(int)curl_getinfo($ch,CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($ok===false || $http!==200) throw new RuntimeException('Featured image download failed (HTTP '.$http.').');
+    } else {
+        if (!filter_var(ini_get('allow_url_fopen'), FILTER_VALIDATE_BOOLEAN)) throw new RuntimeException('PHP cURL or allow_url_fopen is required for URL images.');
+        $ctx=stream_context_create(['http'=>['timeout'=>20,'follow_location'=>0,'ignore_errors'=>true,
+            'header'=>"User-Agent: AloTamiratchi-MCP/1.0\r\nAccept: image/*\r\n"]]);
+        $binary=@file_get_contents($url,false,$ctx,0,$max+1);
+        $status=$http_response_header[0]??'';
+        if (!is_string($binary) || !preg_match('~^HTTP/\S+\s+200(?:\s|$)~',$status)) throw new RuntimeException('Featured image download failed.');
+    }
+    if (strlen($binary)<24 || strlen($binary)>$max) throw new InvalidArgumentException('Image size must be 24 bytes to 2.5 MB.');
+    return $binary;
+}
+
 function aloContentImage(array $args,string $table): ?string {
     $image=$args['image_base64'] ?? null;
     if ($image===null) return null;
