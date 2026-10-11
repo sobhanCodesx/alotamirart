@@ -29,6 +29,7 @@ $authorProfile = !empty($user['id']) && !empty($user['user_name'])
 <?php endif; ?>
 <?php require BASE_PATH.'/them/app/layout/heading.php'; ?>
 <link rel="stylesheet" href="<?= assets('assets/css/lalezar-articles.css') ?>?v=1">
+<link rel="stylesheet" href="<?= assets('assets/css/article-heading-colors.css') ?>?v=1">
 </head>
 <body class="detail-page detail-page--article<?= $contactPhone!==''?' detail-page--has-contact':'' ?>">
 <?php require BASE_PATH.'/them/app/layout/header.php'; ?>
