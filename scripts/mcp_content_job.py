@@ -78,7 +78,35 @@ def media_args(request):
     sources=[key for key in ("image_url","image_base64") if request.get(key)]
     if len(sources)>1:
         raise ValueError("Only one featured image source is permitted")
-    return {sources[0]:request[sources[0]]} if sources else {}
+    if not sources:
+        raise ValueError("A unique, topic-relevant featured image is required")
+    if sources[0] == "image_url":
+        # Optimize downloaded artwork before sending it to the CMS.
+        import base64
+        from io import BytesIO
+        from PIL import Image, ImageOps
+        req = urllib.request.Request(request["image_url"], headers={"User-Agent": "AloTamiratchi-ImageOptimizer/1.0"})
+        with urllib.request.urlopen(req, timeout=30) as response:
+            raw = response.read(8 * 1024 * 1024 + 1)
+        if len(raw) > 8 * 1024 * 1024:
+            raise ValueError("Source image exceeds the 8 MB safety limit")
+        im = Image.open(BytesIO(raw))
+        im = ImageOps.exif_transpose(im).convert("RGB")
+        for width in (1100, 960, 840, 720, 600, 480):
+            height = max(1, round(im.height * width / im.width))
+            scaled = im.resize((width, height), Image.Resampling.LANCZOS)
+            for quality in (76, 65, 55, 45, 35, 25, 15):
+                out = BytesIO()
+                scaled.save(out, "WEBP", quality=quality, method=6)
+                if len(out.getvalue()) <= 30720:
+                    print("FEATURED_IMAGE_OPTIMIZED_BYTES", len(out.getvalue()))
+                    return {"image_base64": base64.b64encode(out.getvalue()).decode("ascii")}
+        raise ValueError("Cannot optimize featured image to 30 KB")
+    if sources[0] == "image_base64":
+        import base64
+        if len(base64.b64decode(request["image_base64"], validate=True)) > 30720:
+            raise ValueError("Featured image exceeds 30 KB")
+    return {sources[0]:request[sources[0]]}
 
 
 
