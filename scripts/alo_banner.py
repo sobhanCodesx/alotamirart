@@ -157,11 +157,13 @@ def make_refrigerator_topic_banner(spec):
     from io import BytesIO
     import base64
     topic = spec.get("topic")
-    if topic not in ("water-leak", "compressor", "error-codes"):
+    if topic not in ("water-leak", "compressor", "error-codes", "airflow", "washing-drain"):
         raise ValueError("Unknown refrigerator illustration topic")
     colors = {"water-leak": ((9, 48, 91), (26, 166, 197)),
               "compressor": ((37, 41, 73), (243, 153, 56)),
-              "error-codes": ((28, 52, 77), (93, 198, 139))}
+              "error-codes": ((28, 52, 77), (93, 198, 139)),
+              "airflow": ((12, 66, 91), (109, 221, 232)),
+              "washing-drain": ((52, 45, 92), (136, 202, 255))}
     bg, accent = colors[topic]
     im = Image.new("RGB", (1120, 588), bg)
     d = ImageDraw.Draw(im)
@@ -177,7 +179,9 @@ def make_refrigerator_topic_banner(spec):
     lines = {
         "water-leak": ("آب کف یخچال", "جمع می‌شود؟", "۸ علت نشتی و راهکار"),
         "compressor": ("یخچال یکسره", "کار می‌کند؟", "عیب‌یابی کمپرسور"),
-        "error-codes": ("ارورهای یخچال", "التو (التتو)", "کدهای خطای 8410 و 8420")
+        "error-codes": ("ارورهای یخچال", "التو (التتو)", "کدهای خطای 8410 و 8420"),
+        "airflow": ("فریزر سرد است", "یخچال گرم؟", "بررسی فن و گردش هوا"),
+        "washing-drain": ("آب لباسشویی", "تخلیه نمی‌شود؟", "بررسی پمپ و فیلتر")
     }[topic]
     rtl(lines[0], 740, 145, 68, (255,255,255))
     rtl(lines[1], 740, 242, 65, accent)
@@ -198,6 +202,15 @@ def make_refrigerator_topic_banner(spec):
         d.ellipse((909,397,976,464), outline=accent, width=7)
         d.line((942,376,942,340), fill=accent, width=9)
         d.line((857,427,827,427), fill=accent, width=9)
+    elif topic == "airflow":
+        for y in (360,405,450):
+            d.arc((840,y-35,1038,y+35),180,345,fill=accent,width=9)
+        d.ellipse((910,115,988,193),outline=accent,width=9)
+        d.line((950,120,950,190),fill=accent,width=5)
+    elif topic == "washing-drain":
+        d.ellipse((848,332,1030,502),outline=accent,width=14)
+        d.arc((860,355,1015,490),20,170,fill=accent,width=12)
+        d.line((910,480,910,530),fill=accent,width=8)
     else:
         d.rounded_rectangle((852, 111, 1030, 234), radius=12, fill=(23,48,64))
         d.text((875,137), "F1 E2", fill=accent, font=ImageFont.truetype(str(fbold), 39))
