@@ -1,0 +1,6 @@
+/* All published article headings, including previously saved rich-text content. */
+.detail-page--article .detail-title,
+.detail-page--article .article-content :is(h1,h2,h3,h4,h5,h6),
+.detail-page--article .article-content :is(h1,h2,h3,h4,h5,h6) * {
+  color: #123b86 !important;
+}
