@@ -28,6 +28,7 @@ $authorProfile = !empty($user['id']) && !empty($user['user_name'])
 <?php if(!empty($post['img'])): ?><meta property="og:image" content="<?= htmlspecialchars(assets($post['img']),ENT_QUOTES,'UTF-8') ?>"><?php endif; ?>
 <?php endif; ?>
 <?php require BASE_PATH.'/them/app/layout/heading.php'; ?>
+<link rel="stylesheet" href="<?= assets('assets/css/lalezar-articles.css') ?>?v=1">
 </head>
 <body class="detail-page detail-page--article<?= $contactPhone!==''?' detail-page--has-contact':'' ?>">
 <?php require BASE_PATH.'/them/app/layout/header.php'; ?>
