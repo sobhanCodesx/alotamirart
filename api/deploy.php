@@ -23,7 +23,7 @@ function deployAllowPath(string $path): bool {
     if (!preg_match('~^(api|app|bootstrap|classes|database|public|reqires|router|them|assets|css|js|images|img|fonts)/[a-zA-Z0-9_./-]+$~D', $path)) return false;
     if (preg_match('~(^|/)(uploads?|storage|cache|logs?|vendor|node_modules|backups?|secrets?)(/|$)~i', $path)) return false;
     if (preg_match('~(^|/)(database\.php|\.env|error_log|config\.php)$~i', $path)) return false;
-    if (!preg_match('~\.(php|css|js|json|html|htm|txt|svg|png|jpg|jpeg|webp|ico|woff2?)$~i', $path)) return false;
+    if (!preg_match('~\.(php|css|js|json|html|htm|txt|svg|png|jpg|jpeg|webp|ico|woff2?|ttf|otf)$~i', $path)) return false;
     return true;
 }
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') deployReply(405,'error','POST required');
