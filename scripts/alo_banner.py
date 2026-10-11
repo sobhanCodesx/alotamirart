@@ -157,14 +157,15 @@ def make_refrigerator_topic_banner(spec):
     from io import BytesIO
     import base64
     topic = spec.get("topic")
-    if topic not in ("water-leak", "compressor", "error-codes", "airflow", "washing-drain", "washing-buying"):
+    if topic not in ("water-leak", "compressor", "error-codes", "airflow", "washing-drain", "washing-buying", "fridge-noise"):
         raise ValueError("Unknown refrigerator illustration topic")
     colors = {"water-leak": ((9, 48, 91), (26, 166, 197)),
               "compressor": ((37, 41, 73), (243, 153, 56)),
               "error-codes": ((28, 52, 77), (93, 198, 139)),
               "airflow": ((12, 66, 91), (109, 221, 232)),
               "washing-drain": ((52, 45, 92), (136, 202, 255)),
-              "washing-buying": ((22, 58, 77), (255, 196, 87))}
+              "washing-buying": ((22, 58, 77), (255, 196, 87)),
+              "fridge-noise": ((27, 38, 76), (255, 177, 69))}
     bg, accent = colors[topic]
     im = Image.new("RGB", (1120, 588), bg)
     d = ImageDraw.Draw(im)
@@ -183,7 +184,8 @@ def make_refrigerator_topic_banner(spec):
         "error-codes": ("ارورهای یخچال", "التو (التتو)", "کدهای خطای 8410 و 8420"),
         "airflow": ("فریزر سرد است", "یخچال گرم؟", "بررسی فن و گردش هوا"),
         "washing-drain": ("آب لباسشویی", "تخلیه نمی‌شود؟", "بررسی پمپ و فیلتر"),
-        "washing-buying": ("راهنمای خرید", "ماشین لباسشویی", "ظرفیت، موتور و مصرف انرژی")
+        "washing-buying": ("راهنمای خرید", "ماشین لباسشویی", "ظرفیت، موتور و مصرف انرژی"),
+        "fridge-noise": ("صدای تق‌تق", "یا وزوز یخچال؟", "تشخیص صدای طبیعی و خرابی")
     }[topic]
     rtl(lines[0], 740, 145, 68, (255,255,255))
     rtl(lines[1], 740, 242, 65, accent)
