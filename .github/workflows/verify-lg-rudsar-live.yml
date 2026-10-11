@@ -1,0 +1,40 @@
+name: Verify published LG Rudsar article live
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-lg-rudsar-live.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Check live HTML, internal links, canonical and featured WebP image
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from urllib.request import Request, urlopen
+          import re
+          base='https://alotamiratchi.ir'
+          url=base+'/post/493/lg-refrigerator-repair-rudsar-guide-2026'
+          def fetch(uri):
+              req=Request(uri,headers={'User-Agent':'AloTamiratchi-Public-Article-Verification/1.0'})
+              with urlopen(req,timeout=35) as r:return r.status, r.url, r.read()
+          status, final, data=fetch(url)
+          html=data.decode('utf-8','replace')
+          print('POST_STATUS',status,'FINAL_URL',final,'HTML_BYTES',len(data))
+          assert status==200 and 'alotamiratchi.ir/post/493' in final
+          for needle in ('تعمیرکار یخچال ال جی در رودسر','tekanino.ir/refrigerator','alotamiratchi.ir/post/491','alotamiratchi.ir/post/490'):
+              assert needle in html,'article missing expected topic or link: '+needle
+          assert 'rel="canonical"' in html
+          assert 'https://www.alotamiratchi.ir/' not in html
+          image='them/admin/dist/img/img-f781d083bf3467ad4f748d86a65f84bc.webp'
+          assert image in html,'featured image missing from HTML'
+          status_img, url_img, img=fetch(base+'/'+image)
+          print('IMAGE_STATUS',status_img,'IMAGE_BYTES',len(img),'IMAGE_URL',url_img)
+          assert status_img==200 and len(img)<=30720 and img[:4]==b'RIFF' and img[8:12]==b'WEBP'
+          print('ARTICLE_493_LIVE_VERIFIED_OK')
+          PY
