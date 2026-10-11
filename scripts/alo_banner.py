@@ -10,6 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def make_banner(spec):
     if not isinstance(spec, dict):
         raise ValueError("banner must be an object")
+    if spec.get("template") == "refrigerator-topic":
+        return make_refrigerator_topic_banner(spec)
     if spec.get("template") == "lg-fridge-rudsar":
         return make_lg_fridge_rudsar_banner(spec)
     if spec.get("template") != "refrigerator-gasket":
@@ -148,3 +150,65 @@ def make_lg_fridge_rudsar_banner(spec):
             if 6000 <= len(raw) <= budget:
                 return base64.b64encode(raw).decode("ascii"), len(raw)
     raise RuntimeError("LG Rudsar editorial image exceeded the byte budget")
+
+def make_refrigerator_topic_banner(spec):
+    """Three original topic-specific illustrations, compressed below 30 KiB."""
+    from PIL import Image, ImageDraw, ImageFont
+    from io import BytesIO
+    import base64
+    topic = spec.get("topic")
+    if topic not in ("water-leak", "compressor", "error-codes"):
+        raise ValueError("Unknown refrigerator illustration topic")
+    colors = {"water-leak": ((9, 48, 91), (26, 166, 197)),
+              "compressor": ((37, 41, 73), (243, 153, 56)),
+              "error-codes": ((28, 52, 77), (93, 198, 139))}
+    bg, accent = colors[topic]
+    im = Image.new("RGB", (1120, 588), bg)
+    d = ImageDraw.Draw(im)
+    fbase = ROOT / "public/src/fonts"
+    fbold = fbase / "Vazir-Black.ttf"
+    if not fbold.is_file():
+        fbold = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
+    def rtl(txt, x, y, sz, color):
+        d.text((x, y), txt, font=ImageFont.truetype(str(fbold), sz),
+               fill=color, direction="rtl", anchor="ra")
+    d.rounded_rectangle((35, 35, 742, 100), radius=18, fill=accent)
+    rtl("راهنمای تخصصی یخچال", 707, 49, 30, bg)
+    lines = {
+        "water-leak": ("آب کف یخچال", "جمع می‌شود؟", "۸ علت نشتی و راهکار"),
+        "compressor": ("یخچال یکسره", "کار می‌کند؟", "عیب‌یابی کمپرسور"),
+        "error-codes": ("ارورهای یخچال", "التو (التتو)", "کدهای خطای 8410 و 8420")
+    }[topic]
+    rtl(lines[0], 740, 145, 68, (255,255,255))
+    rtl(lines[1], 740, 242, 65, accent)
+    rtl(lines[2], 740, 363, 34, (224,239,248))
+    d.rounded_rectangle((35, 493, 741, 558), radius=15, fill=(237,246,252))
+    rtl("الو تعمیراتچی", 708, 509, 31, bg)
+    d.rounded_rectangle((801, 66, 1078, 523), radius=24, fill=(222,235,244), outline=accent, width=7)
+    d.line((810, 294, 1068, 294), fill=(120,150,171), width=7)
+    d.rounded_rectangle((824, 90, 1056, 273), radius=12, fill=(244,248,250))
+    d.rounded_rectangle((824, 313, 1056, 500), radius=12, fill=(239,247,249))
+    if topic == "water-leak":
+        d.line((840, 461, 1025, 461), fill=accent, width=9)
+        for x,y in ((880,486),(946,516),(1010,486)):
+            d.ellipse((x-11,y-11,x+11,y+11), fill=accent)
+        d.arc((827,442,1064,566), 12, 172, fill=accent, width=10)
+    elif topic == "compressor":
+        d.rounded_rectangle((857, 376, 1027, 479), radius=32, fill=(58,72,90), outline=accent, width=8)
+        d.ellipse((909,397,976,464), outline=accent, width=7)
+        d.line((942,376,942,340), fill=accent, width=9)
+        d.line((857,427,827,427), fill=accent, width=9)
+    else:
+        d.rounded_rectangle((852, 111, 1030, 234), radius=12, fill=(23,48,64))
+        d.text((875,137), "F1 E2", fill=accent, font=ImageFont.truetype(str(fbold), 39))
+        d.text((868,180), "H1 C2", fill=(255,255,255), font=ImageFont.truetype(str(fbold), 34))
+        d.line((864,369,1022,369), fill=accent, width=9)
+        d.line((864,403,990,403), fill=accent, width=9)
+    for width in (1120, 1000, 880, 760, 640):
+        scaled=im.resize((width,round(588*width/1120)),Image.Resampling.LANCZOS)
+        for quality in (76,65,54,43,32,22):
+            out=BytesIO()
+            scaled.save(out,"WEBP",quality=quality,method=6)
+            if len(out.getvalue())<=30720:
+                return base64.b64encode(out.getvalue()).decode("ascii"),len(out.getvalue())
+    raise RuntimeError("Unable to compress banner to 30 KiB")
