@@ -1,0 +1,12 @@
+{
+  "type": "article",
+  "action": "update",
+  "id": 495,
+  "fields": {
+    "title": "چرا یخچال یکسره کار می‌کند و اتومات نمی‌کند؟ ۸ علت و راهکار"
+  },
+  "banner": {
+    "template": "refrigerator-topic",
+    "topic": "compressor"
+  }
+}
