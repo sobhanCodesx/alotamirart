@@ -25,6 +25,20 @@ function minifier($code)
     <link rel="icon" type="image/x-icon" href="<?= assets('public/src/img/logo.png') ?>">
     <title><?= $err == true ? $post['title'] : 'پست مورد نظر پیدا نشد' ?> - <?= $dataSeo['title'] ?? '' ?></title>
     
+    <?php if (!empty($post['id']) && (int)$post['id'] === 498): ?>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lalezar&display=swap" rel="stylesheet">
+    <style>
+        /* Only article #498: keep the rest of the website unchanged. */
+        .article-main .article-title,
+        .article-main .article-content,
+        .article-main .article-content * {
+            font-family: 'Lalezar', 'Vazir', sans-serif !important;
+            font-weight: 400;
+        }
+    </style>
+    <?php endif; ?>
     <style>
         /* ===== استایل‌های جدید صفحه مقاله ===== */
         
