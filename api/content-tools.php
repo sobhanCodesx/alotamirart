@@ -155,7 +155,7 @@ function aloContentTools(): array {
         ['name'=>'list_content','description'=>'List records of the selected content type, including drafts.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'limit'=>['type'=>'integer','minimum'=>1,'maximum'=>50]],'required'=>['type']]],
         ['name'=>'find_content','description'=>'Find exact article slug to prevent duplicate publication.', 'inputSchema'=>['type'=>'object','properties'=>['type'=>['type'=>'string','enum'=>['article','brand_article']],'slug'=>['type'=>'string','maxLength'=>220]],'required'=>['type','slug']]],
         ['name'=>'get_content','description'=>'Get all existing fields of a record.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'id'=>$id],'required'=>['type','id']]],
-        ['name'=>'create_content','description'=>'Create content using all supported form fields; status-bearing records become unpublished drafts; image_base64 can attach JPEG/PNG/WebP. Non-status records require confirm_public=true.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'fields'=>$fields,'image_base64'=>['type'=>'string','description'=>'Optional base64 encoded image data, without data URL prefix'],'image_url'=>['type'=>'string','description'=>'Vetted Wikimedia Commons image URL; stored as local featured image'],'confirm_public'=>['type'=>'boolean']],'required'=>['type','fields']]],
+        ['name'=>'create_content','description'=>'Create content using all supported form fields; status-bearing records become unpublished drafts; image_base64 can attach JPEG/PNG/WebP. Non-status records require confirm_public=true.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'fields'=>$fields,'image_base64'=>['type'=>'string','description'=>'Optional base64 encoded image data, without data URL prefix'],'image_url'=>['type'=>'string','description'=>'Vetted Wikimedia Commons image URL; stored as local featured image'],'confirm_public'=>['type'=>'boolean'],'author_username'=>['type'=>'string','description'=>'Exact existing site username; resolved server-side and verified before creating a post']],'required'=>['type','fields']]],
         ['name'=>'update_content','description'=>'Update existing content fields; published records require confirm_public=true.','inputSchema'=>['type'=>'object','properties'=>['type'=>$type,'id'=>$id,'fields'=>$fields,'image_base64'=>['type'=>'string'],'image_url'=>['type'=>'string'],'confirm_public'=>['type'=>'boolean']],'required'=>['type','id','fields']]],
         ['name'=>'set_content_published','description'=>'Explicitly set publication state for an article or brand article; requires enable flag for publishing.','inputSchema'=>['type'=>'object','properties'=>['type'=>['type'=>'string','enum'=>['article','brand_article']],'id'=>$id,'published'=>['type'=>'boolean'],'confirm'=>['type'=>'boolean','const'=>true]],'required'=>['type','id','published','confirm']]],
     ];
@@ -209,11 +209,21 @@ function aloContentExecute(string $name,array $args): array {
         if ($create && $model['image'] && $table!=='posts' && !$image) throw new InvalidArgumentException('Brand and brand article creation requires an image.');
         if ($create) {
             if (in_array($table,['posts','post_brand'],true)) {
-                $author=filter_var(getenv('MCP_AUTHOR_USER_ID'),FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
-                if (!$author) throw new RuntimeException('MCP_AUTHOR_USER_ID is not configured.');
-                $check=$db->prepare('SELECT id FROM users WHERE id=? LIMIT 1');
-                $check->execute([$author]);
-                if (!$check->fetchColumn()) throw new InvalidArgumentException('Configured author missing.');
+                $requestedUsername=$args['author_username']??null;
+                if ($requestedUsername!==null) {
+                    if (!is_string($requestedUsername) || !preg_match('/^[A-Za-z0-9_]{3,64}$/D',$requestedUsername)) throw new InvalidArgumentException('Invalid author username.');
+                    $check=$db->prepare('SELECT id FROM users WHERE LOWER(username)=LOWER(?) LIMIT 2');
+                    $check->execute([$requestedUsername]);
+                    $matches=$check->fetchAll(PDO::FETCH_COLUMN);
+                    if (count($matches)!==1) throw new InvalidArgumentException('Author username not found or ambiguous.');
+                    $author=(int)$matches[0];
+                } else {
+                    $author=filter_var(getenv('MCP_AUTHOR_USER_ID'),FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+                    if (!$author) throw new RuntimeException('MCP_AUTHOR_USER_ID is not configured.');
+                    $check=$db->prepare('SELECT id FROM users WHERE id=? LIMIT 1');
+                    $check->execute([$author]);
+                    if (!$check->fetchColumn()) throw new InvalidArgumentException('Configured author missing.');
+                }
                 $data['user_id']=$author;
                 $data['status']=0;
             }
