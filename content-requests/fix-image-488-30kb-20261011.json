@@ -1,0 +1,12 @@
+{
+  "type": "article",
+  "action": "update",
+  "id": 488,
+  "fields": {
+    "title": "چرا یخچال خنک نمی‌کند ولی فریزر سرد است؟ ۹ علت و راهکار"
+  },
+  "banner": {
+    "template": "refrigerator-topic",
+    "topic": "airflow"
+  }
+}
