@@ -25,7 +25,7 @@ function minifier($code)
     <link rel="icon" type="image/x-icon" href="<?= assets('public/src/img/logo.png') ?>">
     <title><?= $err == true ? $post['title'] : 'پست مورد نظر پیدا نشد' ?> - <?= $dataSeo['title'] ?? '' ?></title>
     
-    <?php if (!empty($post['id']) && (int)$post['id'] === 498): ?>
+    <?php if (!empty($post['id'])): ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lalezar&display=swap" rel="stylesheet">
@@ -373,6 +373,15 @@ function minifier($code)
         ::-webkit-scrollbar-thumb:hover {
             background: #0a58ca;
         }
+    </style>
+    <style>
+      /* Final override: all article body text, including nested elements and tables. */
+      body .article-main .article-content,
+      body .article-main .article-content :is(p,span,div,a,strong,b,em,li,ul,ol,h1,h2,h3,h4,h5,h6,table,thead,tbody,tr,th,td,blockquote,small),
+      body .article-main .article-title {
+        font-family: 'Lalezar', 'Vazir', sans-serif !important;
+        font-weight: 400 !important;
+      }
     </style>
 </head>
 <body>
