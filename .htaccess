@@ -29,3 +29,24 @@ RewriteRule ^ - [L]
 RewriteRule ^ index.php [QSA,L]
 
 ErrorDocument 404 /404.php
+
+# Long-lived browser caching for versioned static assets.
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 month"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+</IfModule>
+<IfModule mod_headers.c>
+    <FilesMatch "\\.(?:css|js|png|jpe?g|webp|svg|ico|woff2?|ttf|otf)$">
+        Header set Cache-Control "public, max-age=2592000"
+    </FilesMatch>
+</IfModule>
