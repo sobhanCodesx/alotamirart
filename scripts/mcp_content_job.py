@@ -165,6 +165,8 @@ def publish(path):
     if existing:
         article_id = int(existing["id"])
         print("Reusing existing matching article:", article_id)
+        if request.get("author_username"):
+            raise RuntimeError("Existing slug requires explicit author verification; refusing to reuse it")
         if int(existing.get("status") or 0) == 1:
             print("ALREADY_PUBLISHED", "https://alotamiratchi.ir/post/" + str(article_id) + "/" + slug)
             return
@@ -174,7 +176,7 @@ def publish(path):
                 "fields": {"title": existing["title"]}, **media
             })["record"]
     else:
-        created = create_content_with_optional_field_fallback("article", fields, media)
+        created = create_content_with_optional_field_fallback("article", fields, media, **({"author_username": request["author_username"]} if request.get("author_username") else {}))
         existing = created["record"]
         article_id = int(existing["id"])
         print("DRAFT_CREATED", article_id)
@@ -258,7 +260,7 @@ def manage_content(path):
             slug=fields.get("slug")
             existing=(tool("find_content",{"type":"article","slug":slug})["record"]
                       if isinstance(slug,str) and slug else None)
-            item=existing or create_content_with_optional_field_fallback("article", fields, media)["record"]
+            item=existing or create_content_with_optional_field_fallback("article", fields, media, **({"author_username": request["author_username"]} if request.get("author_username") else {}))["record"]
             if action=="draft":
                 print("ARTICLE_DRAFT_ID",item["id"])
                 return
