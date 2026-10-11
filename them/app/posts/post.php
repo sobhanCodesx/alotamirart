@@ -27,6 +27,23 @@ $authorProfile = !empty($user['id']) && !empty($user['user_name'])
 <meta property="og:title" content="<?= htmlspecialchars($title,ENT_QUOTES,'UTF-8') ?>">
 <?php if(!empty($post['img'])): ?><meta property="og:image" content="<?= htmlspecialchars(assets($post['img']),ENT_QUOTES,'UTF-8') ?>"><?php endif; ?>
 <?php endif; ?>
+<?php if ($found):
+$articleSchema = [
+  '@context' => 'https://schema.org',
+  '@type' => 'BlogPosting',
+  'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => 'https://alotamiratchi.ir/post/'.(int)$post['id']],
+  'headline' => $title,
+  'author' => ['@type' => 'Person', 'name' => $authorName],
+  'publisher' => ['@type' => 'Organization', 'name' => 'الو تعمیراتچی', 'url' => 'https://alotamiratchi.ir/'],
+];
+if ($description !== '') $articleSchema['description'] = $description;
+if (!empty($post['img'])) $articleSchema['image'] = [assets($post['img'])];
+if (!empty($post['created_at']) && strtotime((string)$post['created_at']) !== false) {
+  $articleSchema['datePublished'] = date(DATE_ATOM, strtotime((string)$post['created_at']));
+}
+?>
+<script type="application/ld+json"><?= json_encode($articleSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE) ?></script>
+<?php endif; ?>
 <?php require BASE_PATH.'/them/app/layout/heading.php'; ?>
 <link rel="stylesheet" href="<?= assets('assets/css/lalezar-articles.css') ?>?v=1">
 <link rel="stylesheet" href="<?= assets('assets/css/article-heading-colors.css') ?>?v=1">
