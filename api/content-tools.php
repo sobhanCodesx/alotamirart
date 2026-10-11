@@ -212,7 +212,7 @@ function aloContentExecute(string $name,array $args): array {
                 $requestedUsername=$args['author_username']??null;
                 if ($requestedUsername!==null) {
                     if (!is_string($requestedUsername) || !preg_match('/^[A-Za-z0-9_]{3,64}$/D',$requestedUsername)) throw new InvalidArgumentException('Invalid author username.');
-                    $check=$db->prepare('SELECT id FROM users WHERE LOWER(username)=LOWER(?) LIMIT 2');
+                    $check=$db->prepare('SELECT id FROM users WHERE LOWER(user_name)=LOWER(?) LIMIT 2');
                     $check->execute([$requestedUsername]);
                     $matches=$check->fetchAll(PDO::FETCH_COLUMN);
                     if (count($matches)!==1) throw new InvalidArgumentException('Author username not found or ambiguous.');
