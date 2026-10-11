@@ -26,6 +26,16 @@ function minifier($code)
     <title><?= $err == true ? $post['title'] : 'پست مورد نظر پیدا نشد' ?> - <?= $dataSeo['title'] ?? '' ?></title>
     
     <?php if (!empty($post['id'])): ?>
+    <style>
+      /* Independent font source when Google Fonts is blocked. */
+      @font-face {
+        font-family: 'LalezarLocalFallback';
+        src: url('https://cdn.jsdelivr.net/npm/@fontsource/lalezar@5.2.6/files/lalezar-arabic-400-normal.woff2') format('woff2');
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+      }
+    </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lalezar&display=swap" rel="stylesheet">
@@ -34,7 +44,7 @@ function minifier($code)
         .article-main .article-title,
         .article-main .article-content,
         .article-main .article-content * {
-            font-family: 'Lalezar', 'Vazir', sans-serif !important;
+            font-family: 'Lalezar', 'LalezarLocalFallback', 'Vazir', sans-serif !important;
             font-weight: 400;
         }
     </style>
@@ -379,7 +389,7 @@ function minifier($code)
       body .article-main .article-content,
       body .article-main .article-content :is(p,span,div,a,strong,b,em,li,ul,ol,h1,h2,h3,h4,h5,h6,table,thead,tbody,tr,th,td,blockquote,small),
       body .article-main .article-title {
-        font-family: 'Lalezar', 'Vazir', sans-serif !important;
+        font-family: 'Lalezar', 'LalezarLocalFallback', 'Vazir', sans-serif !important;
         font-weight: 400 !important;
       }
     </style>
