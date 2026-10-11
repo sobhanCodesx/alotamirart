@@ -1,0 +1,16 @@
+/* Lalezar for article body; self-hosted font can replace the Google Fonts source later. */
+@import url('https://fonts.googleapis.com/css2?family=Lalezar&display=swap');
+.detail-page--article .article-content,
+.detail-page--article .article-content p,
+.detail-page--article .article-content li,
+.detail-page--article .article-content blockquote,
+.detail-page--article .article-content td,
+.detail-page--article .article-content th,
+.detail-page--article .article-content h2,
+.detail-page--article .article-content h3,
+.detail-page--article .article-content h4,
+.detail-page--article .article-content span,
+.detail-page--article .article-content strong,
+.detail-page--article .article-content a {
+  font-family: 'Lalezar', sans-serif !important;
+}
