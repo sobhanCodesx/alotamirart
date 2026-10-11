@@ -1,1 +1,0 @@
-Diagnostic write permission check. No publication requested.
