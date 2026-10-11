@@ -10,6 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def make_banner(spec):
     if not isinstance(spec, dict):
         raise ValueError("banner must be an object")
+    if spec.get("template") == "lg-fridge-rudsar":
+        return make_lg_fridge_rudsar_banner(spec)
     if spec.get("template") != "refrigerator-gasket":
         raise ValueError("Unsupported editorial banner template")
     variant = spec.get("variant", "steps")
@@ -91,3 +93,58 @@ def make_banner(spec):
     if best is None:
         raise RuntimeError("Could not produce a banner under the requested byte limit")
     return base64.b64encode(best).decode("ascii"), len(best)
+
+
+def make_lg_fridge_rudsar_banner(spec):
+    """Distinct illustrated LG refrigerator service feature image, <=30 KiB."""
+    from PIL import Image, ImageDraw, ImageFont
+    width, height = 1120, 588
+    im = Image.new("RGB", (width, height), (15, 43, 78))
+    draw = ImageDraw.Draw(im)
+    draw.polygon([(650, 0), (1120, 0), (1120, 588), (835, 588)], fill=(20, 91, 132))
+    for y in range(44, 588, 64):
+        draw.line((14, y, 750, y), fill=(26, 62, 93), width=2)
+    draw.rounded_rectangle((38, 34, 460, 89), radius=16, fill=(235, 184, 78))
+    fbase = ROOT / "public/src/fonts"
+    fbold = fbase / "Vazir-Black.ttf"
+    fmedium = fbase / "Vazir-Medium.ttf"
+    if not fbold.exists():
+        fbold = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
+        fmedium = fbold
+    def font(sz, bold=True):
+        return ImageFont.truetype(str(fbold if bold else fmedium), sz)
+    def rtl(text, x, y, sz, color, bold=True):
+        draw.text((x, y), text, font=font(sz, bold), direction="rtl", anchor="ra", fill=color)
+    rtl("راهنمای تخصصی خدمات یخچال", 436, 45, 25, (26, 42, 67))
+    rtl("تعمیرکار یخچال", 734, 147, 63, (255, 255, 255))
+    rtl("ال‌جی در رودسر", 734, 252, 67, (255, 201, 105))
+    rtl("عیب‌یابی  |  انتخاب متخصص", 728, 382, 32, (218, 243, 250), False)
+    draw.rounded_rectangle((38, 492, 737, 558), radius=20, fill=(237, 247, 250))
+    rtl("الو تعمیراتچی", 707, 508, 35, (11, 60, 107))
+    draw.text((57, 510), "alotamiratchi.ir", fill=(12, 89, 132), font=font(27))
+    # Modern refrigerator, separate side-by-side cabinets, doors and handles.
+    draw.rounded_rectangle((788, 68, 1074, 536), radius=21, fill=(225, 233, 242), outline=(99, 145, 176), width=5)
+    draw.rounded_rectangle((804, 86, 924, 515), radius=10, fill=(245, 249, 249), outline=(130, 166, 191), width=4)
+    draw.rounded_rectangle((935, 86, 1057, 515), radius=10, fill=(230, 240, 248), outline=(130, 166, 191), width=4)
+    draw.rounded_rectangle((901, 161, 910, 289), radius=5, fill=(86, 119, 152))
+    draw.rounded_rectangle((951, 161, 960, 289), radius=5, fill=(86, 119, 152))
+    draw.rounded_rectangle((963, 107, 1040, 160), radius=6, fill=(34, 70, 108))
+    draw.line((975, 122, 1028, 122), fill=(119, 219, 234), width=3)
+    draw.line((975, 138, 1015, 138), fill=(119, 219, 234), width=3)
+    # Discrete cooling icon, without using or forging the LG trademark.
+    draw.ellipse((840, 344, 892, 396), outline=(26, 142, 175), width=5)
+    draw.line((867, 350, 867, 390), fill=(26, 142, 175), width=4)
+    draw.line((847, 370, 887, 370), fill=(26, 142, 175), width=4)
+    budget = int(spec.get("max_bytes", 30720))
+    if not 20480 <= budget <= 30720:
+        raise ValueError("Banner budget must be 20-30 KiB")
+    for target_w in (1120, 1040, 960, 880):
+        scaled = im if target_w == width else im.resize(
+            (target_w, round(height * target_w / width)), Image.Resampling.LANCZOS)
+        for quality in (82, 72, 60, 48, 36, 26, 18):
+            buf = BytesIO()
+            scaled.save(buf, "WEBP", quality=quality, method=6)
+            raw = buf.getvalue()
+            if 6000 <= len(raw) <= budget:
+                return base64.b64encode(raw).decode("ascii"), len(raw)
+    raise RuntimeError("LG Rudsar editorial image exceeded the byte budget")
