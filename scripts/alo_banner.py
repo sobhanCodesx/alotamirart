@@ -157,13 +157,14 @@ def make_refrigerator_topic_banner(spec):
     from io import BytesIO
     import base64
     topic = spec.get("topic")
-    if topic not in ("water-leak", "compressor", "error-codes", "airflow", "washing-drain"):
+    if topic not in ("water-leak", "compressor", "error-codes", "airflow", "washing-drain", "washing-buying"):
         raise ValueError("Unknown refrigerator illustration topic")
     colors = {"water-leak": ((9, 48, 91), (26, 166, 197)),
               "compressor": ((37, 41, 73), (243, 153, 56)),
               "error-codes": ((28, 52, 77), (93, 198, 139)),
               "airflow": ((12, 66, 91), (109, 221, 232)),
-              "washing-drain": ((52, 45, 92), (136, 202, 255))}
+              "washing-drain": ((52, 45, 92), (136, 202, 255)),
+              "washing-buying": ((22, 58, 77), (255, 196, 87))}
     bg, accent = colors[topic]
     im = Image.new("RGB", (1120, 588), bg)
     d = ImageDraw.Draw(im)
@@ -181,7 +182,8 @@ def make_refrigerator_topic_banner(spec):
         "compressor": ("یخچال یکسره", "کار می‌کند؟", "عیب‌یابی کمپرسور"),
         "error-codes": ("ارورهای یخچال", "التو (التتو)", "کدهای خطای 8410 و 8420"),
         "airflow": ("فریزر سرد است", "یخچال گرم؟", "بررسی فن و گردش هوا"),
-        "washing-drain": ("آب لباسشویی", "تخلیه نمی‌شود؟", "بررسی پمپ و فیلتر")
+        "washing-drain": ("آب لباسشویی", "تخلیه نمی‌شود؟", "بررسی پمپ و فیلتر"),
+        "washing-buying": ("راهنمای خرید", "ماشین لباسشویی", "ظرفیت، موتور و مصرف انرژی")
     }[topic]
     rtl(lines[0], 740, 145, 68, (255,255,255))
     rtl(lines[1], 740, 242, 65, accent)
@@ -207,6 +209,12 @@ def make_refrigerator_topic_banner(spec):
             d.arc((840,y-35,1038,y+35),180,345,fill=accent,width=9)
         d.ellipse((910,115,988,193),outline=accent,width=9)
         d.line((950,120,950,190),fill=accent,width=5)
+    elif topic == "washing-buying":
+        d.ellipse((843,331,1038,510),outline=accent,width=14)
+        d.ellipse((876,365,1005,484),outline=(72,130,158),width=8)
+        d.ellipse((866,115,899,148),fill=accent)
+        d.rounded_rectangle((925,111,1030,156),radius=9,fill=(34,72,96))
+        d.text((942,118),"A++",fill=accent,font=ImageFont.truetype(str(fbold),24))
     elif topic == "washing-drain":
         d.ellipse((848,332,1030,502),outline=accent,width=14)
         d.arc((860,355,1015,490),20,170,fill=accent,width=12)
