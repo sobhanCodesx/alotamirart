@@ -113,6 +113,21 @@ def publish(path):
     if not all(isinstance(fields.get(k), str) and fields[k].strip()
                for k in ("title", "slug", "content", "description")):
         raise ValueError("Article title, slug, content and meta-description are required")
+    # Reject repeated stock photos across editorial publication requests.
+    image_url = request.get("image_url")
+    if image_url:
+        for other in sorted(path.parent.glob("*.json")):
+            if other == path:
+                continue
+            try:
+                prior = json.loads(other.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            if (prior.get("type") == "article" and
+                prior.get("action", "publish") == "publish" and
+                prior.get("image_url") == image_url):
+                raise ValueError("Duplicate featured image URL: " + other.name +
+                                 "; choose a unique relevant image for this article")
     print("Content task:", path.name, "slug:", slug)
 
     # Idempotent re-runs: publishing a draft after a disabled publish attempt
