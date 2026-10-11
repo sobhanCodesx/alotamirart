@@ -1,0 +1,12 @@
+{
+  "type": "article",
+  "action": "update",
+  "id": 489,
+  "fields": {
+    "title": "چرا ماشین لباسشویی آب را تخلیه نمی‌کند؟ ۸ علت و راهکار"
+  },
+  "banner": {
+    "template": "refrigerator-topic",
+    "topic": "washing-drain"
+  }
+}
