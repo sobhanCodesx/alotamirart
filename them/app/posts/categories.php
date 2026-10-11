@@ -8,6 +8,9 @@ $totalPages = isset($pages) ? max(1,(int)$pages) : 1;
 <title><?= htmlspecialchars($categoryTitle,ENT_QUOTES,'UTF-8') ?> | <?= htmlspecialchars(isset($dataSeo['title'])?strip_tags($dataSeo['title']):'الو تعمیراتچی',ENT_QUOTES,'UTF-8') ?></title>
 <meta name="description" content="<?= htmlspecialchars('مقالات دسته‌بندی '.$categoryTitle,ENT_QUOTES,'UTF-8') ?>">
 <meta name="robots" content="index,follow">
+<?php if(isset($item['id'])): ?>
+<link rel="canonical" href="<?= htmlspecialchars(assets('posts/categories/'.(int)$item['id'].'/'.$currentPage),ENT_QUOTES,'UTF-8') ?>">
+<?php endif; ?>
 <?php require BASE_PATH.'/them/app/layout/heading.php'; ?>
 </head><body>
 <?php require BASE_PATH.'/them/app/layout/header.php'; ?>
