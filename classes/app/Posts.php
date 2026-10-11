@@ -59,6 +59,10 @@ class Posts
             $err = true;
         }
         
+        if (!$post) {
+            http_response_code(404);
+        }
+
         $side_brand = $this->db->select("SELECT * FROM post_brand WHERE status = 1 ORDER BY created_at DESC LIMIT 0,6")->fetchAll();
         $side_post = $this->db->select("SELECT * FROM posts WHERE NOT id = ? AND status = 1 ORDER BY created_at DESC LIMIT 0,8", $id)->fetchAll();
         require_once BASE_PATH . "/them/app/posts/post.php";
