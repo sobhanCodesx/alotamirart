@@ -157,7 +157,7 @@ def make_refrigerator_topic_banner(spec):
     from io import BytesIO
     import base64
     topic = spec.get("topic")
-    if topic not in ("water-leak", "compressor", "error-codes", "airflow", "washing-drain", "washing-buying", "fridge-buying", "food-mold", "fridge-noise"):
+    if topic not in ("water-leak", "compressor", "error-codes", "airflow", "washing-drain", "washing-buying", "washing-tear", "fridge-buying", "food-mold", "fridge-noise"):
         raise ValueError("Unknown refrigerator illustration topic")
     colors = {"water-leak": ((9, 48, 91), (26, 166, 197)),
               "compressor": ((37, 41, 73), (243, 153, 56)),
@@ -165,6 +165,7 @@ def make_refrigerator_topic_banner(spec):
               "airflow": ((12, 66, 91), (109, 221, 232)),
               "washing-drain": ((52, 45, 92), (136, 202, 255)),
               "washing-buying": ((22, 58, 77), (255, 196, 87)),
+              "washing-tear": ((42, 46, 83), (246, 166, 94)),
               "fridge-buying": ((18, 43, 77), (255, 195, 65)),
               "food-mold": ((31, 58, 46), (244, 185, 76)),
               "fridge-noise": ((27, 38, 76), (255, 177, 69))}
@@ -187,6 +188,7 @@ def make_refrigerator_topic_banner(spec):
         "airflow": ("فریزر سرد است", "یخچال گرم؟", "بررسی فن و گردش هوا"),
         "washing-drain": ("آب لباسشویی", "تخلیه نمی‌شود؟", "بررسی پمپ و فیلتر"),
         "washing-buying": ("راهنمای خرید", "ماشین لباسشویی", "ظرفیت، موتور و مصرف انرژی"),
+        "washing-tear": ("چرا لباسشویی", "لباس را پاره می‌کند؟", "۸ علت و راه‌حل ایمن"),
         "fridge-buying": ("راهنمای خرید", "یخچال ۱۴۰۵", "ساید، دوقلو، ظرفیت و مصرف انرژی"),
         "food-mold": ("چرا غذا در یخچال", "کپک می‌زند؟", "۱۰ علت و راه‌های پیشگیری"),
         "fridge-noise": ("صدای تق‌تق", "یا وزوز یخچال؟", "تشخیص صدای طبیعی و خرابی")
@@ -215,6 +217,15 @@ def make_refrigerator_topic_banner(spec):
             d.arc((840,y-35,1038,y+35),180,345,fill=accent,width=9)
         d.ellipse((910,115,988,193),outline=accent,width=9)
         d.line((950,120,950,190),fill=accent,width=5)
+    elif topic == "washing-tear":
+        d.rounded_rectangle((825, 94, 1060, 515), radius=24, fill=(231,236,245), outline=(132,152,185), width=7)
+        d.ellipse((853, 180, 1032, 359), fill=(50,66,98), outline=(143,169,194), width=10)
+        d.ellipse((877, 203, 1009, 336), fill=(159,195,217))
+        d.polygon([(894,235),(924,220),(941,239),(964,220),(992,239),(975,307),(911,308)],fill=(245,174,98))
+        d.line((923,263,948,284),fill=(94,54,65),width=7)
+        d.line((947,262,922,288),fill=(94,54,65),width=7)
+        d.rounded_rectangle((855,115,1028,161),radius=9,fill=(63,81,117))
+        d.ellipse((981,126,1003,148),fill=accent)
     elif topic == "food-mold":
         # Moldy produce and storage container: purpose-built editorial artwork.
         d.rounded_rectangle((830, 340, 1055, 485), radius=18, fill=(229,241,225), outline=accent, width=6)
