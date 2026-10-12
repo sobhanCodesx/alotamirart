@@ -157,7 +157,7 @@ def make_refrigerator_topic_banner(spec):
     from io import BytesIO
     import base64
     topic = spec.get("topic")
-    if topic not in ("water-leak", "compressor", "error-codes", "airflow", "washing-drain", "washing-buying", "fridge-buying", "fridge-noise"):
+    if topic not in ("water-leak", "compressor", "error-codes", "airflow", "washing-drain", "washing-buying", "fridge-buying", "food-mold", "fridge-noise"):
         raise ValueError("Unknown refrigerator illustration topic")
     colors = {"water-leak": ((9, 48, 91), (26, 166, 197)),
               "compressor": ((37, 41, 73), (243, 153, 56)),
@@ -166,6 +166,7 @@ def make_refrigerator_topic_banner(spec):
               "washing-drain": ((52, 45, 92), (136, 202, 255)),
               "washing-buying": ((22, 58, 77), (255, 196, 87)),
               "fridge-buying": ((18, 43, 77), (255, 195, 65)),
+              "food-mold": ((31, 58, 46), (244, 185, 76)),
               "fridge-noise": ((27, 38, 76), (255, 177, 69))}
     bg, accent = colors[topic]
     im = Image.new("RGB", (1120, 588), bg)
@@ -187,6 +188,7 @@ def make_refrigerator_topic_banner(spec):
         "washing-drain": ("آب لباسشویی", "تخلیه نمی‌شود؟", "بررسی پمپ و فیلتر"),
         "washing-buying": ("راهنمای خرید", "ماشین لباسشویی", "ظرفیت، موتور و مصرف انرژی"),
         "fridge-buying": ("راهنمای خرید", "یخچال ۱۴۰۵", "ساید، دوقلو، ظرفیت و مصرف انرژی"),
+        "food-mold": ("چرا غذا در یخچال", "کپک می‌زند؟", "۱۰ علت و راه‌های پیشگیری"),
         "fridge-noise": ("صدای تق‌تق", "یا وزوز یخچال؟", "تشخیص صدای طبیعی و خرابی")
     }[topic]
     rtl(lines[0], 740, 145, 68, (255,255,255))
@@ -213,6 +215,19 @@ def make_refrigerator_topic_banner(spec):
             d.arc((840,y-35,1038,y+35),180,345,fill=accent,width=9)
         d.ellipse((910,115,988,193),outline=accent,width=9)
         d.line((950,120,950,190),fill=accent,width=5)
+    elif topic == "food-mold":
+        # Moldy produce and storage container: purpose-built editorial artwork.
+        d.rounded_rectangle((830, 340, 1055, 485), radius=18, fill=(229,241,225), outline=accent, width=6)
+        d.ellipse((850, 354, 948, 453), fill=(216,92,73), outline=(157,52,49), width=5)
+        d.ellipse((939, 367, 1024, 450), fill=(228,186,85), outline=(154,112,54), width=5)
+        for x,y,r in ((880,380,14),(909,405,18),(958,395,11),(985,424,16),(897,434,9)):
+            d.ellipse((x-r,y-r,x+r,y+r),fill=(64,122,73),outline=(32,75,51),width=3)
+        d.rounded_rectangle((841, 109, 1045, 222), radius=15, fill=(234,247,234))
+        d.ellipse((881, 136, 941, 196), fill=(216,92,73))
+        for x,y in ((896,152),(913,169),(929,149)):
+            d.ellipse((x-9,y-9,x+9,y+9), fill=(61,125,73))
+        d.line((971,147,1022,147), fill=(63,122,80), width=9)
+        d.line((971,176,1009,176), fill=(63,122,80), width=9)
     elif topic == "fridge-buying":
         # Three distinct refrigerator silhouettes: side-by-side, twin, freezer-on-top.
         d.rounded_rectangle((816, 345, 900, 480), radius=8, fill=(240,248,251), outline=accent, width=5)
