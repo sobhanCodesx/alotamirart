@@ -157,7 +157,7 @@ def make_refrigerator_topic_banner(spec):
     from io import BytesIO
     import base64
     topic = spec.get("topic")
-    if topic not in ("water-leak", "compressor", "error-codes", "airflow", "washing-drain", "washing-buying", "fridge-noise"):
+    if topic not in ("water-leak", "compressor", "error-codes", "airflow", "washing-drain", "washing-buying", "fridge-buying", "fridge-noise"):
         raise ValueError("Unknown refrigerator illustration topic")
     colors = {"water-leak": ((9, 48, 91), (26, 166, 197)),
               "compressor": ((37, 41, 73), (243, 153, 56)),
@@ -165,6 +165,7 @@ def make_refrigerator_topic_banner(spec):
               "airflow": ((12, 66, 91), (109, 221, 232)),
               "washing-drain": ((52, 45, 92), (136, 202, 255)),
               "washing-buying": ((22, 58, 77), (255, 196, 87)),
+              "fridge-buying": ((18, 43, 77), (255, 195, 65)),
               "fridge-noise": ((27, 38, 76), (255, 177, 69))}
     bg, accent = colors[topic]
     im = Image.new("RGB", (1120, 588), bg)
@@ -185,6 +186,7 @@ def make_refrigerator_topic_banner(spec):
         "airflow": ("فریزر سرد است", "یخچال گرم؟", "بررسی فن و گردش هوا"),
         "washing-drain": ("آب لباسشویی", "تخلیه نمی‌شود؟", "بررسی پمپ و فیلتر"),
         "washing-buying": ("راهنمای خرید", "ماشین لباسشویی", "ظرفیت، موتور و مصرف انرژی"),
+        "fridge-buying": ("راهنمای خرید", "یخچال ۱۴۰۵", "ساید، دوقلو، ظرفیت و مصرف انرژی"),
         "fridge-noise": ("صدای تق‌تق", "یا وزوز یخچال؟", "تشخیص صدای طبیعی و خرابی")
     }[topic]
     rtl(lines[0], 740, 145, 68, (255,255,255))
@@ -211,6 +213,18 @@ def make_refrigerator_topic_banner(spec):
             d.arc((840,y-35,1038,y+35),180,345,fill=accent,width=9)
         d.ellipse((910,115,988,193),outline=accent,width=9)
         d.line((950,120,950,190),fill=accent,width=5)
+    elif topic == "fridge-buying":
+        # Three distinct refrigerator silhouettes: side-by-side, twin, freezer-on-top.
+        d.rounded_rectangle((816, 345, 900, 480), radius=8, fill=(240,248,251), outline=accent, width=5)
+        d.line((858, 348, 858, 478), fill=(60,106,138), width=4)
+        d.line((847, 376, 847, 413), fill=accent, width=5)
+        d.line((868, 376, 868, 413), fill=accent, width=5)
+        d.rounded_rectangle((919, 345, 1000, 480), radius=8, fill=(240,248,251), outline=accent, width=5)
+        d.line((959, 348, 959, 478), fill=(60,106,138), width=4)
+        d.rounded_rectangle((1013, 345, 1065, 480), radius=7, fill=(240,248,251), outline=accent, width=5)
+        d.line((1015, 390, 1063, 390), fill=(60,106,138), width=4)
+        d.rounded_rectangle((836, 111, 1035, 196), radius=12, fill=(32,76,105))
+        d.text((856, 129), "A++", fill=accent, font=ImageFont.truetype(str(fbold), 46))
     elif topic == "washing-buying":
         d.ellipse((843,331,1038,510),outline=accent,width=14)
         d.ellipse((876,365,1005,484),outline=(72,130,158),width=8)
