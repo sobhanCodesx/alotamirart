@@ -157,7 +157,7 @@ def make_refrigerator_topic_banner(spec):
     from io import BytesIO
     import base64
     topic = spec.get("topic")
-    if topic not in ("water-leak", "compressor", "error-codes", "airflow", "washing-drain", "washing-buying", "washing-tear", "fridge-buying", "food-mold", "fridge-noise"):
+    if topic not in ("water-leak", "compressor", "error-codes", "airflow", "washing-drain", "washing-buying", "washing-tear", "fridge-buying", "food-mold", "fridge-noise", "washing-suds"):
         raise ValueError("Unknown refrigerator illustration topic")
     colors = {"water-leak": ((9, 48, 91), (26, 166, 197)),
               "compressor": ((37, 41, 73), (243, 153, 56)),
@@ -168,7 +168,8 @@ def make_refrigerator_topic_banner(spec):
               "washing-tear": ((42, 46, 83), (246, 166, 94)),
               "fridge-buying": ((18, 43, 77), (255, 195, 65)),
               "food-mold": ((31, 58, 46), (244, 185, 76)),
-              "fridge-noise": ((27, 38, 76), (255, 177, 69))}
+              "fridge-noise": ((27, 38, 76), (255, 177, 69)),
+              "washing-suds": ((24, 56, 84), (103, 222, 225))}
     bg, accent = colors[topic]
     im = Image.new("RGB", (1120, 588), bg)
     d = ImageDraw.Draw(im)
@@ -180,7 +181,7 @@ def make_refrigerator_topic_banner(spec):
         d.text((x, y), txt, font=ImageFont.truetype(str(fbold), sz),
                fill=color, direction="rtl", anchor="ra")
     d.rounded_rectangle((35, 35, 742, 100), radius=18, fill=accent)
-    rtl("راهنمای تخصصی یخچال", 707, 49, 30, bg)
+    rtl("راهنمای تخصصی لباسشویی" if topic.startswith("washing-") else "راهنمای تخصصی یخچال", 707, 49, 30, bg)
     lines = {
         "water-leak": ("آب کف یخچال", "جمع می‌شود؟", "۸ علت نشتی و راهکار"),
         "compressor": ("یخچال یکسره", "کار می‌کند؟", "عیب‌یابی کمپرسور"),
@@ -191,7 +192,8 @@ def make_refrigerator_topic_banner(spec):
         "washing-tear": ("چرا لباسشویی", "لباس را پاره می‌کند؟", "۸ علت و راه‌حل ایمن"),
         "fridge-buying": ("راهنمای خرید", "یخچال ۱۴۰۵", "ساید، دوقلو، ظرفیت و مصرف انرژی"),
         "food-mold": ("چرا غذا در یخچال", "کپک می‌زند؟", "۱۰ علت و راه‌های پیشگیری"),
-        "fridge-noise": ("صدای تق‌تق", "یا وزوز یخچال؟", "تشخیص صدای طبیعی و خرابی")
+        "fridge-noise": ("صدای تق‌تق", "یا وزوز یخچال؟", "تشخیص صدای طبیعی و خرابی"),
+        "washing-suds": ("کف زیاد لباسشویی", "آبکشی ناقص؟", "۹ علت علمی و راهکار")
     }[topic]
     rtl(lines[0], 740, 145, 68, (255,255,255))
     rtl(lines[1], 740, 242, 65, accent)
@@ -217,6 +219,14 @@ def make_refrigerator_topic_banner(spec):
             d.arc((840,y-35,1038,y+35),180,345,fill=accent,width=9)
         d.ellipse((910,115,988,193),outline=accent,width=9)
         d.line((950,120,950,190),fill=accent,width=5)
+    elif topic == "washing-suds":
+        d.rounded_rectangle((828, 96, 1052, 512), radius=20, fill=(234,244,249), outline=(116,161,188), width=6)
+        d.ellipse((846,185,1034,373), fill=(44,76,112), outline=accent, width=10)
+        d.ellipse((864,202,1016,355), fill=(143,194,218))
+        for x,y,r in ((891,235,17),(937,224,24),(977,258,21),(916,288,29),(965,317,17)):
+            d.ellipse((x-r,y-r,x+r,y+r),fill=(243,251,252),outline=accent,width=3)
+        d.rounded_rectangle((852,115,1024,158),radius=8,fill=(42,86,123))
+        d.ellipse((980,124,1001,145),fill=accent)
     elif topic == "washing-tear":
         d.rounded_rectangle((825, 94, 1060, 515), radius=24, fill=(231,236,245), outline=(132,152,185), width=7)
         d.ellipse((853, 180, 1032, 359), fill=(50,66,98), outline=(143,169,194), width=10)
