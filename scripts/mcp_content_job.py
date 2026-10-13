@@ -67,7 +67,38 @@ def tool(name, arguments):
     return parsed
 
 
+def load_local_image(relative_path):
+    """Read only approved repository images and optimize to WebP."""
+    import base64
+    from io import BytesIO
+    from PIL import Image, ImageOps
+    if not isinstance(relative_path, str) or not relative_path.startswith("editorial-images/"):
+        raise ValueError("image_path must be inside editorial-images/")
+    image_path = (ROOT / relative_path).resolve()
+    allowed = (ROOT / "editorial-images").resolve()
+    if not image_path.is_relative_to(allowed) or not image_path.is_file():
+        raise ValueError("Invalid or missing editorial image")
+    if image_path.suffix.lower() not in (".webp", ".png", ".jpg", ".jpeg"):
+        raise ValueError("Unsupported editorial image type")
+    if image_path.stat().st_size > 8 * 1024 * 1024:
+        raise ValueError("Editorial image exceeds 8 MB")
+    with Image.open(image_path) as source:
+        im = ImageOps.exif_transpose(source).convert("RGB")
+        im.thumbnail((1200, 1200), Image.Resampling.LANCZOS)
+        for quality in (82, 72, 62, 52, 42, 32, 22, 14):
+            buf = BytesIO()
+            im.save(buf, "WEBP", quality=quality, method=6)
+            if len(buf.getvalue()) <= 30720:
+                print("EDITORIAL_IMAGE_WEBP_BYTES", len(buf.getvalue()))
+                return {"image_base64": base64.b64encode(buf.getvalue()).decode("ascii")}
+    raise ValueError("Unable to compress editorial image below 30 KiB")
+
+
 def media_args(request):
+    if request.get("image_path"):
+        if any(request.get(k) for k in ("banner", "image_url", "image_base64")):
+            raise ValueError("image_path conflicts with another featured image")
+        return load_local_image(request["image_path"])
     if request.get("banner") is not None:
         if request.get("image_url") or request.get("image_base64"):
             raise ValueError("Editorial banner conflicts with provided featured image")
@@ -302,6 +333,11 @@ def manage_content(path):
             "confirm_public":True,**media
         })["record"]
         print("UPDATED",content_type,item["id"])
+        if media and content_type in ("article", "brand_article"):
+            verified = tool("get_content", {"type": content_type, "id": item_id})["record"]
+            if not verified.get("img"):
+                raise RuntimeError("Image update could not be verified")
+            print("IMAGE_UPDATED_VERIFIED", content_type, item_id, verified["img"])
         return
     raise ValueError("Unsupported content management action")
 
