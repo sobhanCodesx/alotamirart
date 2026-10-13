@@ -1,0 +1,10 @@
+{
+  "type": "article",
+  "action": "update",
+  "id": 503,
+  "banner": {
+    "template": "refrigerator-topic",
+    "topic": "washing-suds"
+  },
+  "fields": {}
+}
