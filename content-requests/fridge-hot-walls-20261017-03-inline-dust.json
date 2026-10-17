@@ -2,6 +2,8 @@
   "action": "update",
   "type": "article",
   "id": 504,
-  "fields": {},
+  "fields": {
+    "slug": "refrigerator-hot-side-walls-causes"
+  },
   "image_base64": ""
 }
