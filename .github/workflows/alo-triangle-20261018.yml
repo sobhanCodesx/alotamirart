@@ -1,0 +1,20 @@
+name: Verify and publish approved triangle article 506
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/alo-triangle-20261018.yml']
+permissions:
+  contents: read
+jobs:
+  article:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: python3 -m py_compile scripts/alo_triangle_20261018.py
+      - name: Verify saved article and publish same id
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: python3 scripts/alo_triangle_20261018.py
