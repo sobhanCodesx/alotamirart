@@ -1,0 +1,34 @@
+name: Validate Izeh math tutoring article package
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/alo-math-izeh-validate.yml']
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install supported original graphics renderer
+        run: python3 -m pip install --quiet 'Pillow>=10,<13' 'arabic-reshaper>=3,<4' 'python-bidi>=0.6,<1'
+      - name: Static syntax check
+        run: python3 -m py_compile scripts/alo_math_izeh_images.py scripts/alo_math_izeh_publish.py
+      - name: Validate three genuine optimized visual assets
+        run: python3 scripts/alo_math_izeh_images.py
+      - name: Validate editorial content length, identity and phone
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          a=json.loads(Path('editorial/math-private-tutoring-izeh-1405.json').read_text())
+          assert a['slug']=='private-math-tutoring-izeh-1405'
+          assert a['post_id']==10 and a['contact_number']=='09168949864'
+          assert a['content'].count('href="tel:09168949864"')==3
+          assert a['content'].count('[[INLINE_')==2
+          assert len(a['content'].split())>=1250
+          print('ARTICLE_VALIDATED',len(a['content'].split()),'words',a['title'])
+          PY
