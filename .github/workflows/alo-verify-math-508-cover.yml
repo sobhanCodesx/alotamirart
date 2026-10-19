@@ -1,0 +1,35 @@
+name: Read-only verify Izeh article 508 featured image
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-verify-math-508-cover.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check article identity, image bytes and public URL (read-only)
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import sys,re,hashlib,urllib.request,json
+          sys.path.insert(0,"scripts")
+          from mcp_content_job import tool
+          a=tool("get_content",{"type":"article","id":508})["record"]
+          assert int(a["id"])==508
+          print("ARTICLE_METADATA",json.dumps({k:a.get(k) for k in ("id","title","slug","status","post_id","img")},ensure_ascii=False))
+          print("ARTICLE_CONTENT_SUMMARY",len(a.get("content") or ""),int((a.get("content") or "").count("<img ")),("09168949864" in (a.get("content") or "")))
+          url="https://alotamiratchi.ir/"+a["img"].lstrip("/")
+          with urllib.request.urlopen(urllib.request.Request(url,headers={"User-Agent":"Mozilla/5.0"}),timeout=25) as r:
+            blob=r.read(50000)
+          print("CURRENT_IMAGE_BYTES_AND_SHA256",len(blob),hashlib.sha256(blob).hexdigest())
+          print("EXPECTED_IMAGE_SHA256","4b9ef2c11ce6ee8ee54fbb8138459a454619f3a46d85fb0b900b960ea3777fea")
+          print("IMAGE_MATCHES_USER_CHOICE",hashlib.sha256(blob).hexdigest()=="4b9ef2c11ce6ee8ee54fbb8138459a454619f3a46d85fb0b900b960ea3777fea")
+          PY
