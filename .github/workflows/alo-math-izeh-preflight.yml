@@ -1,0 +1,19 @@
+name: Alo Izeh math tuition preflight
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/alo-math-izeh-preflight.yml']
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify live categories and prevent duplicate publication
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: python3 scripts/alo_math_izeh_preflight.py
