@@ -19,7 +19,7 @@ jobs:
           persist-credentials: false
       - name: Syntax check for cover-only action
         run: python3 -m py_compile scripts/alo_math_508_change_featured.py
-      - name: Replace image while preserving all article body and metadata
+      - name: Replace image using legacy-compatible title no-op and verify
         env:
           MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
         run: python3 scripts/alo_math_508_change_featured.py
