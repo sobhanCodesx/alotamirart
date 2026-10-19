@@ -1,0 +1,26 @@
+name: Publish approved Izeh math tutoring article
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/alo-math-izeh-publish.yml']
+permissions:
+  contents: read
+concurrency:
+  group: alotamiratchi-content-publishing
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install image generation requirements
+        run: python3 -m pip install --quiet 'Pillow>=10,<13' 'arabic-reshaper>=3,<4' 'python-bidi>=0.6,<1'
+      - name: Validate code before touching production
+        run: python3 -m py_compile scripts/alo_math_izeh_images.py scripts/alo_math_izeh_publish.py
+      - name: Create or resume exact approved math article with three optimized WebPs and publish
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: python3 scripts/alo_math_izeh_publish.py
