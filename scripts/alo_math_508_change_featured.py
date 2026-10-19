@@ -57,7 +57,7 @@ else:
     result=tool("update_content",{
         "type":"article",
         "id":ID,
-        "fields":{},
+        "fields":{"title":before["title"]},
         "image_base64":encoded,
         "confirm_public":True
     })["record"]
