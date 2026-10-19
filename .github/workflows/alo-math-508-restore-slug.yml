@@ -1,0 +1,22 @@
+name: Restore article 508 original SEO URL after photo update
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/alo-math-508-restore-slug.yml']
+permissions:
+  contents: read
+concurrency:
+  group: alotamiratchi-content-publishing
+  cancel-in-progress: false
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify selected photo and restore unchanged permalink slug
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: python3 scripts/alo_math_508_restore_slug.py
