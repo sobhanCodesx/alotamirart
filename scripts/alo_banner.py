@@ -10,6 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def make_banner(spec):
     if not isinstance(spec, dict):
         raise ValueError("banner must be an object")
+    if spec.get("template") == "gas-thermocouple":
+        return make_gas_thermocouple_banner(spec)
     if spec.get("template") == "refrigerator-topic":
         return make_refrigerator_topic_banner(spec)
     if spec.get("template") == "lg-fridge-rudsar":
@@ -344,3 +346,38 @@ def make_washing_drawer_banner(spec):
             if 6000 <= len(out.getvalue()) <= budget:
                 return base64.b64encode(out.getvalue()).decode("ascii"), len(out.getvalue())
     raise RuntimeError("Unable to optimize detergent-drawer banner under 30 KiB")
+
+def make_gas_thermocouple_banner(spec):
+    """Illustrated gas-stove safety sensor feature, compressed below 30 KB."""
+    from PIL import Image, ImageDraw, ImageFont
+    from math import sin, cos, pi
+    img=Image.new("RGB",(960,510),(14,43,67))
+    d=ImageDraw.Draw(img)
+    d.rounded_rectangle((22,30,938,480),radius=24,fill=(20,74,98))
+    d.ellipse((555,57,911,417),fill=(199,214,220),outline=(255,174,67),width=9)
+    d.ellipse((584,87,881,384),fill=(31,39,49),outline=(232,234,232),width=10)
+    for k in range(24):
+        a=k*pi/12;x=733+112*cos(a);y=235+106*sin(a)
+        d.ellipse((x-10,y-11,x+10,y+11),fill=(65,157,236))
+    d.rounded_rectangle((855,179,878,370),radius=8,fill=(207,211,215))
+    d.rounded_rectangle((864,166,870,335),radius=4,fill=(246,189,100))
+    d.rectangle((855,339,880,377),fill=(251,164,61))
+    fontpath=ROOT/'public/src/fonts/Vazir-Black.ttf'
+    if not fontpath.exists():fontpath=Path('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf')
+    font=lambda n:ImageFont.truetype(str(fontpath),n)
+    d.text((510,70),"عیب‌یابی اجاق گاز",font=font(47),anchor="ra",fill=(240,244,246),direction="rtl")
+    d.text((516,150),"خرابی ترموکوپل",font=font(60),anchor="ra",fill=(255,198,90),direction="rtl")
+    d.text((512,248),"خاموش شدن شعله",font=font(40),anchor="ra",fill=(241,246,246),direction="rtl")
+    d.text((512,326),"نشانه‌ها و راهکار ایمن",font=font(34),anchor="ra",fill=(241,246,246),direction="rtl")
+    d.rounded_rectangle((32,407,523,464),radius=16,fill=(231,246,248))
+    d.text((490,416),"الو تعمیراتچی",font=font(29),anchor="ra",fill=(13,55,87),direction="rtl")
+    budget=int(spec.get('max_bytes',30720))
+    if budget>30720 or budget<18000:raise ValueError('Image budget out of range')
+    for width in (960,820,740,620,500):
+        resized=img.resize((width,round(510*width/960)),Image.Resampling.LANCZOS)
+        for quality in (75,60,45,30,20,10):
+            out=BytesIO();resized.save(out,'WEBP',quality=quality,method=6)
+            b=out.getvalue()
+            if 4000<len(b)<=budget:
+                return base64.b64encode(b).decode('ascii'),len(b)
+    raise RuntimeError('Unable to compress thermocouple cover')
