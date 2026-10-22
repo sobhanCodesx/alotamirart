@@ -274,6 +274,48 @@ def manage_content(path):
     if action=="publish" and content_type=="article":
         publish(path)
         return
+    if action=="distribute_thermocouple_links":
+        if content_type!="article" or request.get("id")!=511 or request.get("expected_slug")!="gas-stove-thermocouple-symptoms-safe-checks":
+            raise ValueError("Only verified thermocouple article 511 is supported")
+        article=tool("get_content",{"type":"article","id":511})["record"]
+        if article.get("slug")!=request["expected_slug"] or int(article.get("status") or 0)!=1 or not article.get("img"):
+            raise RuntimeError("Published article identity or image mismatch")
+        original=article["content"]
+        if not isinstance(original,str) or "<h2>ترموکوپل اجاق گاز چیست؟</h2>" not in original:
+            raise ValueError("Unexpected article content")
+        new=original
+        # Move previous grouped link sections into the relevant passages.
+        for header in ("<h2>خدمات مرتبط و مطالعه تکمیلی</h2>","<h2>مطالب مرتبط با خرابی ترموکوپل اجاق گاز</h2>"):
+            if header in new:
+                start=new.index(header)
+                next_header=new.find("<h2>",start+len(header))
+                if next_header<0:raise ValueError("No end boundary for grouped links")
+                new=new[:start]+new[next_header:]
+        snippets=[
+            ("هرگز ولوم را با ابزار در حالت روشن ثابت نکنید.</p>",
+             'هرگز ولوم را با ابزار در حالت روشن ثابت نکنید. برای تشخیص علت‌های مشابه، <a href="https://khadamatrad.ir/article/gas-stove-flame-goes-out-thermocouple-checks-172">راهنمای علت خاموش شدن شعله در خدمات راد</a> را ببینید.</p>'),
+            ("برای اصلاح شکل شعله، نازل یا مسیر گاز را دستکاری نکنید.</p>",
+             'برای اصلاح شکل شعله، نازل یا مسیر گاز را دستکاری نکنید. دیگر نشانه‌های اجاق را می‌توانید در <a href="https://alotamiratchi.ir/posts/categories/3/1">دسته مطالب اجاق گاز الو تعمیراتچی</a> بررسی کنید.</p>'),
+            ("هیچ‌کدام از این نشانه‌ها به‌تنهایی مجوز باز کردن اتصالات گاز نیست.</p>",
+             'هیچ‌کدام از این نشانه‌ها به‌تنهایی مجوز باز کردن اتصالات گاز نیست. برای مقایسه عملکرد حسگر و فندک، <a href="https://tekanino.ir/blog/gas-stove-thermocouple-failure-diagnosis">راهنمای خرابی ترموکوپل در تکانی‌نو</a> را بخوانید.</p>'),
+            ("اگر مشکل ادامه داشت، پیش از آزمون‌های مکرر دستگاه را برای بررسی تخصصی متوقف کنید.</p>",
+             'اگر مشکل ادامه داشت، پیش از آزمون‌های مکرر دستگاه را برای بررسی تخصصی متوقف کنید. درباره رسیدگی تخصصی به این دستگاه، <a href="https://tekanino.ir/gaz">صفحه خدمات تعمیر اجاق گاز</a> اطلاعات تکمیلی دارد.</p>'),
+            ("دور زدن ترموکوپل یا حذف شیر ایمنی برای روشن نگه داشتن شعله اقدامی خطرناک است و نباید انجام شود.</p>",
+             'دور زدن ترموکوپل یا حذف شیر ایمنی برای روشن نگه داشتن شعله اقدامی خطرناک است و نباید انجام شود. برای درخواست خدمات محلی <a href="https://tekanino.ir/gaz/babol">صفحه تعمیر اجاق گاز در بابل</a> را ببینید و شرایط پوشش خدمات را بررسی کنید.</p>')
+        ]
+        marker="href=\"https://khadamatrad.ir/article/gas-stove-flame-goes-out-thermocouple-checks-172\""
+        if marker in new and "<h2>مطالب مرتبط با خرابی ترموکوپل اجاق گاز</h2>" not in original and "<h2>خدمات مرتبط و مطالعه تکمیلی</h2>" not in original:
+            print("ALO_DISTRIBUTED_LINKS_ALREADY_PRESENT",511);return
+        for old,replacement in snippets:
+            if new.count(old)!=1:raise RuntimeError("Cannot safely locate unique paragraph for: "+old[:30])
+            new=new.replace(old,replacement,1)
+        if new.count("<a href=")<5:raise ValueError("Insufficient contextual links")
+        tool("update_content",{"type":"article","id":511,"fields":{"content":new},"confirm_public":True})
+        actual=tool("get_content",{"type":"article","id":511})["record"]
+        if actual.get("content")!=new or actual.get("img")!=article.get("img") or actual.get("slug")!=article.get("slug") or int(actual.get("status") or 0)!=1:
+            raise RuntimeError("Distributed links verification failed")
+        print("ALO_THERMO_DISTRIBUTED_LINKS_VERIFIED",511,5,"IMAGE_PRESERVED")
+        return
     if action=="append_related_links":
         # Read the live record before updating; never overwrite it with stale GitHub copy.
         if content_type!="article":
