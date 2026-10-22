@@ -274,7 +274,9 @@ def manage_content(path):
     if action=="publish" and content_type=="article":
         publish(path)
         return
-    media=media_args(request)
+    # Text-only edits must keep the previously published featured image intact.
+    has_media=any(request.get(key) is not None for key in ("banner","image_url","image_base64","image_path"))
+    media=media_args(request) if action in ("draft","create","publish") or has_media else {}
     fields=request.get("fields")
     if action in ("draft","create","publish"):
         if not isinstance(fields,dict):
