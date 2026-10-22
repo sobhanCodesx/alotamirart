@@ -274,6 +274,27 @@ def manage_content(path):
     if action=="publish" and content_type=="article":
         publish(path)
         return
+    if action=="add_babol_post10_internal":
+        if content_type!="article" or request.get("id")!=511 or request.get("expected_slug")!="gas-stove-thermocouple-symptoms-safe-checks":
+            raise ValueError("Unexpected Babol link target")
+        before=tool("get_content",{"type":"article","id":511})["record"]
+        old=before.get("content")
+        if before.get("slug")!=request["expected_slug"] or int(before.get("status") or 0)!=1 or not before.get("img") or not isinstance(old,str):
+            raise RuntimeError("Live article identity or image mismatch")
+        target="https://alotamiratchi.ir/post/10"
+        if target in old:
+            print("ALO_BABOL_POST10_ALREADY_PRESENT",511)
+            return
+        context="دور زدن ترموکوپل یا حذف شیر ایمنی برای روشن نگه داشتن شعله اقدامی خطرناک است و نباید انجام شود."
+        if old.count(context)!=1:raise RuntimeError("Expected repair context not found")
+        extra=' برای اطلاعات خدمات محلی، <a href="'+target+'">صفحه تعمیر اجاق گاز در بابل</a> را نیز ببینید و جزئیات ارائه خدمات را همان‌جا بررسی کنید.'
+        new=old.replace(context,context+extra,1)
+        tool("update_content",{"type":"article","id":511,"fields":{"content":new},"confirm_public":True})
+        after=tool("get_content",{"type":"article","id":511})["record"]
+        if after.get("content")!=new or after.get("img")!=before.get("img") or int(after.get("status") or 0)!=1:
+            raise RuntimeError("Babol internal link not verified")
+        print("ALO_BABOL_POST10_VERIFIED",511)
+        return
     if action=="distribute_thermocouple_links":
         if content_type!="article" or request.get("id")!=511 or request.get("expected_slug")!="gas-stove-thermocouple-symptoms-safe-checks":
             raise ValueError("Only verified thermocouple article 511 is supported")
