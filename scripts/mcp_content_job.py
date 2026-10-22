@@ -274,6 +274,53 @@ def manage_content(path):
     if action=="publish" and content_type=="article":
         publish(path)
         return
+    if action=="append_related_links":
+        # Read the live record before updating; never overwrite it with stale GitHub copy.
+        if content_type!="article":
+            raise ValueError("Related linking currently supports ordinary articles only")
+        article_id=request.get("id")
+        slug=request.get("expected_slug")
+        section=request.get("section_html")
+        if type(article_id) is not int or article_id<1 or not isinstance(slug,str) or not slug:
+            raise ValueError("A positive article ID and exact slug are required")
+        if not isinstance(section,str) or not 40<=len(section)<=3000:
+            raise ValueError("Invalid linking section")
+        if re.search(r"<(?!/?(?:p|a|h2|strong)\\b)",section,re.I):
+            raise ValueError("Unsupported HTML in related-links section")
+        if re.search(r"\\bon\\w+\\s*=|javascript:|<img",section,re.I):
+            raise ValueError("Unsafe related-links content")
+        urls=re.findall(r'href="([^"]+)"',section)
+        if not urls or any(not url.startswith(("https://khadamatrad.ir/","https://tekanino.ir/","https://alotamiratchi.ir/")) for url in urls):
+            raise ValueError("Related links must point to one of the three editorial sites")
+        current=tool("get_content",{"type":"article","id":article_id})["record"]
+        if current.get("slug")!=slug or int(current.get("status") or 0)!=1:
+            raise ValueError("Article slug/status mismatch; refusing to change a different record")
+        previous=current.get("content")
+        if not isinstance(previous,str) or not current.get("img"):
+            raise ValueError("Existing article HTML or cover is missing")
+        header=section.split("</h2>",1)[0]+"</h2>"
+        if header in previous:
+            if all(url in previous for url in urls):
+                print("RELATED_LINKS_ALREADY_PRESENT",article_id)
+                return
+            raise RuntimeError("Related links section already exists with different destinations")
+        needle="<h2>جمع‌بندی</h2>"
+        if previous.count(needle)!=1:
+            raise ValueError("No unique safe anchor to append links")
+        new_content=previous.replace(needle,section+"\\n"+needle,1)
+        tool("update_content",{
+            "type":"article","id":article_id,
+            "fields":{"content":new_content},
+            "confirm_public":True
+        })
+        verified=tool("get_content",{"type":"article","id":article_id})["record"]
+        if (int(verified.get("status") or 0)!=1 or
+            verified.get("img")!=current.get("img") or
+            verified.get("content")!=new_content or
+            verified.get("slug")!=slug):
+            raise RuntimeError("Related-links update failed live verification")
+        print("RELATED_LINKS_VERIFIED",article_id,"added",len(urls))
+        return
     # Text-only edits must keep the previously published featured image intact.
     has_media=any(request.get(key) is not None for key in ("banner","image_url","image_base64","image_path"))
     media=media_args(request) if action in ("draft","create","publish") or has_media else {}
