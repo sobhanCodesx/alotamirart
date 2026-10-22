@@ -285,9 +285,9 @@ def manage_content(path):
             raise ValueError("A positive article ID and exact slug are required")
         if not isinstance(section,str) or not 40<=len(section)<=3000:
             raise ValueError("Invalid linking section")
-        if re.search(r"<(?!/?(?:p|a|h2|strong)\\b)",section,re.I):
+        if re.search(r"<(?!/?(?:p|a|h2|strong)\b)",section,re.I):
             raise ValueError("Unsupported HTML in related-links section")
-        if re.search(r"\\bon\\w+\\s*=|javascript:|<img",section,re.I):
+        if re.search(r"\bon\w+\s*=|javascript:|<img",section,re.I):
             raise ValueError("Unsafe related-links content")
         urls=re.findall(r'href="([^"]+)"',section)
         if not urls or any(not url.startswith(("https://khadamatrad.ir/","https://tekanino.ir/","https://alotamiratchi.ir/")) for url in urls):
@@ -307,7 +307,7 @@ def manage_content(path):
         needle="<h2>جمع‌بندی</h2>"
         if previous.count(needle)!=1:
             raise ValueError("No unique safe anchor to append links")
-        new_content=previous.replace(needle,section+"\\n"+needle,1)
+        new_content=previous.replace(needle,section+"\n"+needle,1)
         tool("update_content",{
             "type":"article","id":article_id,
             "fields":{"content":new_content},
