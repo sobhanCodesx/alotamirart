@@ -21,6 +21,14 @@ class EditorialBannerTests(unittest.TestCase):
         self.assertGreater(size, 6000)
         self.assertLessEqual(size, 30720)
 
+    def test_washing_drawer_banner_is_unique_and_under_30_kib(self):
+        drawer, size = make_banner({"template": "refrigerator-topic", "topic": "washing-detergent-drawer"})
+        suds, _ = make_banner({"template": "refrigerator-topic", "topic": "washing-suds"})
+        self.assertNotEqual(drawer, suds)
+        self.assertLessEqual(size, 30720)
+        self.assertGreater(size, 6000)
+        self.assertTrue(base64.b64decode(drawer).startswith(b"RIFF"))
+
     def test_unsupported_banner_variant_is_rejected(self):
         with self.assertRaises(ValueError):
             make_banner({"template": "refrigerator-gasket", "variant": "random"})
