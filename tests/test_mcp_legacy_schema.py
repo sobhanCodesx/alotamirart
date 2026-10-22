@@ -49,6 +49,39 @@ class LegacySchemaTests(unittest.TestCase):
                     writer.manage_content(job)
             self.assertEqual(mocked.call_count, 1)
 
+    def test_related_links_append_keeps_live_content_and_image(self):
+        import json
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "linking.json"
+            path.write_text(json.dumps({
+                "type": "article", "action": "append_related_links",
+                "id": 510, "expected_slug": "washer-drawer-test",
+                "section_html": '<h2>مطالب مرتبط با جاپودری</h2><p><a href="https://khadamatrad.ir/article/test">مطالعه</a></p>'
+            }), encoding="utf-8")
+            original = {
+                "id": 510, "slug": "washer-drawer-test", "status": 1,
+                "img": "them/admin/dist/img/old.webp",
+                "content": "<p>متن قبلی</p><h2>جمع‌بندی</h2><p>پایان</p>",
+            }
+            updated = {}
+            def fake_tool(name, args):
+                if name == "get_content":
+                    return {"record": dict(original, **updated)}
+                self.assertEqual(name, "update_content")
+                self.assertEqual(args["id"], 510)
+                self.assertEqual(args["fields"].keys(), {"content"})
+                self.assertEqual(args["confirm_public"], True)
+                self.assertNotIn("image_base64", args)
+                self.assertIn("متن قبلی", args["fields"]["content"])
+                self.assertIn("مطالب مرتبط با جاپودری", args["fields"]["content"])
+                updated["content"] = args["fields"]["content"]
+                return {"record": dict(original, **updated)}
+            with patch.object(writer, "tool", side_effect=fake_tool) as mocked:
+                writer.manage_content(path)
+            self.assertEqual(mocked.call_count, 3)
+            self.assertEqual(updated["content"].count("مطالب مرتبط با جاپودری"), 1)
+
     def test_required_and_unexpected_fields_are_never_dropped(self):
         for error in ["Unknown/unavailable content field: title",
                       "Unknown/unavailable content field: description",
