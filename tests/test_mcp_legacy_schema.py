@@ -28,6 +28,27 @@ class LegacySchemaTests(unittest.TestCase):
         self.assertIn("keyword",fields)
         self.assertIn("tags",fields)
 
+    def test_text_only_update_does_not_require_featured_image(self):
+        import json
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            job = Path(tmp) / "update.json"
+            job.write_text(json.dumps({
+                "type": "article", "action": "update", "id": 510,
+                "fields": {"content": "<p>Related article link</p>"}
+            }), encoding="utf-8")
+            def fake_tool(name, args):
+                self.assertEqual(name, "update_content")
+                self.assertEqual(args["id"], 510)
+                self.assertEqual(args["fields"]["content"], "<p>Related article link</p>")
+                self.assertNotIn("image_base64", args)
+                self.assertNotIn("image_url", args)
+                return {"record": {"id": 510}}
+            with patch.object(writer, "media_args", side_effect=AssertionError("Unnecessary image reupload")):
+                with patch.object(writer, "tool", side_effect=fake_tool) as mocked:
+                    writer.manage_content(job)
+            self.assertEqual(mocked.call_count, 1)
+
     def test_required_and_unexpected_fields_are_never_dropped(self):
         for error in ["Unknown/unavailable content field: title",
                       "Unknown/unavailable content field: description",
