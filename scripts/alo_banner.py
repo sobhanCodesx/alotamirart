@@ -157,6 +157,8 @@ def make_refrigerator_topic_banner(spec):
     from io import BytesIO
     import base64
     topic = spec.get("topic")
+    if topic == "washing-detergent-drawer":
+        return make_washing_drawer_banner(spec)
     if topic not in ("water-leak", "compressor", "error-codes", "airflow", "washing-drain", "washing-buying", "washing-tear", "fridge-buying", "food-mold", "fridge-noise", "washing-suds"):
         raise ValueError("Unknown refrigerator illustration topic")
     colors = {"water-leak": ((9, 48, 91), (26, 166, 197)),
@@ -285,3 +287,60 @@ def make_refrigerator_topic_banner(spec):
             if len(out.getvalue())<=30720:
                 return base64.b64encode(out.getvalue()).decode("ascii"),len(out.getvalue())
     raise RuntimeError("Unable to compress banner to 30 KiB")
+
+
+def make_washing_drawer_banner(spec):
+    """An original detergent-drawer diagram for the Alo washing machine guide."""
+    from PIL import Image, ImageDraw, ImageFont
+    width, height = 1120, 588
+    im = Image.new("RGB", (width, height), (19, 50, 79))
+    d = ImageDraw.Draw(im)
+    blue, orange, pale = (35, 108, 150), (255, 180, 76), (237, 248, 250)
+    d.polygon([(756, 0), (1120, 0), (1120, 588), (900, 588)], fill=(29, 92, 127))
+    for y in range(120, 520, 56):
+        d.line((34, y, 745, y), fill=(29, 66, 93), width=2)
+    font_dir = ROOT / "public/src/fonts"
+    font_path = font_dir / "Vazir-Black.ttf"
+    if not font_path.is_file():
+        font_path = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
+    def font(size):
+        return ImageFont.truetype(str(font_path), size)
+    def rtl(text, x, y, size, fill):
+        d.text((x, y), text, font=font(size), fill=fill, anchor="ra", direction="rtl")
+    d.rounded_rectangle((38, 39, 730, 100), radius=17, fill=orange)
+    rtl("راهنمای عیب‌یابی ماشین لباسشویی", 704, 51, 30, (17, 49, 79))
+    rtl("چرا آب در", 728, 141, 72, (255, 255, 255))
+    rtl("جاپودری می‌ماند؟", 728, 249, 66, orange)
+    rtl("آب کم طبیعی است یا گرفتگی مسیر؟", 727, 368, 35, (226, 246, 251))
+    d.rounded_rectangle((36, 493, 740, 558), radius=17, fill=pale)
+    rtl("الو تعمیراتچی", 707, 508, 34, (18, 57, 86))
+    # A front-loading washing machine with a distinct open detergent drawer.
+    d.rounded_rectangle((819, 86, 1074, 526), radius=22, fill=(222, 235, 245), outline=(142, 182, 204), width=6)
+    d.rounded_rectangle((838, 105, 1056, 174), radius=10, fill=(57, 102, 135))
+    d.rounded_rectangle((848, 122, 976, 158), radius=7, fill=(23, 61, 91))
+    d.line((858, 141, 922, 141), fill=(174, 231, 243), width=4)
+    d.ellipse((1003, 119, 1040, 156), fill=(207, 223, 233), outline=orange, width=4)
+    d.ellipse((851, 215, 1040, 405), fill=(42, 80, 116), outline=(116, 153, 186), width=12)
+    d.ellipse((871, 235, 1020, 385), fill=(142, 190, 212))
+    d.arc((891, 267, 1012, 368), 18, 175, fill=(219, 241, 249), width=13)
+    d.rounded_rectangle((836, 444, 1056, 479), radius=10, fill=(201, 219, 233))
+    # Exploded inset showing the detergent tray and residual water (not the drum).
+    d.rounded_rectangle((785, 48, 967, 228), radius=16, fill=(248, 252, 253), outline=orange, width=5)
+    d.rounded_rectangle((805, 92, 950, 167), radius=8, fill=(197, 220, 237), outline=blue, width=5)
+    d.line((851, 96, 851, 163), fill=blue, width=4)
+    d.line((900, 96, 900, 163), fill=blue, width=4)
+    for x, y in ((824, 151), (870, 147), (919, 151)):
+        d.arc((x - 13, y - 9, x + 13, y + 9), 5, 176, fill=blue, width=4)
+    d.line((846, 180, 846, 207), fill=orange, width=5)
+    d.polygon([(837, 201), (855, 201), (846, 216)], fill=orange)
+    budget = int(spec.get("max_bytes", 30720))
+    if budget < 20480 or budget > 30720:
+        raise ValueError("Banner budget must be between 20 and 30 KiB")
+    for target_w in (1120, 1000, 880, 760, 640):
+        scaled = im.resize((target_w, round(height * target_w / width)), Image.Resampling.LANCZOS)
+        for quality in (78, 68, 58, 48, 38, 28, 18):
+            out = BytesIO()
+            scaled.save(out, "WEBP", quality=quality, method=6)
+            if 6000 <= len(out.getvalue()) <= budget:
+                return base64.b64encode(out.getvalue()).decode("ascii"), len(out.getvalue())
+    raise RuntimeError("Unable to optimize detergent-drawer banner under 30 KiB")
