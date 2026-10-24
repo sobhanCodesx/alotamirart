@@ -10,5 +10,9 @@
     "keyword": "بوی سوختگی ماشین لباسشویی",
     "tags": "بوی سوختگی لباسشویی,بوی لاستیک سوخته,خرابی موتور لباسشویی,ایمنی لباسشویی"
   },
-  "image_url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Front_Load_Washing_Machine.jpg?width=500"
+  "banner": {
+    "template": "refrigerator-topic",
+    "topic": "washing-machine-burning-smell",
+    "max_bytes": 30720
+  }
 }
