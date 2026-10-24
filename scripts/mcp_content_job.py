@@ -238,6 +238,22 @@ def manage_content(path):
     request=json.loads(path.read_text(encoding="utf-8"))
     content_type=request.get("type","article")
     action=request.get("action","publish")
+    if action == "update_gilan_96_phones":
+        if request.get("profile_user_id") != 96 or request.get("profile_username") != "gilan" or request.get("phone") != "09040731535" or request.get("confirm") is not True:
+            raise ValueError("Exact profile identity, destination phone and confirmation are required")
+        result = tool("set_gilan_96_article_phones", {
+            "profile_user_id":96, "profile_username":"gilan",
+            "phone":"09040731535", "confirm":True
+        })
+        if result.get("success") is not True or result.get("owner_verified") is not True or result.get("user_id") != 96:
+            raise RuntimeError("Profile article contact update was not verified")
+        counts=result.get("results") or {}
+        print("GILAN_96_PHONE_VERIFIED_OK", "articles",counts.get("articles"),
+              "brand_articles",counts.get("brand_articles"),
+              "changed_articles",counts.get("changed_articles"),
+              "changed_brand_articles",counts.get("changed_brand_articles"),
+              "fields_changed",counts.get("fields_changed"))
+        return
     if action == "bulk_mahshahr_contacts":
         if request.get("city") != "ماهشهر" or request.get("confirm") is not True:
             raise ValueError("Mahshahr operation requires explicit city confirmation")
