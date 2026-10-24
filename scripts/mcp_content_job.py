@@ -274,6 +274,32 @@ def manage_content(path):
     if action=="publish" and content_type=="article":
         publish(path)
         return
+    if action=="crosslink_igniter_512":
+        if content_type!="article" or request.get("id")!=512 or request.get("expected_slug")!="gas-stove-igniter-not-sparking-troubleshooting":
+            raise ValueError("Wrong igniter crosslink target")
+        old_record=tool("get_content",{"type":"article","id":512})["record"]
+        old=old_record.get("content")
+        if old_record.get("slug")!=request["expected_slug"] or int(old_record.get("status") or 0)!=1 or not old_record.get("img") or not isinstance(old,str):
+            raise RuntimeError("Published igniter identity or featured image unavailable")
+        new=old
+        snippets=[
+            ("از فلز تیز، سنباده و مایع فراوان برای پاک‌کردن مجموعه الکتریکی استفاده نکنید.",
+             'از فلز تیز، سنباده و مایع فراوان برای پاک‌کردن مجموعه الکتریکی استفاده نکنید. <a href="https://khadamatrad.ir/article/gas-stove-igniter-no-spark-clicking-causes-173">راهنمای بررسی جرقه نزدن فندک در خدمات راد</a> نیز به تفاوت آلودگی و خرابی قطعات اشاره می‌کند.'),
+            ("اگر جرقه‌زنی ناخواسته ادامه دارد، برق را به شیوه ایمن قطع کنید.",
+             'اگر جرقه‌زنی ناخواسته ادامه دارد، برق را به شیوه ایمن قطع کنید. برای شناخت علائم تیک‌تیک مداوم، <a href="https://tekanino.ir/blog/gas-stove-igniter-not-sparking-clicking-reasons">آموزش خرابی فندک در تکانی‌نو</a> را مطالعه کنید.')]
+        if "gas-stove-igniter-no-spark-clicking-causes-173" in new:
+            if all(url in new for url in ["gas-stove-igniter-no-spark-clicking-causes-173","gas-stove-igniter-not-sparking-clicking-reasons"]):
+                print("ALO_IGNITER_CROSSLINKS_ALREADY_PRESENT",512);return
+            raise RuntimeError("Partial existing igniter crosslink")
+        for prev,replacement in snippets:
+            if new.count(prev)!=1:raise RuntimeError("Cannot safely match igniter section")
+            new=new.replace(prev,replacement,1)
+        tool("update_content",{"type":"article","id":512,"fields":{"content":new},"confirm_public":True})
+        after=tool("get_content",{"type":"article","id":512})["record"]
+        if after.get("content")!=new or after.get("img")!=old_record.get("img") or int(after.get("status") or 0)!=1:
+            raise RuntimeError("Igniter crosslinks verification failed")
+        print("ALO_IGNITER_CROSSLINKS_VERIFIED",512,2,"FEATURED_PRESERVED")
+        return
     if action=="add_babol_post10_internal":
         if content_type!="article" or request.get("id")!=511 or request.get("expected_slug")!="gas-stove-thermocouple-symptoms-safe-checks":
             raise ValueError("Unexpected Babol link target")
