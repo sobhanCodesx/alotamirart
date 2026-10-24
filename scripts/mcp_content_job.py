@@ -274,6 +274,32 @@ def manage_content(path):
     if action=="publish" and content_type=="article":
         publish(path)
         return
+    if action=="crosslink_console_513":
+        if content_type!="article" or request.get("id")!=513 or request.get("expected_slug")!="connect-console-to-tv-monitor-hdmi-troubleshooting":
+            raise ValueError("Wrong HDMI guide link request")
+        record=tool("get_content",{"type":"article","id":513})["record"]
+        old=record.get("content")
+        if (record.get("slug")!=request["expected_slug"] or record.get("title")!="وصل کردن کنسول بازی به مانیتور تلویزیون" or
+            int(record.get("status") or 0)!=1 or not record.get("img") or not isinstance(old,str)):
+            raise RuntimeError("Article 513 identity, cover, or published status mismatch")
+        old_url='https://khadamatrad.ir/'
+        target='https://khadamatrad.ir/article/connect-game-console-to-monitor-tv-hdmi-174'
+        needle='<a href="'+old_url+'">مطالب فنی تلویزیون در خدمات راد</a>'
+        link='<a href="'+target+'">راهنمای اتصال کنسول به تلویزیون در خدمات راد</a>'
+        if target in old:
+            print("ALO_CONSOLE_DEEP_LINK_ALREADY_PRESENT",513)
+            return
+        if old.count(needle)!=1:raise RuntimeError("Expected TV repair anchor missing")
+        content=old.replace(needle,link,1)
+        tool("update_content",{"type":"article","id":513,"fields":{"content":content},"confirm_public":True})
+        after=tool("get_content",{"type":"article","id":513})["record"]
+        if (after.get("content")!=content or after.get("img")!=record.get("img") or
+            after.get("slug")!=record.get("slug") or int(after.get("status") or 0)!=1):
+            raise RuntimeError("Alo console crosslink not verified")
+        if not all(x in content for x in [target,"https://tekanino.ir/blog/connect-game-console-to-monitor-tv-guide","https://playnexus.ir/"]):
+            raise RuntimeError("One of required links missing")
+        print("ALO_CONSOLE_CROSSLINKS_VERIFIED",513,"RAD",target)
+        return
     if action=="crosslink_igniter_512":
         if content_type!="article" or request.get("id")!=512 or request.get("expected_slug")!="gas-stove-igniter-not-sparking-troubleshooting":
             raise ValueError("Wrong igniter crosslink target")
