@@ -69,12 +69,17 @@ function aloProfilePhoneExecute(array $args,?PDO $db=null): array {
         $update=$db->prepare('UPDATE `'.$table.'` SET '.$sets.' WHERE id=? AND user_id=?');
         $update->execute([...array_values($changed),(int)$row['id'],96]);
         if($update->rowCount()!==1)throw new RuntimeException('Owner-scoped update failed');
+        $verify=$db->prepare('SELECT '.implode(',',array_map(static fn($k)=>'`'.$k.'`',array_keys($changed))).' FROM `'.$table.'` WHERE id=? AND user_id=?');
+        $verify->execute([(int)$row['id'],96]);
+        $verified=$verify->fetch(PDO::FETCH_ASSOC);
+        foreach($changed as $field=>$expected)if(!is_array($verified)||$verified[$field]!==$expected)throw new RuntimeException('Persisted number mismatch');
         $result[$table==='posts'?'changed_articles':'changed_brand_articles']++;
       }
       $check=$db->prepare('SELECT COUNT(*) FROM `'.$table.'` WHERE user_id=?');
       $check->execute([96]);
       if((int)$check->fetchColumn()!==count($rows))throw new RuntimeException('Owned article set changed during operation');
     }
+    if($result['articles']+$result['brand_articles']<1)throw new RuntimeException('No verified owner articles, refused empty operation');
     $db->commit();
     return ['success'=>true,'owner_verified'=>true,'user_id'=>96,'username'=>'gilan','phone'=>$phone,'results'=>$result];
   }catch(Throwable $e){if($db->inTransaction())$db->rollBack();throw $e;}
