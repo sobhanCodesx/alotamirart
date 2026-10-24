@@ -8,7 +8,8 @@ function aloProfilePhoneTool(): array {
       'profile_user_id'=>['type'=>'integer','const'=>96],
       'profile_username'=>['type'=>'string','const'=>'gilan'],
       'phone'=>['type'=>'string','pattern'=>'^09[0-9]{9}$'],
-      'confirm'=>['type'=>'boolean','const'=>true]],
+      'confirm'=>['type'=>'boolean','const'=>true],
+      'inspect_only'=>['type'=>'boolean']],
       'required'=>['profile_user_id','profile_username','phone','confirm']]];
 }
 function aloProfilePhoneExecute(array $args,?PDO $db=null): array {
@@ -21,8 +22,23 @@ function aloProfilePhoneExecute(array $args,?PDO $db=null): array {
   $profile->execute([96,'gilan']);
   $owner=$profile->fetch(PDO::FETCH_ASSOC);
   $display=(string)($owner['name']??'');
-  if (!$owner || mb_strpos($display,'دانش')===false || mb_strpos($display,'اسدی')===false)
-    throw new RuntimeException('User account identity not verified; no changes.');
+  if ((!$owner || mb_strpos($display,'دانش')===false || mb_strpos($display,'اسدی')===false) && ($args['inspect_only']??false)!==true)
+    throw new InvalidArgumentException('Profile identity verification failed; no updates');
+  if (($args['inspect_only']??false)===true) {
+    $meta=['profile_found'=>(bool)$owner,'username_matched'=>((string)($owner['user_name']??''))==='gilan',
+      'name_has_danesh'=>mb_strpos($display,'دانش')!==false,'name_has_asadi'=>mb_strpos($display,'اسدی')!==false];
+    foreach(['posts','post_brand'] as $table) {
+      $cols=aloContentColumns($db,$table);
+      $meta[$table.'_has_owner']=isset($cols['user_id']);
+      $meta[$table.'_has_content']=isset($cols['content']);
+      if(isset($cols['user_id'])){
+        $count=$db->prepare('SELECT COUNT(*) FROM `'.$table.'` WHERE user_id=?');
+        $count->execute([96]);
+        $meta[$table.'_count']=(int)$count->fetchColumn();
+      }
+    }
+    return ['success'=>true,'inspect_only'=>true,'checks'=>$meta];
+  }
   $phone='09040731535';
   $patterns=[
     '~(?<![\d])(?:\+98|0098|98)[\s.\-]*9(?:[\s.\-]*[0-9]){9}(?![\d])~u',
