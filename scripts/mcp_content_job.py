@@ -238,6 +238,16 @@ def manage_content(path):
     request=json.loads(path.read_text(encoding="utf-8"))
     content_type=request.get("type","article")
     action=request.get("action","publish")
+    if action == "inspect_gilan_96_phones":
+        result = tool("set_gilan_96_article_phones", {
+            "profile_user_id":96, "profile_username":"gilan",
+            "phone":"09040731535", "confirm":True,
+            "inspect_only":True,
+        })
+        if result.get("success") is not True or result.get("inspect_only") is not True:
+            raise RuntimeError("Profile inspection failed")
+        print("GILAN_96_INSPECTION",json.dumps(result.get("checks"),ensure_ascii=False))
+        return
     if action == "update_gilan_96_phones":
         if request.get("profile_user_id") != 96 or request.get("profile_username") != "gilan" or request.get("phone") != "09040731535" or request.get("confirm") is not True:
             raise ValueError("Exact profile identity, destination phone and confirmation are required")
