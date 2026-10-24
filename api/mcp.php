@@ -69,6 +69,7 @@ function mcpMenuExists(PDO $db, int $id): bool {
 require_once __DIR__ . '/content-tools.php';
 require_once __DIR__ . '/site-graph.php';
 require_once __DIR__ . '/city-contact.php';
+require_once __DIR__ . '/profile-contact-96.php';
 require_once __DIR__ . '/refrigerator-links.php';
 
 function mcpTools(): array {
@@ -87,10 +88,11 @@ function mcpTools(): array {
         ['name' => 'create_article_draft', 'description' => 'Create an unpublished draft; never publishes immediately.', 'inputSchema' => ['type' => 'object', 'properties' => $fields, 'required' => ['title', 'content', 'post_id']]],
         ['name' => 'update_article_draft', 'description' => 'Edit an existing UNPUBLISHED draft only.', 'inputSchema' => ['type' => 'object', 'properties' => array_merge(['id' => ['type' => 'integer', 'minimum' => 1]], $fields), 'required' => ['id']]],
         ['name' => 'publish_article', 'description' => 'Explicitly publish a draft ONLY after user approval; requires MCP_ALLOW_PUBLISH=1.', 'inputSchema' => ['type' => 'object', 'properties' => ['id' => ['type' => 'integer', 'minimum' => 1], 'confirm' => ['type' => 'boolean', 'const' => true]], 'required' => ['id', 'confirm']]],
-    ], aloContentTools(), aloGraphTools(), [aloCityContactTool(), aloRefrigeratorLinkTool()]);
+    ], aloContentTools(), aloGraphTools(), [aloCityContactTool(), aloRefrigeratorLinkTool(), aloProfilePhoneTool()]);
 }
 function mcpExecute(string $name, array $a): array {
     if ($name === 'set_mahshahr_contact_numbers') return aloCityContactExecute($a);
+    if ($name === 'set_gilan_96_article_phones') return aloProfilePhoneExecute($a);
     if ($name === 'replace_refrigerator_o3am_links') return aloRefrigeratorLinkExecute($a);
     if (in_array($name, ['describe_alo_graph','query_alo_graph','get_article_titles_by_ids'], true)) return aloGraphExecute($name,$a);
     if (in_array($name, ['describe_content_fields','list_content','find_content','get_content','create_content','update_content','set_content_published'], true)) return aloContentExecute($name, $a);
