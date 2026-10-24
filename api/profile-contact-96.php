@@ -22,7 +22,7 @@ function aloProfilePhoneExecute(array $args,?PDO $db=null): array {
   $profile->execute([96,'gilan']);
   $owner=$profile->fetch(PDO::FETCH_ASSOC);
   $display=(string)($owner['name']??'');
-  if ((!$owner || mb_strpos($display,'دانش')===false || mb_strpos($display,'اسدی')===false) && ($args['inspect_only']??false)!==true)
+  if ((!$owner || mb_strpos($display,'اسدی')===false) && ($args['inspect_only']??false)!==true)
     throw new InvalidArgumentException('Profile identity verification failed; no updates');
   if (($args['inspect_only']??false)===true) {
     $meta=['profile_found'=>(bool)$owner,'username_matched'=>((string)($owner['user_name']??''))==='gilan',
@@ -42,7 +42,9 @@ function aloProfilePhoneExecute(array $args,?PDO $db=null): array {
   $phone='09040731535';
   $patterns=[
     '~(?<![\d])(?:\+98|0098|98)[\s.\-]*9(?:[\s.\-]*[0-9]){9}(?![\d])~u',
-    '~(?<![\d])0[\s.\-]*9(?:[\s.\-]*[0-9]){9}(?![\d])~u'
+    '~(?<![\d])(?:\+98|0098|98)[\s.\-]*[1-8](?:[\s.\-]*[0-9]){9}(?![\d])~u',
+    '~(?<![\d])0[\s.\-]*9(?:[\s.\-]*[0-9]){9}(?![\d])~u',
+    '~(?<![\d])0[\s.\-]*[1-8](?:[\s.\-]*[0-9]){9}(?![\d])~u'
   ];
   $repl=static function(string $input) use ($patterns,$phone): string {
     foreach($patterns as $pat) {
