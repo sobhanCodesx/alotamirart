@@ -30,6 +30,12 @@ $canonicalBrandSlug = $found ? trim((string)($post['slug'] ?? ''), '/') : '';
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title><?= htmlspecialchars($title,ENT_QUOTES,'UTF-8') ?> | <?= htmlspecialchars(isset($dataSeo['title'])?clean_display_text($dataSeo['title']):'الو تعمیراتچی',ENT_QUOTES,'UTF-8') ?></title>
+<?php if ($found && $description === ''): ?>
+<?php
+$plainContent = clean_display_text($post['content'] ?? '');
+$description = mb_substr($plainContent !== '' ? $plainContent : $title . ' | اطلاعات و جزئیات این مطلب در الو تعمیراتچی', 0, 155, 'UTF-8');
+?>
+<?php endif; ?>
 <?php if($description!==''): ?><meta name="description" content="<?= htmlspecialchars($description,ENT_QUOTES,'UTF-8') ?>"><?php endif; ?>
 <meta name="robots" content="<?= $found?'index,follow':'noindex,follow' ?>">
 <?php if ($found && $canonicalBrandSlug !== ''): ?><link rel="canonical" href="https://alotamiratchi.ir/<?= htmlspecialchars(rawurlencode($canonicalBrandSlug), ENT_QUOTES, 'UTF-8') ?>/<?= (int)$post['id'] ?>"><?php endif; ?>
