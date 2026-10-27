@@ -10,6 +10,10 @@ RewriteBase /
 # Apache keeps the public request path /api/mcp and internally serves PHP.
 RewriteRule ^api/mcp/?$ api/mcp.php [END,QSA,NC]
 
+# Canonicalize www for all paths, including static assets.
+RewriteCond %{HTTP_HOST} ^www\.alotamiratchi\.ir$ [NC]
+RewriteRule ^ https://alotamiratchi.ir%{REQUEST_URI} [R=301,L,NE]
+
 # Force HTTPS while keeping the original path/query.
 RewriteCond %{HTTPS} off
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
