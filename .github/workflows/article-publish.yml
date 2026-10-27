@@ -1,0 +1,77 @@
+name: Publish approved Alo Tamiratchi article
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content/publish/*.json'
+  workflow_dispatch:
+    inputs:
+      article_file:
+        description: 'Path under content/publish/ ending in .json'
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: alo-article-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish approved article via authenticated JSON-RPC
+        env:
+          ALO_MCP_TOKEN: ${{ secrets.ALO_MCP_TOKEN }}
+          ARTICLE_FILE: ${{ github.event_name == 'workflow_dispatch' && inputs.article_file || '' }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          python3 - <<'PY'
+          import glob,json,os,pathlib,sys,urllib.request,urllib.error
+          token=os.environ.get('ALO_MCP_TOKEN','')
+          if len(token)<32: sys.exit('Missing ALO_MCP_TOKEN GitHub Actions secret.')
+          if os.environ['EVENT_NAME']=='workflow_dispatch':
+              paths=[os.environ['ARTICLE_FILE']]
+          else:
+              import subprocess
+              before='${{ github.event.before }}'
+              after='${{ github.sha }}'
+              if before=='0'*40:
+                  changed=subprocess.check_output(['git','ls-files','content/publish/*.json'],text=True).splitlines()
+              else:
+                  subprocess.run(['git','fetch','--no-tags','--depth=2','origin',before],check=True)
+                  changed=subprocess.check_output(['git','diff','--name-only','--diff-filter=A',before,after,'--','content/publish/'],text=True).splitlines()
+              paths=changed
+          def rpc(method,params):
+              data=json.dumps({'jsonrpc':'2.0','id':1,'method':'tools/call','params':{'name':method,'arguments':params}},ensure_ascii=False).encode()
+              req=urllib.request.Request('https://alotamiratchi.ir/api/mcp.php',data=data,headers={'Authorization':'Bearer '+token,'Content-Type':'application/json'},method='POST')
+              with urllib.request.urlopen(req,timeout=25) as resp: result=json.load(resp)
+              if result.get('error'): raise RuntimeError('MCP request failed: '+str(result['error']))
+              body=result.get('result',{})
+              if body.get('isError'): raise RuntimeError('MCP tool returned error: '+str(body.get('content','')))
+              content=body.get('content',[])
+              for item in content:
+                  if item.get('type')=='text':
+                      try: return json.loads(item['text'])
+                      except ValueError: continue
+              return body
+          for p in paths:
+              path=pathlib.Path(p)
+              if len(path.parts)!=3 or path.parts[:2]!=('content','publish') or path.suffix!='.json' or not path.is_file():
+                  sys.exit('Invalid article path')
+              article=json.loads(path.read_text(encoding='utf-8'))
+              if article.get('approved_for_publication') is not True: sys.exit('Article not approved for publication.')
+              if not isinstance(article.get('post_id'),int) or article['post_id']<1: sys.exit('Valid post_id category required.')
+              draft={k:article[k] for k in ('title','content','description','keyword','tags','post_id') if k in article}
+              if not isinstance(draft.get('title'),str) or not isinstance(draft.get('content'),str): sys.exit('Missing title or content')
+              created=rpc('create_article_draft',draft)
+              obj=created.get('article') or created.get('data',{}).get('article')
+              if not isinstance(obj,dict) or not isinstance(obj.get('id'),(int,str)): sys.exit('Cannot confirm draft ID: '+str(created)[:500])
+              article_id=int(obj['id'])
+              print('Created draft ID:',article_id)
+              published=rpc('publish_article',{'id':article_id,'confirm':True})
+              if published.get('published') is not True: sys.exit('Publication not confirmed: '+str(published)[:500])
+              print('Published article ID:',article_id)
+          if not paths: print('No newly added article JSON files to publish.')
+          PY
