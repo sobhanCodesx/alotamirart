@@ -39,4 +39,7 @@ $postSource=file_get_contents($root.'/them/app/posts/post.php');
 $brandSource=file_get_contents($root.'/them/app/brands/post.php');
 seoAssert(strpos($postSource,'rel="canonical" href="https://alotamiratchi.ir/post/')!==false,'article canonical link');
 seoAssert(strpos($brandSource,'rel="canonical" href="https://alotamiratchi.ir/')!==false,'brand canonical link');
+$brandsController=file_get_contents($root.'/classes/app/Brands.php');
+seoAssert(strpos($brandsController,'WHERE brand_id = ? AND id != ? AND status = 1')!==false,'related brand listings must share brand_id and exclude current listing');
+seoAssert(strpos($brandsController,'ORDER BY updated_at DESC LIMIT 0,6')!==false,'related brand listings should prefer recent updates');
 echo "SEO crawling and canonicalization checks passed\n";
