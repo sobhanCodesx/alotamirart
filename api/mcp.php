@@ -88,9 +88,10 @@ function mcpTools(): array {
         ['name' => 'create_article_draft', 'description' => 'Create an unpublished draft; never publishes immediately.', 'inputSchema' => ['type' => 'object', 'properties' => $fields, 'required' => ['title', 'content', 'post_id']]],
         ['name' => 'update_article_draft', 'description' => 'Edit an existing UNPUBLISHED draft only.', 'inputSchema' => ['type' => 'object', 'properties' => array_merge(['id' => ['type' => 'integer', 'minimum' => 1]], $fields), 'required' => ['id']]],
         ['name' => 'publish_article', 'description' => 'Explicitly publish a draft ONLY after user approval; requires MCP_ALLOW_PUBLISH=1.', 'inputSchema' => ['type' => 'object', 'properties' => ['id' => ['type' => 'integer', 'minimum' => 1], 'confirm' => ['type' => 'boolean', 'const' => true]], 'required' => ['id', 'confirm']]],
-    ], aloContentTools(), aloGraphTools(), [aloCityContactTool(), aloRefrigeratorLinkTool(), aloProfilePhoneTool()]);
+    ], aloContentTools(), aloGraphTools(), [aloCityContactTool(), aloShahrekordContactTool(), aloRefrigeratorLinkTool(), aloProfilePhoneTool()]);
 }
 function mcpExecute(string $name, array $a): array {
+    if ($name === 'set_shahrekord_contact_numbers') return aloShahrekordContactExecute($a);
     if ($name === 'set_mahshahr_contact_numbers') return aloCityContactExecute($a);
     if ($name === 'set_gilan_96_article_phones') return aloProfilePhoneExecute($a);
     if ($name === 'replace_refrigerator_o3am_links') return aloRefrigeratorLinkExecute($a);
