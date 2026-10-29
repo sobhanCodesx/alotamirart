@@ -10,6 +10,21 @@ ROOT = Path(__file__).resolve().parents[1]
 def make_banner(spec):
     if not isinstance(spec, dict):
         raise ValueError("banner must be an object")
+    if spec.get("template") == "honey-izeh":
+        from PIL import Image, ImageDraw
+        import random
+        random.seed(481)
+        im=Image.new("RGB",(960,540),(244,194,80))
+        d=ImageDraw.Draw(im)
+        for i in range(24):
+            x=random.randrange(0,960);y=random.randrange(0,540);r=random.randrange(24,75)
+            d.ellipse((x-r,y-r,x+r,y+r),fill=(random.randrange(170,220),random.randrange(95,145),random.randrange(15,55)))
+        d.rounded_rectangle((245,70,710,470),radius=55,fill=(255,228,151),outline=(102,57,20),width=18)
+        d.rounded_rectangle((300,125,655,425),radius=35,fill=(199,109,22),outline=(255,243,201),width=12)
+        d.ellipse((365,190,595,355),fill=(245,175,44),outline=(255,225,138),width=12)
+        out=BytesIO();im.save(out,format="WEBP",quality=58,method=6)
+        data=out.getvalue()
+        return base64.b64encode(data).decode("ascii"),len(data)
     if spec.get("template") == "gas-igniter":
         return make_gas_igniter_banner(spec)
     if spec.get("template") == "gas-thermocouple":
