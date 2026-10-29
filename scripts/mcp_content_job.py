@@ -264,6 +264,10 @@ def manage_content(path):
               "changed_brand_articles",counts.get("changed_brand_articles"),
               "fields_changed",counts.get("fields_changed"))
         return
+    if action == "bulk_shahrekord_contacts":
+        from mcp_shahrekord_contacts import update_shahrekord
+        update_shahrekord(tool,request)
+        return
     if action == "bulk_mahshahr_contacts":
         if request.get("city") != "ماهشهر" or request.get("confirm") is not True:
             raise ValueError("Mahshahr operation requires explicit city confirmation")
