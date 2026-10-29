@@ -265,8 +265,12 @@ def manage_content(path):
               "fields_changed",counts.get("fields_changed"))
         return
     if action == "bulk_shahrekord_contacts":
-        from mcp_shahrekord_contacts import update_shahrekord
-        update_shahrekord(tool,request)
+        if request.get("city") != "شهرکرد" or request.get("phone") != "09139858891" or request.get("confirm") is not True:
+            raise ValueError("Exact Shahrekord scope and authorized phone required")
+        result = tool("set_shahrekord_contact_numbers", {"city":"شهرکرد","phone":"09139858891","confirm":True})
+        if result.get("verified") is not True or result.get("phone") != "09139858891":
+            raise RuntimeError("Server did not confirm Shahrekord contact update")
+        print("SHAHREKORD_ALL_CONTACTS_VERIFIED",json.dumps(result,ensure_ascii=False))
         return
     if action == "bulk_mahshahr_contacts":
         if request.get("city") != "ماهشهر" or request.get("confirm") is not True:
