@@ -63,7 +63,7 @@ class Brands
         }
 
         $side_brand = $post
-            ? $db->select("SELECT * FROM post_brand WHERE brand_id = ? AND id != ? AND status = 1 ORDER BY updated_at DESC LIMIT 0,6", $post['brand_id'], $post['id'])->fetchAll()
+            ? $db->select("SELECT * FROM post_brand WHERE brand_id = ? AND id != ? AND status = 1 ORDER BY updated_at DESC LIMIT 0,6", [$post['brand_id'], $post['id']])->fetchAll()
             : [];
         $side_post = $db->select("SELECT * FROM posts WHERE NOT id = ? AND status = 1 ORDER BY updated_at DESC LIMIT 0,8", $id)->fetchAll();
         require_once BASE_PATH . '/them/app/brands/post.php';
