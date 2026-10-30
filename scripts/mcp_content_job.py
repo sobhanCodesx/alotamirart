@@ -238,6 +238,10 @@ def manage_content(path):
     request=json.loads(path.read_text(encoding="utf-8"))
     content_type=request.get("type","article")
     action=request.get("action","publish")
+    if action=="inspect_dishwasher_categories_20261030":
+        result=tool("list_article_categories",{})
+        print("ALO_DISHWASHER_CATEGORIES",json.dumps(result,ensure_ascii=False))
+        return
     if action == "inspect_gilan_96_phones":
         result = tool("set_gilan_96_article_phones", {
             "profile_user_id":96, "profile_username":"gilan",
