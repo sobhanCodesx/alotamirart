@@ -1060,12 +1060,23 @@ $serviceName = $service['name'];
 $serviceIcon = $service['icon'];
 $serviceTitle = $service['title'];
 $serviceDesc = $service['desc'];
-$longDesc = str_replace('{city}', $city['name'], $service['long_desc']);
+// Each active city/service pair has independently structured, deterministic editorial copy.
+// Do not print the legacy static long_desc: it repeated across cities and contained
+// unverifiable testimonials, fixed prices and placeholder contact numbers.
+require_once __DIR__ . '/app/Support/city-service-editorial.php';
+$editorial = aloCityServiceEditorial($city, $serviceSlug);
+$longDesc = $editorial !== null
+    ? $editorial['html']
+    : '<p>لطفاً برای دریافت اطلاعات این خدمت، بخش خدمات شهر را بررسی کنید.</p>';
 $serviceList = $service['services'];
 
 // ===== تنظیمات سئو =====
-$pageTitle = "{$serviceTitle} در {$city['name']} | الو تعمیراتچی";
-$pageDescription = "تعمیرات تخصصی {$serviceName} در {$city['name']} با بهترین کیفیت و ضمانت. تعمیر انواع {$serviceName} در {$city['name']} توسط تکنسین‌های مجرب.";
+$pageTitle = $editorial !== null
+    ? $editorial['title']
+    : "{$serviceTitle} در {$city['name']} | الو تعمیراتچی";
+$pageDescription = $editorial !== null
+    ? $editorial['meta_description']
+    : "راهنمای تعمیر {$serviceName} در {$city['name']} و بررسی مشکلات متداول.";
 $canonical = "https://alotamiratchi.ir/{$serviceSlug}-repair-in-{$city['slug']}";
 $ogImage = "https://alotamiratchi.ir/assets/images/logo.png";
 ?>
