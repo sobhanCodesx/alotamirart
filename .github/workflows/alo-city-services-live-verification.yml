@@ -1,0 +1,50 @@
+name: Verify Distinct City Service Content on Live Site
+on:
+  workflow_run:
+    workflows:
+      - 'Deploy AloTamiratchi Production (signed HTTPS, no SSH/FTP)'
+    types: [completed]
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Compare two active city pages and the page's contextual content
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from html import unescape
+          from urllib.request import urlopen, Request
+          import re, time
+          HOST='https://alotamiratchi.ir'
+          def get(path):
+              req=Request(HOST+path,headers={'User-Agent':'AloCityEditorialLiveVerifier/1.0','Accept':'text/html'})
+              with urlopen(req,timeout=35) as r:
+                  text=r.read(1200000).decode('utf-8','replace')
+                  assert r.status==200, (path,r.status)
+                  print('LIVE_FETCH',r.status,path,'BYTES',len(text))
+                  return unescape(text)
+          listing=get('/cities')
+          slugs=[]
+          for slug in re.findall(r'/city/([a-z0-9][a-z0-9-]{0,90})',listing):
+              if slug not in slugs:slugs.append(slug)
+          assert len(slugs)>=2, 'Need two active city slugs from public cities page'
+          texts={}
+          for slug in slugs[:2]:
+              for service in ('refrigerator','washing-machine'):
+                  page=get('/'+service+'-repair-in-'+slug)
+                  assert 'alo-city-editorial' in page,'New editorial renderer not present '+slug+'/'+service
+                  assert '0912-345-6789' not in page and '09123456789' not in page,'Legacy placeholder phone visible'
+                  assert 'روند تغییر' in page or 'عیب‌یابی' in page or 'مدل دستگاه' in page
+                  assert '/services-in-'+slug in page,'Missing current-city links'
+                  assert 'https://alotamiratchi.ir/'+service+'-repair-in-'+slug in page, 'Missing canonical'
+                  core=page.split('class="alo-city-editorial"',1)[-1].split('</section>',1)[0]
+                  texts[(slug,service)]=re.sub(slug,'[CITY]',core)
+          for service in ('refrigerator','washing-machine'):
+              assert texts[(slugs[0],service)]!=texts[(slugs[1],service)],'City service content repeated after removing URL slug'
+          print('LIVE_CITY_SERVICE_EDITORIAL_VERIFIED',slugs[0],slugs[1],'2 services each')
+          PY
