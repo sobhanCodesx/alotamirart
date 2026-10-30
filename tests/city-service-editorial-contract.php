@@ -43,7 +43,7 @@ foreach ($slugs as $service) {
             'Article lacks useful heading hierarchy');
         checkEditorial(strlen($first['meta_description']) > 80, 'Missing actionable description');
         $normalized = str_replace($name, '[CITY]', $html);
-        checkEditorial(!isset($unique[$normalized]), 'Two city pages reuse the same non-local content: ' . $unique[$normalized] . ' / ' . $slug . ' for ' . $service);
+        checkEditorial(!isset($unique[$normalized]), 'Two city pages reuse the same non-local content: ' . ($unique[$normalized] ?? '<none>') . ' / ' . $slug . ' for ' . $service);
         $unique[$normalized] = $slug;
     }
 }
