@@ -1058,7 +1058,7 @@ $serviceContent = [
 $service = isset($serviceContent[$serviceSlug]) ? $serviceContent[$serviceSlug] : $serviceContent['refrigerator'];
 $serviceName = $service['name'];
 $serviceIcon = $service['icon'];
-$serviceTitle = $service['title'];
+$serviceTitle = 'راهنمای تعمیر ' . $service['name'];
 $serviceDesc = $service['desc'];
 // Each active city/service pair has independently structured, deterministic editorial copy.
 // Do not print the legacy static long_desc: it repeated across cities and contained
@@ -1373,7 +1373,7 @@ $ogImage = "https://alotamiratchi.ir/assets/images/logo.png";
     <div class="header">
         <span class="icon-big"><?= $serviceIcon ?></span>
         <h1><?= $serviceTitle ?> در <span class="highlight"><?= htmlspecialchars($city['name']) ?></span></h1>
-        <p>🔧 <?= $serviceDesc ?> با بهترین کیفیت و ضمانت</p>
+        <p>🔧 نکات کاربردی عیب‌یابی، شرایط ایمنی و راهنمای انتخاب خدمت برای <?= htmlspecialchars($city['name'], ENT_QUOTES, 'UTF-8') ?></p>
         <span class="badge"><i class="fas fa-map-pin"></i> <?= htmlspecialchars($city['name']) ?> | الو تعمیراتچی</span
         <!-- ============================================================
 اپراتور خدمات - شماره تماس ثابت
@@ -1416,12 +1416,12 @@ $ogImage = "https://alotamiratchi.ir/assets/images/logo.png";
                 </a>
             </div>
             <div style="font-size: 0.65rem; color: #64748b; margin-top: 2px;">
-                <i class="fas fa-clock"></i> پاسخگویی ۲۴ ساعته
+                <i class="fas fa-clock"></i> برای هماهنگی زمان مراجعه تماس بگیرید
             </div>
         </div>
 
     </div>
-</div>>
+</div>
     </div>
 
     <div class="info-box">
@@ -1501,8 +1501,8 @@ $ogImage = "https://alotamiratchi.ir/assets/images/logo.png";
     </div>
 </div>
     <div class="contact-row">
-        <a href="tel:09123456789" class="btn btn-phone"><i class="fas fa-phone-alt"></i> تماس بگیرید</a>
-        <a href="https://wa.me/989123456789" target="_blank" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i> واتساپ</a>
+        <a href="tel:09933493049" class="btn btn-phone"><i class="fas fa-phone-alt"></i> تماس بگیرید</a>
+        <a href="https://wa.me/989933493049" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i> واتساپ</a>
     </div>
 
     <a href="/services-in-<?= $city['slug'] ?>" class="back-link"><i class="fas fa-arrow-right"></i> بازگشت به خدمات <?= htmlspecialchars($city['name']) ?></a>
