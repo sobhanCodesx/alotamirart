@@ -1,0 +1,10 @@
+{
+  "action": "bulk_three_city_contacts",
+  "cities": [
+    "هشتگرد",
+    "نظرآباد",
+    "آبیک"
+  ],
+  "phone": "09371141762",
+  "confirm": true
+}
