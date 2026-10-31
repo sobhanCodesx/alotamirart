@@ -1,0 +1,57 @@
+name: Audit Full Rewrites of 22 Mahmoodabad Fridge Guides
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-mahmoodabad-full-rewrite-audit.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify brand-specific uniqueness and fields
+        run: |
+          python3 - <<'PY'
+          import json,re,html
+          from pathlib import Path
+          from itertools import combinations
+          docs=[]
+          names=['بکو','بوش','دوو','دیپوینت','الکترواستیل','جنرال الکتریک','کلور','هایسنس','هیتاچی','مدیا','ایستکول','کنوود','سینجر','وستینگ‌هاوس','التو','برفاب','ایران شرق','نیکسان','اورست','هیوندا','سیلور','سینور']
+          def tokens(content):
+              plain=html.unescape(re.sub(r'<[^>]+>',' ',content))
+              for n in names: plain=plain.replace(n,'برند')
+              plain=plain.replace('محمودآباد','شهر').replace('محمود آباد','شهر')
+              return re.findall(r'[\w\u0600-\u06ff]+',plain.lower())
+          def grams(t,n=7):return {tuple(t[i:i+n]) for i in range(max(0,len(t)-n+1))}
+          for i in range(462,484):
+              p=Path('content-requests')/f'20261101-mahmoodabad-rewrite-{i}.json'
+              d=json.loads(p.read_text(encoding='utf-8'))
+              assert d['id']==i and d['action']=='update' and d['type']=='brand_article'
+              content=d['fields']['content']
+              assert len(re.findall(r'<h2\b',content))>=7, ('not enough distinct sections',i)
+              assert len(re.findall(r'href="https://alotamiratchi.ir/',content))==2,('internal links',i)
+              assert len(re.findall(r'href="https://tekanino.ir/',content))==1,('outgoing link',i)
+              assert len(d['fields'].get('des',''))>=70,('missing unique meta',i)
+              t=tokens(content)
+              assert len(t)>=360,('rewrite content too short',i,len(t))
+              hs=re.findall(r'<h2>(.*?)</h2>',content)
+              docs.append((i,t,grams(t),hs))
+              print('REWRITE_DOC_OK',i,'words',len(t),'headings',len(hs))
+          assert len(docs)==22
+          overlaps=[]
+          for (id1,t1,g1,h1),(id2,t2,g2,h2) in combinations(docs,2):
+              intr=len(g1&g2)
+              j=intr/(len(g1|g2) or 1)
+              shared_heads=set(h1)&set(h2)
+              overlaps.append((j,id1,id2,intr,len(shared_heads)))
+              assert not shared_heads,('same headings',id1,id2,shared_heads)
+          overlaps.sort(reverse=True)
+          for x in overlaps[:15]:
+              print('MOST_SIMILAR_PAIR',str(round(x[0],4)),x[1],x[2],'matching_ngrams',x[3])
+          print('FULL_REWRITE_MAX_7GRAM_JACCARD',round(overlaps[0][0],4))
+          assert overlaps[0][0]<0.25,('near duplicate content',overlaps[0])
+          print('ALO_22_FULL_REWRITES_DISTINCT_OK')
+          PY
