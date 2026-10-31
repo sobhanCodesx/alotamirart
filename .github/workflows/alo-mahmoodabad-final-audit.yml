@@ -1,4 +1,5 @@
 name: Verify 22 Mahmoodabad Refrigerator Brand Articles Live
+# Confirm latest fully rewritten article pages, media and links after successful uniqueness QA
 on:
   push:
     branches: [main]
