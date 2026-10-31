@@ -11,10 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - uses: actions/checkout@v4
       - name: Verify HTTP, canonical, title, links and WebP bytes for all 22 live articles
         run: |
           python3 - <<'PY'
           from concurrent.futures import ThreadPoolExecutor
+          from pathlib import Path
+          import json
           from html.parser import HTMLParser
           from urllib.request import urlopen,Request
           from urllib.parse import urljoin,urlparse
@@ -74,6 +77,10 @@ jobs:
               url=f'{site}/refrigerator-{slug}-mahmoodabad-repair-guide-2026/{id}'
               html=get(url,2000000).decode('utf-8','replace')
               p=Parse();p.feed(html)
+              source=json.loads((Path('content-requests')/f'20261101-mahmoodabad-rewrite-{id}.json').read_text(encoding='utf-8'))['fields']['content']
+              first=re.search(r'<h2>(.*?)</h2>',source,re.S).group(1)
+              assert unescape(first) in unescape(html),(name,'new rewritten content missing',first)
+              print('ALO_REWRITTEN_CONTENT_LIVE_OK',id,first)
               assert p.h1==1,(name,'H1',p.h1)
               expected=f'نمایندگی تعمیر یخچال {name} در محمودآباد'
               observed=' '.join(unescape(''.join(p.h1_text)).split())
