@@ -47,18 +47,20 @@ jobs:
           ]
           class Parse(HTMLParser):
               def __init__(self):
-                  super().__init__();self.h1=0;self.links=[];self.meta=[];self.canonical=[];self.cover=None;self.content=False;self.article=[]
+                  super().__init__();self.h1=0;self.in_h1=False;self.h1_text=[];self.links=[];self.meta=[];self.canonical=[];self.cover=None;self.content=False;self.article=[]
               def handle_starttag(self,tag,attrs):
                   a=dict(attrs)
-                  if tag=='h1': self.h1+=1
+                  if tag=='h1': self.h1+=1;self.in_h1=True
                   if tag=='a' and a.get('href'):self.links.append(a['href'])
                   if tag=='meta' and a.get('name')=='description':self.meta.append(a.get('content',''))
                   if tag=='link' and 'canonical' in a.get('rel',''):self.canonical.append(a.get('href',''))
                   if tag=='img' and 'detail-cover' in a.get('class',''):self.cover=a.get('src')
                   if tag=='div' and 'article-content' in a.get('class',''):self.content=True
               def handle_data(self,data):
+                  if self.in_h1:self.h1_text.append(data)
                   if self.content:self.article.append(data)
               def handle_endtag(self,tag):
+                  if tag=='h1': self.in_h1=False
                   if tag=='div' and self.content:self.content=False
           def get(url,max_bytes):
               req=Request(url,headers={'User-Agent':'AloCityEditorialLiveVerifier/1.0','Accept':'text/html,image/webp'})
@@ -73,6 +75,10 @@ jobs:
               html=get(url,2000000).decode('utf-8','replace')
               p=Parse();p.feed(html)
               assert p.h1==1,(name,'H1',p.h1)
+              expected=f'نمایندگی تعمیر یخچال {name} در محمودآباد'
+              observed=' '.join(unescape(''.join(p.h1_text)).split())
+              assert observed==expected,('Title mismatch',id,expected,observed)
+              print('ALO_MAHMOODABAD_TITLE_LIVE_OK',id,observed)
               assert p.meta and len(p.meta[0].strip())>=70,(name,'meta')
               assert p.canonical and p.canonical[0].rstrip('/')==url,(name,'canonical',p.canonical)
               assert name in unescape(html),(name,'brand title')
