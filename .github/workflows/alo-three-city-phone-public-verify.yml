@@ -1,0 +1,42 @@
+name: Verify three-city public contact in Alo
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-three-city-phone-public-verify.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read back public contact and prevent stale numbers on target city service pages
+        run: |
+          python3 - <<'PY'
+          import urllib.request,urllib.error,time
+          hosts=[
+              "/services-in-hashtgerd",
+              "/services-in-nazarabad",
+              "/services-in-abik",
+              "/refrigerator-repair-in-hashtgerd",
+              "/tv-repair-in-nazarabad",
+              "/refrigerator-repair-in-abik",
+              "/washing-machine-repair-in-abik",
+          ]
+          for path in hosts:
+              q=urllib.request.Request("https://alotamiratchi.ir"+path,headers={"User-Agent":"Mozilla/5.0 (CityPhoneQA)","Cache-Control":"no-cache"})
+              try:
+                  with urllib.request.urlopen(q,timeout=20) as r:
+                      content=r.read(1000000).decode("utf-8","replace")
+                      status=r.status
+              except urllib.error.HTTPError as e:
+                  print("MISSING_CITY_ROUTE",path,e.code,flush=True)
+                  raise
+              ok="09371141762" in content
+              clickable='tel:09371141762' in content
+              stale=('tel:09933493049' in content or '0993-349-3049' in content or '۰۹۱۲-۳۴۵-۶۷۸۹' in content)
+              print("ALO_PUBLIC_CITY_PHONE",path,"STATUS",status,"PHONE",ok,"CLICKABLE",clickable,"STALE",stale,flush=True)
+              if not ok or not clickable or stale:
+                  raise SystemExit("Wrong visible contact for "+path)
+          PY
