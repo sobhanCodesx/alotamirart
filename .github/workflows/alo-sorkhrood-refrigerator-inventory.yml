@@ -1,0 +1,71 @@
+name: Audit Sorkhrood Published Refrigerator Brand Articles
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-sorkhrood-refrigerator-inventory.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Inspect public Alo Tamiratchi city brand search (read only)
+        run: |
+          python3 - <<'PY'
+          import json,re
+          from html import unescape
+          from urllib.request import Request,urlopen
+          from urllib.parse import urlencode
+          ROOT='https://alotamiratchi.ir'
+          variants=('سرخرود','سرخ رود','سرخ‌رود','سرخرود مازندران')
+          brands={
+            'iran-shargh':'ایران شرق','nixan':'نیکسان','alto':'التو','everest':'اورست',
+            'barfab':'برفاب','sinor':'سینور','silver':'سیلور','frigidaire':'فریجیدر',
+            'eastcool':'ایستکول','vestel':'وستل','kenwood':'کنوود','singer':'سینجر',
+            'westinghouse':'وستینگ‌هاوس','yakhsaran':'یخساران','hyundai':'هیوندا',
+            'beko':'بکو','whirlpool':'ویرپول','general-electric':'جنرال الکتریک',
+            'daewoo':'دوو','bosch':'بوش','snowa':'اسنوا','hitachi':'هیتاچی',
+            'midea':'مدیا','pars':'پارس','depoint':'دیپوینت','hisense':'هایسنس',
+            'himalaya':'هیمالیا','filver':'فیلور','clever':'کلور','emersun':'امرسان',
+            'electrosteel':'الکترواستیل','lg':'ال جی','samsung':'سامسونگ'}
+          def norm(s):
+              s=unescape(re.sub('<[^>]+>',' ',s))
+              for old,new in [('ي','ی'),('ك','ک'),('‌',''),(' ','')]:s=s.replace(old,new)
+              return s.casefold()
+          found={}
+          for term in variants:
+              for page in range(1,101):
+                  req=Request(ROOT+'/search/'+str(page),data=urlencode({'search':term}).encode(),method='POST',headers={'User-Agent':'AloEditorialInventory/1.0','Content-Type':'application/x-www-form-urlencoded','Accept':'text/html'})
+                  try:
+                      with urlopen(req,timeout=35) as r:
+                          body=r.read(2000000).decode('utf-8','replace')
+                          if r.status!=200:raise RuntimeError('status '+str(r.status))
+                  except Exception as exc:
+                      print('SEARCH_ERROR',json.dumps({'term':term,'page':page,'error':str(exc)[:180]},ensure_ascii=False),flush=True)
+                      break
+                  rows=re.findall(r'<h3>\s*<a\s+href="([^"]+)">(.+?)</a>\s*</h3>',body,re.I|re.S)
+                  print('SEARCH_PAGE',json.dumps({'term':term,'page':page,'rows':len(rows)},ensure_ascii=False),flush=True)
+                  if not rows:break
+                  new=0
+                  for url,title in rows:
+                      title=unescape(re.sub('<[^>]+>','',title)).strip()
+                      url=unescape(url).strip()
+                      if url.startswith('/'):url=ROOT+url
+                      if norm('سرخرود') not in norm(title):continue
+                      if url not in found:
+                          found[url]=title
+                          new+=1
+                  if len(rows)<10:break
+                  if page>1 and not new:break
+          print('SORKHROOD_ALL_CITY_ARTICLES_COUNT',len(found),flush=True)
+          for url,title in sorted(found.items()):
+              match=[{'slug':slug,'name':name} for slug,name in brands.items()
+                     if norm(name) in norm(title) or (slug=='lg' and 'ال‌جی' in title)]
+              is_fridge=any(v in norm(title) for v in ('یخچال','فریزر','سایدبایساید','refrigerator'))
+              record={'url':url,'title':title,'refrigerator_in_title':is_fridge,'matching_brands':match}
+              print('SORKHROOD_ARTICLE',json.dumps(record,ensure_ascii=False),flush=True)
+          print('SORKHROOD_AUDIT_COMPLETED',flush=True)
+          PY
