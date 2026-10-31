@@ -1,0 +1,58 @@
+name: Preflight Unique Mahmoodabad Refrigerator Images
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/alo-mahmoodabad-photo-check.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check distinct Wikimedia photo URLs and Python WebP optimizer inputs
+        run: |
+          python3 - <<'PY'
+          from urllib.request import urlopen,Request
+          from io import BytesIO
+          from PIL import Image
+          from concurrent.futures import ThreadPoolExecutor
+          files=[
+              (0, 'Home_appliance_repair.jpg'),
+              (1, 'Refrigerator_1_2017-03-21.jpg'),
+              (2, 'California_Kitchen_Fridge_1.jpg'),
+              (3, 'Fridge_with_Water_Jar.jpg'),
+              (4, 'Fridge_with_Wood_Appearance_Elements.jpg'),
+              (5, 'Refrigerator_Water_Connection.jpg'),
+              (6, 'Fridgemu.jpg'),
+              (7, 'Fridgeinterior.jpg'),
+              (8, 'Inside_the_refrigerator.jpg'),
+              (9, 'Juliesfridge.jpg'),
+              (10, 'Fridge.jpg'),
+              (11, 'Refrigerator.jpg'),
+              (12, 'Fridge_at_night_with_open_door.jpg'),
+              (13, 'Inside_a_refrigerator_%E2%80%93_360%C2%B0_Photo.jpg'),
+              (14, 'Refrigerator_2026-09-13_1.jpeg'),
+              (15, 'California_Kitchen_Fridge_2.jpg'),
+              (16, 'Frigidaire_by_Electrolux_Model_ffu20fc4cw0.JPG'),
+              (17, 'Brisa_refrigerator.jpg'),
+              (18, 'Air_conditioning_and_refrigeration_repair.jpg'),
+              (19, 'K%C3%BChlschrank1.jpg'),
+              (20, 'Fridge_(2015-11-2720-18-380038~2).jpg'),
+              (21, 'Freezer_door_open_on_refrigerator_in_home_kitchen_in_New_Orleans%2C_March_2025.jpg'),
+          ]
+          def check(item):
+              i,filename=item
+              url='https://commons.wikimedia.org/wiki/Special:Redirect/file/'+filename+'?width=640'
+              try:
+                  with urlopen(Request(url,headers={'User-Agent':'AloTamiratchi-ImageOptimizer/1.0'}),timeout=30) as r:
+                      blob=r.read(8000001)
+                  if len(blob)>8000000:raise ValueError('Image exceeds 8MB')
+                  with Image.open(BytesIO(blob)) as im:
+                      size=im.size
+                  return i,'OK',len(blob),size
+              except Exception as e:return i,'FAILED',str(e)[:150]
+          with ThreadPoolExecutor(max_workers=5) as pool:
+              for result in sorted(pool.map(check,files)):
+                  print('PHOTO_SOURCE_PREFLIGHT',*result)
+          PY
