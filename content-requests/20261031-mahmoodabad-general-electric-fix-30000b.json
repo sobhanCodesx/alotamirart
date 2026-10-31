@@ -2,6 +2,8 @@
   "type": "brand_article",
   "action": "update",
   "id": 467,
-  "fields": {},
+  "fields": {
+    "slug": "refrigerator-general-electric-mahmoodabad-repair-guide-2026"
+  },
   "image_url": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Refrigerator_Water_Connection.jpg?width=640"
 }
