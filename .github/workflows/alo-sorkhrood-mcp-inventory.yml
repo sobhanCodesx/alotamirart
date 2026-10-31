@@ -1,0 +1,37 @@
+name: Verify Sorkhrood Inventory With Authenticated Readonly MCP
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-sorkhrood-mcp-inventory.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Query published article and brand article titles via authenticated MCP
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os,json
+          from urllib.request import Request,urlopen
+          token=os.environ.get('MCP_API_TOKEN','')
+          if len(token)<32:raise RuntimeError('MCP secret unavailable')
+          endpoint='https://www.alotamiratchi.ir/api/mcp/'
+          checks=('سرخرود','سرخ رود','سرخ‌رود','محمودآباد')
+          for phrase in checks:
+              for table in ('brand_article','article'):
+                  payload={'jsonrpc':'2.0','id':1,'method':'tools/call','params':{'name':'query_alo_graph','arguments':{'type':table,'query':phrase,'limit':25,'include_drafts':False}}}
+                  request=Request(endpoint,data=json.dumps(payload,ensure_ascii=False).encode('utf-8'),method='POST',headers={'Authorization':'Bearer '+token,'Content-Type':'application/json','Accept':'application/json'})
+                  with urlopen(request,timeout=35) as response:
+                      data=json.load(response)
+                  if 'error' in data or (data.get('result') or {}).get('isError'):
+                      raise RuntimeError('MCP query failed for '+repr(phrase)+' '+table)
+                  ctx=(data.get('result') or {}).get('structuredContent') or {}
+                  entries=(ctx.get('entities') or {}).get('brand_articles' if table=='brand_article' else 'articles',[])
+                  print('ALO_MCP_CITY_INVENTORY',json.dumps({'city_variant':phrase,'type':table,'records':len(entries),'items':[{'id':v['id'],'title':v['title'],'slug':v.get('slug'),'status':v.get('status'),'brand_name':v.get('brand_name')} for v in entries]},ensure_ascii=False),flush=True)
+          print('ALO_MCP_SORKHROOD_READONLY_DONE',flush=True)
+          PY
