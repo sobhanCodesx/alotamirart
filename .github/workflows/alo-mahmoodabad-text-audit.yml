@@ -1,0 +1,37 @@
+name: Check Brand Article Text Similarity in Mahmoodabad
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/alo-mahmoodabad-text-audit.yml']
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Report content duplication signals without publishing or changing pages
+        run: |
+          python3 - <<'PY'
+          import glob,json,re,html,itertools
+          files=glob.glob('content-requests/20261031-mahmoodabad-*-refrigerator.json')
+          brand_names=['بوش','دوو','بکو','جنرال الکتریک','الکترواستیل','دیپوینت','کلور','هایسنس','هیتاچی','مدیا','ایستکول','کنوود','سینجر','وستینگ‌هاوس','هیوندا','سیلور','سینور','اورست','التو','نیکسان','ایران شرق','برفاب']
+          docs={}
+          for f in files:
+              x=json.load(open(f,encoding='utf-8'));txt=html.unescape(re.sub('<[^>]+>',' ',x['fields']['content']))
+              txt=re.sub(r'https?://\S+',' ',txt)
+              for n in sorted(brand_names,key=len,reverse=True):txt=txt.replace(n,'برند')
+              txt=txt.replace('محمودآباد','شهر')
+              words=re.findall(r'[\w\u0600-\u06FF]+',txt.lower(),flags=re.UNICODE)
+              sh={' '.join(words[i:i+7]) for i in range(max(0,len(words)-6))}
+              docs[x['fields']['title']]=(len(words),sh)
+          assert len(docs)==22,len(docs)
+          pairs=[]
+          for (a,(wa,sa)),(b,(wb,sb)) in itertools.combinations(docs.items(),2):
+              score=len(sa&sb)/max(1,len(sa|sb))
+              pairs.append((score,a,b))
+          print('ARTICLE_COUNT',len(docs),'WORD_RANGE',min(v[0] for v in docs.values()),max(v[0] for v in docs.values()))
+          for score,a,b in sorted(pairs,reverse=True)[:15]:
+              print('NORMALIZED_7GRAM_JACCARD',round(score,4),a,'/',b)
+          print('MAX_JACCARD',round(max(x[0] for x in pairs),4))
+          PY
