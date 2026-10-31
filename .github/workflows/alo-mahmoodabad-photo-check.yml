@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Install Pillow image verifier
+        run: python3 -m pip install --quiet pillow
       - name: Check distinct Wikimedia photo URLs and Python WebP optimizer inputs
         run: |
           python3 - <<'PY'
