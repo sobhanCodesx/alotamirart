@@ -26,8 +26,8 @@ if ($db->connect_error) {
 // ===== گرفتن اطلاعات از آدرس =====
 $serviceSlug = !empty($serviceSlug) ? $serviceSlug : (isset($_GET['service']) ? $_GET['service'] : 'refrigerator');
 $citySlug = !empty($city['slug']) ? $city['slug'] : (isset($_GET['city']) ? $_GET['city'] : 'tehran');
-$aloThreeCityContact = in_array((string)$citySlug, ['hashtgerd','nazarabad','abyek'], true) ? '09371141762' : '09933493049';
-$aloThreeCitySchemaContact = in_array((string)$citySlug, ['hashtgerd','nazarabad','abyek'], true) ? '+989371141762' : '+989123456789';
+$aloThreeCityContact = in_array((string)$citySlug, ['hashtgerd','nazarabad','abyek','abik'], true) ? '09371141762' : '09933493049';
+$aloThreeCitySchemaContact = in_array((string)$citySlug, ['hashtgerd','nazarabad','abyek','abik'], true) ? '+989371141762' : '+989123456789';
 
 // ===== دریافت اطلاعات شهر =====
 if (empty($city) && !empty($citySlug)) {
