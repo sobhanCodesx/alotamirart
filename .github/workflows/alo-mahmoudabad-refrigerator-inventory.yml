@@ -62,5 +62,14 @@ jobs:
               print('CITY_BRAND_ARTICLE',json.dumps({'title':title,'url':url},ensure_ascii=False))
           for url,title in fridge:
               print('MAHMOUDABAD_REFRIGERATOR_PUBLISHED',json.dumps({'title':title,'url':url},ensure_ascii=False))
+          for url,title in all_city:
+              try:
+                  req=Request(url,headers={'User-Agent':'AloCityEditorialLiveVerifier/1.0','Accept':'text/html'})
+                  with urlopen(req,timeout=35) as response:
+                      html=response.read(300000).decode('utf-8','replace')
+                      ok=response.status==200 and ('<h1' in html.lower())
+                      print('PUBLISHED_PAGE_CHECK',json.dumps({'title':title,'url':url,'status':response.status,'h1':ok},ensure_ascii=False))
+              except Exception as e:
+                  print('PUBLISHED_PAGE_CHECK_FAILED',json.dumps({'title':title,'url':url,'error':str(e)[:120]},ensure_ascii=False))
           print('MAHMOUDABAD_PUBLIC_SEARCH_AUDIT_FINISHED')
           PY
