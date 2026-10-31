@@ -13,9 +13,9 @@ def update_three_city_contacts(tool,request):
     stats={}
     for city in CITIES:
         for kind,key in TYPES:
-            data=tool("query_alo_graph",{"type":kind,"query":city,"limit":80,"include_drafts":True})
+            data=tool("query_alo_graph",{"type":kind,"query":city,"limit":25,"include_drafts":True})
             rows=data["entities"][key]
-            if not isinstance(rows,list) or len(rows)>=80:raise RuntimeError("Truncated list for "+city+" "+kind+"; no write")
+            if not isinstance(rows,list) or len(rows)>=25:raise RuntimeError("Truncated list for "+city+" "+kind+"; no write")
             for row in rows:
                 identity=int(row["id"])
                 record=tool("get_content",{"type":kind,"id":identity})["record"]
