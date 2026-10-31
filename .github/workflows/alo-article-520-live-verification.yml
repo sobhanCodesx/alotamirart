@@ -52,7 +52,7 @@ jobs:
           assert p.h1==1, ('H1 count',p.h1)
           assert 'چرا الو تعمیراتچی را انتخاب کنیم' in unescape(page),'Missing expected article text'
           assert 'چرا الو تعمیراتچی را انتخاب کنیم' in unescape(p.title),'Missing search title'
-          assert p.canonical and p.canonical[0].rstrip('/')==ROOT+PATH,('Bad canonical',p.canonical)
+          assert p.canonical and p.canonical[0].rstrip('/')==ROOT+'/post/520',('Bad canonical',p.canonical)
           assert p.meta and len(p.meta[0].strip())>40,('Missing meta description',p.meta)
           for target in ('https://alotamiratchi.ir/post/516/','https://alotamiratchi.ir/post/519/','https://tekanino.ir/','https://khadamatrad.ir/'):
               assert any(x.startswith(target) for x in p.links),('Missing contextual link',target)
