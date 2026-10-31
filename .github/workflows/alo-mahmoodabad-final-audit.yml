@@ -1,0 +1,96 @@
+name: Verify 22 Mahmoodabad Refrigerator Brand Articles Live
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-mahmoodabad-final-audit.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify HTTP, canonical, title, links and WebP bytes for all 22 live articles
+        run: |
+          python3 - <<'PY'
+          from concurrent.futures import ThreadPoolExecutor
+          from html.parser import HTMLParser
+          from urllib.request import urlopen,Request
+          from urllib.parse import urljoin,urlparse
+          from html import unescape
+          import hashlib,re
+          site='https://alotamiratchi.ir'
+          items=[
+              (462, 'beko', 'بکو'),
+              (463, 'bosch', 'بوش'),
+              (464, 'daewoo', 'دوو'),
+              (465, 'depoint', 'دیپوینت'),
+              (466, 'electrosteel', 'الکترواستیل'),
+              (467, 'general-electric', 'جنرال الکتریک'),
+              (468, 'clever', 'کلور'),
+              (469, 'hisense', 'هایسنس'),
+              (470, 'hitachi', 'هیتاچی'),
+              (471, 'midea', 'مدیا'),
+              (472, 'eastcool', 'ایستکول'),
+              (473, 'kenwood', 'کنوود'),
+              (474, 'singer', 'سینجر'),
+              (475, 'westinghouse', 'وستینگ‌هاوس'),
+              (476, 'alto', 'التو'),
+              (477, 'barfab', 'برفاب'),
+              (478, 'iran-shargh', 'ایران شرق'),
+              (479, 'nixan', 'نیکسان'),
+              (480, 'everest', 'اورست'),
+              (481, 'hyundai', 'هیوندا'),
+              (482, 'silver', 'سیلور'),
+              (483, 'sinor', 'سینور'),
+          ]
+          class Parse(HTMLParser):
+              def __init__(self):
+                  super().__init__();self.h1=0;self.links=[];self.meta=[];self.canonical=[];self.cover=None;self.content=False;self.article=[]
+              def handle_starttag(self,tag,attrs):
+                  a=dict(attrs)
+                  if tag=='h1': self.h1+=1
+                  if tag=='a' and a.get('href'):self.links.append(a['href'])
+                  if tag=='meta' and a.get('name')=='description':self.meta.append(a.get('content',''))
+                  if tag=='link' and 'canonical' in a.get('rel',''):self.canonical.append(a.get('href',''))
+                  if tag=='img' and 'detail-cover' in a.get('class',''):self.cover=a.get('src')
+                  if tag=='div' and 'article-content' in a.get('class',''):self.content=True
+              def handle_data(self,data):
+                  if self.content:self.article.append(data)
+              def handle_endtag(self,tag):
+                  if tag=='div' and self.content:self.content=False
+          def get(url,max_bytes):
+              req=Request(url,headers={'User-Agent':'AloCityEditorialLiveVerifier/1.0','Accept':'text/html,image/webp'})
+              with urlopen(req,timeout=40) as res:
+                  data=res.read(max_bytes+1)
+                  assert res.status==200,(url,res.status)
+                  assert 0<len(data)<=max_bytes,('Unexpected content length',url,len(data))
+                  return data
+          def verify(item):
+              id,slug,name=item
+              url=f'{site}/refrigerator-{slug}-mahmoodabad-repair-guide-2026/{id}'
+              html=get(url,2000000).decode('utf-8','replace')
+              p=Parse();p.feed(html)
+              assert p.h1==1,(name,'H1',p.h1)
+              assert p.meta and len(p.meta[0].strip())>=70,(name,'meta')
+              assert p.canonical and p.canonical[0].rstrip('/')==url,(name,'canonical',p.canonical)
+              assert name in unescape(html),(name,'brand title')
+              alos=[x for x in p.links if x.startswith(site+'/')]
+              tks=[x for x in p.links if x.startswith('https://tekanino.ir/refrigerator/mahmoodabad')]
+              assert len(alos)>=2,(name,'internal',len(alos))
+              assert len(tks)>=1,(name,'Tekanino link',len(tks))
+              assert p.cover,(name,'no cover')
+              cover_url=urljoin(site+'/',p.cover)
+              assert urlparse(cover_url).netloc=='alotamiratchi.ir',(name,'external cover')
+              cover=get(cover_url,100000)
+              assert cover[:4]==b'RIFF' and cover[8:12]==b'WEBP',(name,'format')
+              assert len(cover)<=30000,(name,'cover over 30000 bytes',len(cover))
+              contenthash=hashlib.sha256(' '.join(p.article).encode()).hexdigest()[:14]
+              return (id,name,len(cover),len(alos),len(tks),contenthash,url)
+          with ThreadPoolExecutor(max_workers=6) as pool:
+              rows=sorted(pool.map(verify,items))
+          for row in rows: print('ALO_MAHMOODABAD_LIVE_VERIFIED',*row)
+          assert len({row[5] for row in rows})==22,'Exact duplicate article content detected'
+          print('ALO_22_MAHMOODABAD_ARTICLES_LIVE_VERIFIED_OK',len(rows))
+          PY
