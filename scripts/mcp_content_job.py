@@ -129,7 +129,7 @@ def media_args(request):
             for quality in (76, 65, 55, 45, 35, 25, 15):
                 out = BytesIO()
                 scaled.save(out, "WEBP", quality=quality, method=6)
-                if len(out.getvalue()) <= 30720:
+                if len(out.getvalue()) <= 30000:
                     print("FEATURED_IMAGE_OPTIMIZED_BYTES", len(out.getvalue()))
                     return {"image_base64": base64.b64encode(out.getvalue()).decode("ascii")}
         raise ValueError("Cannot optimize featured image to 30 KB")
