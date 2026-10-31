@@ -42,16 +42,19 @@ jobs:
               print('REWRITE_DOC_OK',i,'words',len(t),'headings',len(hs))
           assert len(docs)==22
           overlaps=[]
+          shared_headings=[]
           for (id1,t1,g1,h1),(id2,t2,g2,h2) in combinations(docs,2):
               intr=len(g1&g2)
               j=intr/(len(g1|g2) or 1)
               shared_heads=set(h1)&set(h2)
               overlaps.append((j,id1,id2,intr,len(shared_heads)))
-              assert not shared_heads,('same headings',id1,id2,shared_heads)
+              if shared_heads: shared_headings.append((id1,id2,sorted(shared_heads)))
           overlaps.sort(reverse=True)
           for x in overlaps[:15]:
               print('MOST_SIMILAR_PAIR',str(round(x[0],4)),x[1],x[2],'matching_ngrams',x[3])
+          print('SHARED_HEADINGS_ALL',shared_headings)
           print('FULL_REWRITE_MAX_7GRAM_JACCARD',round(overlaps[0][0],4))
+          assert not shared_headings,('repeated headings',shared_headings)
           assert overlaps[0][0]<0.25,('near duplicate content',overlaps[0])
           print('ALO_22_FULL_REWRITES_DISTINCT_OK')
           PY
