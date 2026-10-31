@@ -1,0 +1,58 @@
+name: Audit Published Amol Refrigerator Brand Articles
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-amol-refrigerator-inventory.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Read public paginated Amol search (no writes)
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import re,json
+          from html import unescape
+          from urllib.request import Request,urlopen
+          from urllib.parse import urlencode
+          BASE='https://alotamiratchi.ir'
+          variants=('آمل','امل','آمول')
+          seen={}
+          for term in variants:
+              last_error=None
+              for page in range(1,65):
+                  form=urlencode({'search':term}).encode('utf-8')
+                  req=Request(BASE+'/search/'+str(page),data=form,method='POST',headers={
+                      'User-Agent':'AloEditorialPublishedInventory/1.0',
+                      'Content-Type':'application/x-www-form-urlencoded; charset=utf-8',
+                      'Accept':'text/html'})
+                  try:
+                      with urlopen(req,timeout=30) as resp:
+                          source=resp.read(1600000).decode('utf-8','replace')
+                          if resp.status!=200:raise RuntimeError('Unexpected response '+str(resp.status))
+                  except Exception as exc:
+                      last_error=type(exc).__name__+': '+str(exc)[:150]
+                      print('AMOL_SEARCH_ERROR',repr(term),page,last_error,flush=True)
+                      break
+                  matches=re.findall(r'<h3>\s*<a href="([^"]+)">(.+?)</a>\s*</h3>',source,re.I|re.S)
+                  print('AMOL_SEARCH_PAGE',repr(term),page,'RESULTS',len(matches),flush=True)
+                  new=0
+                  for url,title in matches:
+                      url=unescape(url.strip())
+                      if url.startswith('/'):url=BASE+url
+                      title=unescape(re.sub('<[^>]+>','',title)).strip()
+                      if url not in seen:seen[url]=title;new+=1
+                  if len(matches)<10 or new==0:break
+              print('AMOL_SEARCH_TERM_DONE',repr(term),'LAST_PAGE',page,'ERROR',last_error)
+          results=sorted([(u,t) for u,t in seen.items() if 'آمل' in t or 'امل' in t],key=lambda x:x[1])
+          fridge=[(u,t) for u,t in results if any(k in t.lower() for k in ('یخچال','فریزر','ساید بای ساید','refrigerator'))]
+          print('AMOL_PUBLISHED_ALL',len(results))
+          print('AMOL_PUBLISHED_FRIDGE',len(fridge))
+          for u,t in fridge:print('AMOL_PUBLISHED_FRIDGE_PAGE',json.dumps({'title':t,'url':u},ensure_ascii=False))
+          print('AMOL_PUBLIC_SEARCH_AUDIT_COMPLETE')
+          PY
