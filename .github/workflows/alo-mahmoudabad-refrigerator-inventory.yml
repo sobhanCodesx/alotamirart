@@ -1,0 +1,66 @@
+name: Inspect Published Mahmoudabad Refrigerator Brand Articles
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-mahmoudabad-refrigerator-inventory.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspect public brand search results (read-only)
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import re, json
+          from html import unescape
+          from urllib.request import Request,urlopen
+          from urllib.parse import urlencode
+          BASE='https://alotamiratchi.ir'
+          variants=('محمودآباد','محمود آباد','محموداباد')
+          seen={}
+          for term in variants:
+              result_count=0
+              last_error=None
+              for page in range(1,71):
+                  form=urlencode({'search':term}).encode('utf-8')
+                  req=Request(BASE+'/search/'+str(page),data=form,method='POST',headers={
+                      'User-Agent':'AloCityEditorialLiveVerifier/1.0',
+                      'Content-Type':'application/x-www-form-urlencoded; charset=utf-8',
+                      'Accept':'text/html'})
+                  try:
+                      with urlopen(req,timeout=35) as response:
+                          source=response.read(1500000).decode('utf-8','replace')
+                          if response.status != 200: raise RuntimeError('Non-200 search response '+str(response.status))
+                  except Exception as e:
+                      last_error=str(e)[:180]
+                      print('SEARCH_ERROR',repr(term),'page',page,last_error)
+                      break
+                  matches=re.findall(r'<h3>\s*<a href="([^"]+)">(.+?)</a>\s*</h3>',source,re.I|re.S)
+                  print('SEARCH_PAGE',repr(term),page,'RESULTS',len(matches))
+                  new=0
+                  for url,title in matches:
+                      title=unescape(re.sub('<[^>]+>','',title)).strip()
+                      url=unescape(url).strip()
+                      if url.startswith('/'): url=BASE+url
+                      if url not in seen:
+                          seen[url]=title
+                          new+=1
+                      result_count+=1
+                  if len(matches)<10 or not new:
+                      break
+              print('SEARCH_DONE',repr(term),'PAGES_LAST',page,'MATCHED_ROWS',result_count,'ERROR',last_error)
+          all_city=sorted([(url,title) for url,title in seen.items()],key=lambda x:x[1])
+          fridge=[(url,title) for url,title in all_city if any(key in title for key in ('یخچال','فریزر','refrigerator','Refrigerator','ساید بای ساید'))]
+          print('MAHMOUDABAD_CITY_BRAND_ARTICLES_TOTAL',len(all_city))
+          print('MAHMOUDABAD_FRIDGE_ARTICLES_TOTAL',len(fridge))
+          for url,title in all_city:
+              print('CITY_BRAND_ARTICLE',json.dumps({'title':title,'url':url},ensure_ascii=False))
+          for url,title in fridge:
+              print('MAHMOUDABAD_REFRIGERATOR_PUBLISHED',json.dumps({'title':title,'url':url},ensure_ascii=False))
+          print('MAHMOUDABAD_PUBLIC_SEARCH_AUDIT_FINISHED')
+          PY
