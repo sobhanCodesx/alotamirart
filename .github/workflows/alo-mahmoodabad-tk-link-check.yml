@@ -1,0 +1,31 @@
+name: Check Tekanino Mahmoodabad Refrigerator Brand Targets
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-mahmoodabad-tk-link-check.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify cross-site brand links (read only)
+        run: |
+          python3 - <<'PY'
+          import concurrent.futures, urllib.request,urllib.error
+          slugs=['bosch','daewoo','beko','general-electric','electrosteel','depoint','clever','hisense','hitachi','midea','eastcool','kenwood','singer','westinghouse','hyundai','silver','sinor','everest','alto','nixan','iran-shargh','barfab']
+          def check(slug):
+              url='https://tekanino.ir/refrigerator/mahmoodabad/'+slug
+              try:
+                  req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 (compatible; ContentAudit/1.0)','Accept':'text/html'})
+                  with urllib.request.urlopen(req,timeout=25) as resp:
+                      data=resp.read(100000).decode('utf-8','replace')
+                      return slug,resp.status,len(data),'404' if 'not found' in data[:800].lower() else 'OK'
+              except Exception as e:
+                  return slug,'ERROR',0,str(e)[:140]
+          with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
+              for item in sorted(pool.map(check,slugs)):
+                  print('TK_BRAND_LIVE',*item)
+          PY
