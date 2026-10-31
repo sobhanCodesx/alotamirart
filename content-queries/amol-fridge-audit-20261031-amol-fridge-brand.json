@@ -1,0 +1,9 @@
+{
+  "tool": "query_alo_graph",
+  "arguments": {
+    "type": "brand",
+    "query": "یخچال",
+    "limit": 25,
+    "include_drafts": false
+  }
+}
