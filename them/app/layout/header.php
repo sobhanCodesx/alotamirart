@@ -3,6 +3,15 @@ $siteTitle = isset($dataSeo['title']) ? clean_display_text($dataSeo['title']) : 
 $logo = isset($dataSeo['logo']) ? $dataSeo['logo'] : 'public/src/img/logo.png';
 $phone = isset($dataFooter['phon']) ? clean_display_text($dataFooter['phon']) : '';
 $email = isset($dataFooter['email']) ? clean_display_text($dataFooter['email']) : '';
+// The shared layout's public phone follows the selected city only on its own pages.
+$aloScopedCity = isset($city) && is_array($city)
+    && in_array((string)($city['slug'] ?? ''), ['hashtgerd','nazarabad','abyek'], true);
+if (!$aloScopedCity) {
+    $aloPath = parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
+    $aloScopedCity = is_string($aloPath)
+        && preg_match('~(?:^|/)(?:services-in-|[a-z0-9-]+-repair-in-|cities/|city/)(?:hashtgerd|nazarabad|abyek)/?$~i', $aloPath) === 1;
+}
+if ($aloScopedCity) $phone = '09371141762';
 $phoneHref = preg_replace('/[^\d+]/', '', $phone);
 
 if (isset($_SESSION['id']) && empty($_SESSION['img'])) {
