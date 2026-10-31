@@ -268,6 +268,10 @@ def manage_content(path):
               "changed_brand_articles",counts.get("changed_brand_articles"),
               "fields_changed",counts.get("fields_changed"))
         return
+    if action == "bulk_three_city_contacts":
+        from mcp_three_city_contacts import update_three_city_contacts
+        update_three_city_contacts(tool,request)
+        return
     if action == "bulk_shahrekord_contacts":
         if request.get("city") != "شهرکرد" or request.get("phone") != "09139858891" or request.get("confirm") is not True:
             raise ValueError("Exact Shahrekord scope and authorized phone required")
