@@ -26,6 +26,8 @@ if ($db->connect_error) {
 // ===== گرفتن اطلاعات از آدرس =====
 $serviceSlug = !empty($serviceSlug) ? $serviceSlug : (isset($_GET['service']) ? $_GET['service'] : 'refrigerator');
 $citySlug = !empty($city['slug']) ? $city['slug'] : (isset($_GET['city']) ? $_GET['city'] : 'tehran');
+$aloThreeCityContact = in_array((string)$citySlug, ['hashtgerd','nazarabad','abyek'], true) ? '09371141762' : '09933493049';
+$aloThreeCitySchemaContact = in_array((string)$citySlug, ['hashtgerd','nazarabad','abyek'], true) ? '+989371141762' : '+989123456789';
 
 // ===== دریافت اطلاعات شهر =====
 if (empty($city) && !empty($citySlug)) {
@@ -1131,7 +1133,7 @@ $ogImage = "https://alotamiratchi.ir/assets/images/logo.png";
         "name": "تعمیرات <?= $serviceName ?> در <?= htmlspecialchars($city['name']) ?>",
         "description": "<?= htmlspecialchars($pageDescription) ?>",
         "url": "<?= $canonical ?>",
-        "telephone": "+989123456789",
+        "telephone": "<?= $aloThreeCitySchemaContact ?>",
         "email": "info@alotamiratchi.ir",
         "address": {
             "@type": "PostalAddress",
@@ -1501,8 +1503,8 @@ $ogImage = "https://alotamiratchi.ir/assets/images/logo.png";
     </div>
 </div>
     <div class="contact-row">
-        <a href="tel:09933493049" class="btn btn-phone"><i class="fas fa-phone-alt"></i> تماس بگیرید</a>
-        <a href="https://wa.me/989933493049" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i> واتساپ</a>
+        <a href="tel:<?= htmlspecialchars($aloThreeCityContact, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-phone"><i class="fas fa-phone-alt"></i> تماس بگیرید</a>
+        <a href="https://wa.me/98<?= ltrim($aloThreeCityContact, '0') ?>" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i> واتساپ</a>
     </div>
 
     <a href="/services-in-<?= $city['slug'] ?>" class="back-link"><i class="fas fa-arrow-right"></i> بازگشت به خدمات <?= htmlspecialchars($city['name']) ?></a>
