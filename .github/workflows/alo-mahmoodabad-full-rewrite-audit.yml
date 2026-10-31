@@ -1,4 +1,5 @@
 name: Audit Full Rewrites of 22 Mahmoodabad Fridge Guides
+# Rerun after Westinghouse heading correction
 on:
   push:
     branches: [main]
