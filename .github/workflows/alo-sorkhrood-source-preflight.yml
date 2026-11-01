@@ -1,0 +1,49 @@
+name: Sorkhrood Publication Source Preflight
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/alo-sorkhrood-source-preflight.yml']
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Readonly verify sources, current content, images
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os,json
+          from urllib.request import Request,urlopen
+          from urllib.parse import quote
+          urls=["https://alotamiratchi.ir/post/381","https://alotamiratchi.ir/post/381/","https://alotamiratchi.ir/representation-refrigerator-himalia-mahmodabad/175","https://alotamiratchi.ir/refrigerator-beko-mahmoodabad-repair-guide-2026/462","https://alotamiratchi.ir/refrigerator-bosch-mahmoodabad-repair-guide-2026/463","https://alotamiratchi.ir/posts/categories/9/1"]
+          photos=["Food_into_a_refrigerator_-_20111002.jpg","Inside_domestic_refrigerator.JPG","Mini_buzdolab%C4%B1_%28fridge%29_.jpg"]
+          def check(url,kind):
+              try:
+                  with urlopen(Request(url,headers={'User-Agent':'Mozilla/5.0 (AloEditor/1.0)','Accept':'*/*'}),timeout=25) as r:
+                      b=r.read(2000000)
+                      print('SORKHROOD_PREFLIGHT',json.dumps({'kind':kind,'url':url,'status':r.status,'final_url':r.url,'size':len(b),'type':r.headers.get('Content-Type'),'signature':b[:20].hex()},ensure_ascii=False),flush=True)
+              except Exception as e:print('SORKHROOD_PREFLIGHT_ERROR',kind,url,str(e)[:160],flush=True)
+          for url in urls:check(url,'internal')
+          for photo in photos:
+              url='https://commons.wikimedia.org/wiki/Special:Redirect/file/'+photo+'?width=600'
+              check(url,'cc0_image')
+          token=os.environ.get('MCP_API_TOKEN','')
+          if len(token)<32:raise RuntimeError('MCP_API_TOKEN missing')
+          ep='https://alotamiratchi.ir/api/mcp/'
+          def tool(name,args):
+              data=json.dumps({'jsonrpc':'2.0','id':1,'method':'tools/call','params':{'name':name,'arguments':args}},ensure_ascii=False).encode()
+              req=Request(ep,data=data,method='POST',headers={'Authorization':'Bearer '+token,'Content-Type':'application/json'})
+              with urlopen(req,timeout=35) as resp:r=json.load(resp)
+              if r.get('error') or (r.get('result') or {}).get('isError'):raise RuntimeError(str(r)[:400])
+              return (r.get('result') or {}).get('structuredContent') or {}
+          for typ in ('brand_article','article'):
+              d=tool('query_alo_graph',{'type':typ,'query':'سرخرود','limit':50,'include_drafts':True})
+              entries=(d.get('entities') or {}).get('brand_articles' if typ=='brand_article' else 'articles',[])
+              print('SORKHROOD_CURRENT_INVENTORY',json.dumps({'type':typ,'count':len(entries),'items':[{'id':v.get('id'),'title':v.get('title'),'status':v.get('status')} for v in entries]},ensure_ascii=False),flush=True)
+          d=tool('get_content',{'type':'article','id':381})
+          v=d.get('record') or {}
+          print('SORKHROOD_GENERAL_381',json.dumps({'id':v.get('id'),'title':v.get('title'),'slug':v.get('slug'),'status':v.get('status'),'img':v.get('img')},ensure_ascii=False),flush=True)
+          PY
