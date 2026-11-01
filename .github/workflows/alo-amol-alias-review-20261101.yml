@@ -1,0 +1,20 @@
+name: Amol Fridge Alias Gap Review
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-amol-alias-review-20261101.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Cross-check variant brand names in published Amol posts
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: python3 scripts/alo_amol_alias_review_20261101.py
