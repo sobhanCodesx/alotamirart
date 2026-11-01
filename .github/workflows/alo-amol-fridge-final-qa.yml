@@ -1,0 +1,20 @@
+name: QA Twelve Published Amol Refrigerator Articles
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-amol-fridge-final-qa.yml'
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify content, SEO links, photos and unpublished duplicates
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: python3 scripts/amol_fridge_final_qa_20261101.py
