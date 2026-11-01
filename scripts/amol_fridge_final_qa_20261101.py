@@ -17,7 +17,7 @@ for article_id,brand,slug in expected:
     content=str(record.get("content",""))
     plain=html.unescape(re.sub(r"<[^>]+>"," ",content))
     words=len(plain.split())
-    links=re.findall(r'href=["\\\']([^"\\\']+)["\\\']',content,re.I)
+    links=re.findall(r'href="([^"]+)"',content,re.I)
     internal=[x for x in links if x.startswith(("https://alotamiratchi.ir/","/"))]
     external=[x for x in links if x.startswith(("https://tekanino.ir/","https://khadamatrad.ir/"))]
     tek=[x for x in external if "/refrigerator/amol/" in x]
@@ -26,11 +26,11 @@ for article_id,brand,slug in expected:
     info={"id":article_id,"brand":brand,"title":title,"slug":record.get("slug"),
           "url":"https://alotamiratchi.ir/"+str(record.get("slug"))+"/"+str(article_id),
           "words":words,"internal":len(internal),"external":len(external),"tek_amol":len(tek),
-          "inline":len(re.findall(r"<img\\b",content,re.I)),"cover":has_cover,"live":is_live}
+          "inline":len(re.findall(r"<img\b",content,re.I)),"cover":has_cover,"live":is_live}
     print("AMOL_FINAL_QA",json.dumps(info,ensure_ascii=False),flush=True)
     assert is_live and has_cover and words>=1000 and brand in title and "آمل" in title, "Bad article: "+str(article_id)
     assert len(internal)>0 and len(external)>0 and len(tek)>0,"Missing contextual links "+str(article_id)
-    assert len(re.findall(r"<h2\\b",content,re.I))>=5,"Missing structure "+str(article_id)
+    assert len(re.findall(r"<h2\b",content,re.I))>=5,"Missing structure "+str(article_id)
     for p in re.findall(r"<p[^>]*>(.*?)</p>",content,re.I|re.S):
         normalized=" ".join(html.unescape(re.sub(r"<[^>]*>"," ",p)).split())
         if len(normalized.split())>=55:
