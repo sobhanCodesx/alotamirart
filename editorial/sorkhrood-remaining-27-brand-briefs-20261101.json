@@ -1,0 +1,246 @@
+{
+  "created_at": "2026-11-01",
+  "city": "سرخرود",
+  "city_slug": "sorkhrood",
+  "target_site": "https://alotamiratchi.ir",
+  "reference_site": "https://tekanino.ir",
+  "brand_total": 33,
+  "published_verified": [
+    "beko",
+    "bosch",
+    "eastcool",
+    "himalaya",
+    "general-electric",
+    "lg"
+  ],
+  "remaining_count": 27,
+  "quality_gate": {
+    "words_min": 1000,
+    "words_max": 1200,
+    "internal_links": 2,
+    "tekanino_links": 1,
+    "unique_h2": true,
+    "max_7gram_jaccard": 0.12,
+    "featured_image_max_bytes": 30000,
+    "license": "CC0/public domain or original with verified rights",
+    "official_agency_claims": "forbidden without documentation"
+  },
+  "remaining": [
+    {
+      "brand": "ایران شرق",
+      "slug": "iran-shargh",
+      "article_focus": "افتادگی در و نشتی هوا",
+      "distinctive_research": "بررسی اختلاف فاصله در و بدنه، لولا و نوار بدون دستکاری",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/iran-shargh"
+    },
+    {
+      "brand": "نیکسان",
+      "slug": "nixan",
+      "article_focus": "بسته‌نشدن کامل در پس از پر کردن کابین",
+      "distinctive_research": "اثر چیدمان مواد بر بسته‌شدن در و رطوبت",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/nixan"
+    },
+    {
+      "brand": "التو",
+      "slug": "alto",
+      "article_focus": "کدهای روی نمایشگر و تفاوت هشدار با خرابی",
+      "distinctive_research": "روش خواندن برچسب مدل و تطبیق کد با دفترچه",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/alto"
+    },
+    {
+      "brand": "اورست",
+      "slug": "everest",
+      "article_focus": "افت سرما بعد از جابه‌جایی",
+      "distinctive_research": "مراحل ایمن بازگشت به کار بعد از حمل و اثر تراز",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/everest"
+    },
+    {
+      "brand": "برفاب",
+      "slug": "barfab",
+      "article_focus": "تشخیص نوع دستگاه و سرویس مناسب",
+      "distinctive_research": "تفاوت دستگاه‌های سرمایشی و تطبیق قطعه با مدل واقعی",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/barfab"
+    },
+    {
+      "brand": "سینور",
+      "slug": "sinor",
+      "article_focus": "فریزر سرد ولی کابین یخچال گرم",
+      "distinctive_research": "تفکیک مسیر هوا از کنترل دمای دو محفظه",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/sinor"
+    },
+    {
+      "brand": "سیلور",
+      "slug": "silver",
+      "article_focus": "یخ‌زدن میوه در کشوی پایینی",
+      "distinctive_research": "الگوی دمای کشو و تنظیمات با سنجش واقعی",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/silver"
+    },
+    {
+      "brand": "فریجیدر",
+      "slug": "frigidaire",
+      "article_focus": "برفک اطراف در فریزر و نفوذ هوا",
+      "distinctive_research": "نوار، لولا و تفاوت میعان با دیفراست",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/frigidaire"
+    },
+    {
+      "brand": "وستل",
+      "slug": "vestel",
+      "article_focus": "چشمک زدن چراغ بعد از قطعی برق",
+      "distinctive_research": "ثبت توالی هشدار و بررسی واقعی دما",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/vestel"
+    },
+    {
+      "brand": "کنوود",
+      "slug": "kenwood",
+      "article_focus": "قطره آب در طبقات و مسیر تخلیه",
+      "distinctive_research": "تفاوت قطره روی سقف با جمع شدن آب زیر کشو",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/kenwood"
+    },
+    {
+      "brand": "سینجر",
+      "slug": "singer",
+      "article_focus": "صدای لرزش شبانه",
+      "distinctive_research": "مقایسه صدای پایه و کابینت با صدای مکانیکی",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/singer"
+    },
+    {
+      "brand": "وستینگ‌هاوس",
+      "slug": "westinghouse",
+      "article_focus": "آب جمع‌شده زیر یخچال",
+      "distinctive_research": "تمایز مسیر تخلیه، میعان و نشتی آب ورودی",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/westinghouse"
+    },
+    {
+      "brand": "یخساران",
+      "slug": "yakhsaran",
+      "article_focus": "نوار در که در یک گوشه نمی‌چسبد",
+      "distinctive_research": "نقش تراز، کشو و آسیب فیزیکی نوار",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/yakhsaran"
+    },
+    {
+      "brand": "هیوندا",
+      "slug": "hyundai",
+      "article_focus": "گرم شدن دیواره و طولانی شدن کارکرد",
+      "distinctive_research": "تفکیک دفع گرمای عادی از تهویه ناکافی",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/hyundai"
+    },
+    {
+      "brand": "ویرپول",
+      "slug": "whirlpool",
+      "article_focus": "یخ گیرکرده در خروجی در",
+      "distinctive_research": "تفکیک ساخت یخ از حرکت مکانیزم خروجی",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/whirlpool"
+    },
+    {
+      "brand": "دوو",
+      "slug": "daewoo",
+      "article_focus": "سه منشأ آبریزش در کابین و پشت دستگاه",
+      "distinctive_research": "مقایسه آبریز، تخلیه دیفراست و میعان",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/daewoo"
+    },
+    {
+      "brand": "اسنوا",
+      "slug": "snowa",
+      "article_focus": "رطوبت کشوی میوه و فساد زودهنگام",
+      "distinctive_research": "اثر دمای کشو، درزبندی و بارگذاری",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/snowa"
+    },
+    {
+      "brand": "هیتاچی",
+      "slug": "hitachi",
+      "article_focus": "اختلاف دمای محفظه‌های مستقل",
+      "distinctive_research": "تطبیق فناوری و تنظیمات فقط با مدل",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/hitachi"
+    },
+    {
+      "brand": "مدیا",
+      "slug": "midea",
+      "article_focus": "سرمایش نامنظم بعد از تنظیمات کنترل",
+      "distinctive_research": "لینک اختصاصی تکانی‌نو در بررسی قبلی خراب بود؛ تا اصلاح نباید منتشر شود",
+      "status": "blocked_broken_tekanino_brand_url",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/midea"
+    },
+    {
+      "brand": "پارس",
+      "slug": "pars",
+      "article_focus": "ترموستات مکانیکی و خاموش‌نشدن",
+      "distinctive_research": "آزمون بی‌خطر رفتار تنظیمات و ثبت دوره کارکرد",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/pars"
+    },
+    {
+      "brand": "دیپوینت",
+      "slug": "depoint",
+      "article_focus": "صدای فن پشت پنل و یخ‌زدگی",
+      "distinctive_research": "تفکیک صدای سایش از برفک احتمالی",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/depoint"
+    },
+    {
+      "brand": "هایسنس",
+      "slug": "hisense",
+      "article_focus": "عدد نمایشگر با دمای واقعی متفاوت است",
+      "distinctive_research": "روش ثبت دما و معنی مقدار تنظیم‌شده",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/hisense"
+    },
+    {
+      "brand": "فیلور",
+      "slug": "filver",
+      "article_focus": "خاموشی ناگهانی و بررسی برق ورودی",
+      "distinctive_research": "تفاوت پریز و سیم با خرابی داخلی",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/filver"
+    },
+    {
+      "brand": "کلور",
+      "slug": "clever",
+      "article_focus": "هشدار باز ماندن در با در بسته",
+      "distinctive_research": "بررسی برخورد کشو، نوار و حسگر بسته به مدل",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/clever"
+    },
+    {
+      "brand": "امرسان",
+      "slug": "emersun",
+      "article_focus": "کم شدن سرما پس از خرید تازه",
+      "distinctive_research": "تفکیک بار حرارتی موقت از افت سرمایش واقعی",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/emersun"
+    },
+    {
+      "brand": "الکترواستیل",
+      "slug": "electrosteel",
+      "article_focus": "اختلاف عملکرد واحدهای دوقلو",
+      "distinctive_research": "عیب‌یابی مستقل یخچال و فریزر دوقلو",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/electrosteel"
+    },
+    {
+      "brand": "سامسونگ",
+      "slug": "samsung",
+      "article_focus": "صدای تغییر دور کمپرسور اینورتر",
+      "distinctive_research": "تفکیک رفتار عادی از لرزش و افت سرمایش",
+      "status": "not_drafted",
+      "tekanino_url": "https://tekanino.ir/refrigerator/sorkhrood/samsung"
+    }
+  ]
+}
