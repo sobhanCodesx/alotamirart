@@ -1,0 +1,44 @@
+name: Preflight Tekanino Sorkhrood Refrigerator Brand Links
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-sorkhrood-tk-links-preflight.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Verify 33 brand destinations read-only
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from concurrent.futures import ThreadPoolExecutor
+          from urllib.request import Request,urlopen
+          from urllib.error import HTTPError
+          import json,re,html
+          brands=["iran-shargh","nixan","alto","everest","barfab","sinor","silver","frigidaire","eastcool","vestel","kenwood","singer","westinghouse","yakhsaran","hyundai","beko","whirlpool","general-electric","daewoo","bosch","snowa","hitachi","midea","pars","depoint","hisense","himalaya","filver","clever","emersun","electrosteel","lg","samsung"]
+          base='https://tekanino.ir/refrigerator/sorkhrood/'
+          def check(slug):
+              url=base+slug
+              try:
+                  req=Request(url,headers={'User-Agent':'Mozilla/5.0 (compatible; EditorialPreflight/1.0)','Accept':'text/html'})
+                  with urlopen(req,timeout=35) as resp:
+                      data=resp.read(500000).decode('utf-8','replace')
+                      title=re.search(r'<title[^>]*>(.*?)</title>',data,re.I|re.S)
+                      h1=re.search(r'<h1[^>]*>(.*?)</h1>',data,re.I|re.S)
+                      title=html.unescape(re.sub('<[^>]+>','',title.group(1)))[:140] if title else ''
+                      h1=html.unescape(re.sub('<[^>]+>','',h1.group(1)))[:140] if h1 else ''
+                      ok=resp.status==200 and len(data)>1000 and ('سرخرود' in data or 'sorkhrood' in data.lower())
+                      return {'slug':slug,'url':url,'http':resp.status,'bytes':len(data),'title':title,'h1':h1,'ok':ok}
+              except Exception as exc:
+                  return {'slug':slug,'url':url,'ok':False,'error':str(exc)[:120]}
+          with ThreadPoolExecutor(max_workers=6) as pool:
+              results=sorted(pool.map(check,brands),key=lambda q:q['slug'])
+          for result in results:
+              print('SORKHROOD_LINK_CHECK',json.dumps(result,ensure_ascii=False),flush=True)
+          print('SORKHROOD_LINK_PREFLIGHT_TOTAL',len(results),'verified',sum(int(v['ok']) for v in results),flush=True)
+          PY
