@@ -1,0 +1,92 @@
+name: Verify Published Sorkhrood Original Articles and Photos
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/alo-sorkhrood-published-originality-qa.yml']
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify all content, image bytes, live URLs and links
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os,json,re,html,hashlib
+          from pathlib import Path
+          from itertools import combinations
+          from urllib.request import Request,urlopen
+          files=["20261101-sorkhrood-beko-unique-refrigerator.json","20261101-sorkhrood-bosch-unique-refrigerator.json","20261101-sorkhrood-eastcool-unique-refrigerator.json","20261101-sorkhrood-himalaya-unique-refrigerator.json","20261101-sorkhrood-general-electric-unique-refrigerator.json"]
+          ids=[484,485,486,487,488]
+          base='https://alotamiratchi.ir/'
+          def fetch(url):
+              req=Request(url,headers={'User-Agent':'Mozilla/5.0 (AloSorkhroodAudit/1.0)','Accept':'*/*'})
+              with urlopen(req,timeout=30) as resp:
+                  b=resp.read(3000000)
+                  return resp.status,resp.headers.get('Content-Type',''),b,resp.url
+          def tool(name,args):
+              token=os.environ['MCP_API_TOKEN']
+              data=json.dumps({'jsonrpc':'2.0','id':1,'method':'tools/call','params':{'name':name,'arguments':args}},ensure_ascii=False).encode('utf-8')
+              req=Request(base+'api/mcp/',data=data,method='POST',headers={'Authorization':'Bearer '+token,'Content-Type':'application/json'})
+              with urlopen(req,timeout=35) as response:result=json.load(response)
+              if result.get('error') or (result.get('result') or {}).get('isError'):raise RuntimeError(str(result)[:600])
+              return (result.get('result') or {}).get('structuredContent') or {}
+          def tokens(body):
+              body=html.unescape(re.sub(r'<[^>]+>',' ',body)).lower()
+              for b in ['بکو','بوش','ایستکول','هیمالیا','جنرال الکتریک','سرخرود','محمودآباد']:body=body.replace(b,'برند')
+              return re.findall(r'[\w\u0600-\u06ff]+',body)
+          def grams(t,n=7):return set(tuple(t[i:i+n]) for i in range(max(0,len(t)-n+1)))
+          docs=[];img_hashes=set();links_checked=set()
+          for name,ident in zip(files,ids):
+              p=Path('content-requests')/name
+              req=json.loads(p.read_text(encoding='utf-8'))
+              assert req['type']=='brand_article' and req['action']=='publish'
+              fields=req['fields'];body=fields['content']
+              wordcount=len(tokens(body))
+              assert 1000<=wordcount<=1200,(ident,'wordcount',wordcount)
+              h2=re.findall(r'<h2>(.*?)</h2>',body)
+              assert len(h2)>=8,(ident,'headings')
+              links=re.findall(r'href="(https?://[^"]+)"',body)
+              assert len(links)==3,(ident,'links',links)
+              assert sum(x.startswith(base) for x in links)==2,(ident,'internal links')
+              assert sum(x.startswith('https://tekanino.ir/refrigerator/sorkhrood/') for x in links)==1,(ident,'external link')
+              live=tool('get_content',{'type':'brand_article','id':ident}).get('record') or {}
+              assert int(live.get('status') or 0)==1,(ident,'unpublished')
+              assert live.get('slug')==fields['slug'],(ident,'wrong slug')
+              assert live.get('title')==fields['title'],(ident,'wrong title')
+              assert live.get('img'),(ident,'no featured image')
+              assert all(h in (live.get('content') or '') for h in h2[:2]),(ident,'live content mismatch')
+              page=base+fields['slug']+'/'+str(ident)
+              code,ctype,data,final=fetch(page)
+              decoded=data.decode('utf-8','replace')
+              assert code==200 and len(data)>8000 and fields['title'] in html.unescape(decoded),(ident,'bad public page')
+              for link in links:
+                  if link not in links_checked:
+                      lc,lt,lb,lf=fetch(link)
+                      assert lc==200 and len(lb)>1000,(ident,'bad destination',link,lc,len(lb))
+                      links_checked.add(link)
+              img=live['img']
+              imgurl=img if img.startswith('https://') else base+img.lstrip('/')
+              ic,it,ib,iu=fetch(imgurl)
+              assert ic==200 and 2000<len(ib)<=30000,(ident,'image byte limit',len(ib),imgurl)
+              assert 'image/' in it,(ident,'image mime',it)
+              assert ib[:4]==b'RIFF' and ib[8:12]==b'WEBP',(ident,'not webp')
+              digest=hashlib.sha256(ib).hexdigest()
+              assert digest not in img_hashes,(ident,'reused featured photo')
+              img_hashes.add(digest)
+              docs.append((ident,grams(tokens(body)),set(h2)))
+              print('SORKHROOD_LIVE_VERIFIED',json.dumps({'id':ident,'title':fields['title'],'url':page,'words':wordcount,'h2':len(h2),'image_bytes':len(ib),'image_url':imgurl,'internal_links':2,'tekanino_links':1,'image_sha256':digest[:16]},ensure_ascii=False),flush=True)
+          pair=[]
+          for (i,gi,hi),(j,gj,hj) in combinations(docs,2):
+              overlap=len(gi&gj)/max(1,len(gi|gj))
+              pair.append((overlap,i,j))
+              assert not hi&hj,('duplicate H2',i,j,list(hi&hj))
+          pair.sort(reverse=True)
+          assert pair[0][0]<0.12,('duplicate wording',pair[0])
+          print('SORKHROOD_MAX_7GRAM_JACCARD',round(pair[0][0],5),pair[0][1:],flush=True)
+          print('SORKHROOD_5_ORIGINAL_ARTICLES_ALL_LIVE_VERIFIED_OK',len(docs),flush=True)
+          PY
