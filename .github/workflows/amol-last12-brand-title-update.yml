@@ -1,0 +1,25 @@
+name: Update Final Twelve Amol Fridge Brand SEO Titles
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/amol-last12-brand-title-update.yml'
+permissions:
+  contents: read
+concurrency:
+  group: alotamiratchi-content-publishing
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate safe content update script
+        run: python3 -m py_compile scripts/amol_last12_brand_titles_20261101.py
+      - name: Update existing twelve guides through live authenticated MCP and verify
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: python3 -u scripts/amol_last12_brand_titles_20261101.py
