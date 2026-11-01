@@ -40,7 +40,7 @@ jobs:
               if r.get('error') or (r.get('result') or {}).get('isError'):raise RuntimeError(str(r)[:400])
               return (r.get('result') or {}).get('structuredContent') or {}
           for typ in ('brand_article','article'):
-              d=tool('query_alo_graph',{'type':typ,'query':'سرخرود','limit':50,'include_drafts':True})
+              d=tool('query_alo_graph',{'type':typ,'query':'سرخرود','limit':25,'include_drafts':True})
               entries=(d.get('entities') or {}).get('brand_articles' if typ=='brand_article' else 'articles',[])
               print('SORKHROOD_CURRENT_INVENTORY',json.dumps({'type':typ,'count':len(entries),'items':[{'id':v.get('id'),'title':v.get('title'),'status':v.get('status')} for v in entries]},ensure_ascii=False),flush=True)
           d=tool('get_content',{'type':'article','id':381})
