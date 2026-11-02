@@ -4,7 +4,7 @@
  */
 declare(strict_types=1);
 function aloNorthContactTool():array {
- return ['name'=>'set_north_cities_operator_contact','description'=>'Preview or atomically set contact_number for 13 exact northern city names in article/brand article titles; exclude gas stoves, heaters, water heaters, boilers.',
+ return ['name'=>'set_north_cities_operator_contact','description'=>'Preview or atomically set contact_number for 13 exact northern city names in article/brand article titles; exclude gas stoves, televisions, heaters, and water heaters.',
  'inputSchema'=>['type'=>'object','properties'=>[
  'phone'=>['type'=>'string','const'=>'09351211661'],
  'confirm'=>['type'=>'boolean'],
@@ -17,7 +17,7 @@ function aloNorthContactExecute(array $args,?PDO $db=null):array {
  $dry=($args['dry_run']??false)===true;
  if(!$dry && $args['confirm']!==true)throw new InvalidArgumentException('Confirmation required for writing');
  $cities=['آمل','سرخرود','بابلسر','فریدونکنار','محمودآباد','ایزدشهر','نور','متل قو','رویان','نوشهر','چالوس','قائمشهر','بابل'];
- $excluded=['اجاق گاز','اجاق‌گاز','اجاق','بخاری','آبگرمکن','آب گرمکن','آب‌گرمکن','پکیج'];
+ $excluded=['اجاق گاز','اجاق‌گاز','اجاق','تلویزیون','تی وی','تی‌وی','TV','بخاری','آبگرمکن','آب گرمکن','آب‌گرمکن'];
  $db??=mcpDb();
  $matched=[];$changed=[];$excludedCount=0;$samples=[];
  $db->beginTransaction();
@@ -32,13 +32,13 @@ function aloNorthContactExecute(array $args,?PDO $db=null):array {
     $titleNorm=str_replace(['ي','ك','‌'],['ی','ک',' '],$title);
     $hit=false;
     foreach($cities as $city) {
-      if(mb_strpos($titleNorm,$city,'UTF-8')!==false){$hit=true;break;}
+      if(preg_match('/(?<![\\p{L}\\p{N}])'.preg_quote($city,'/').'(?![\\p{L}\\p{N}])/u',$titleNorm)){ $hit=true;break; }
     }
     if(!$hit)continue;
     $skip=false;
     foreach($excluded as $word) {
       $w=str_replace('‌',' ',$word);
-      if(mb_strpos($titleNorm,$w,'UTF-8')!==false){$skip=true;break;}
+      if(mb_stripos($titleNorm,$w,0,'UTF-8')!==false){$skip=true;break;}
     }
     if($skip){++$excludedCount;continue;}
     ++$matched[$type];
