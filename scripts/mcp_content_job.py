@@ -243,7 +243,7 @@ def manage_content(path):
         matches=tool("query_alo_graph",{"type":"brand","query":name,"limit":25})["entities"]["brands"]
         exact=[b for b in matches if b["name"].strip()==name]
         if not exact:
-            created=tool("create_content",{"type":"brand","fields":{"name":name},"confirm_public":True})["record"]
+            created=tool("create_content",{"type":"brand","fields":{"name":name},"confirm_public":True,**media_args(request)})["record"]
             exact=[created]
         if len(exact)!=1:
             raise ValueError("Brand identity ambiguous: "+name)
