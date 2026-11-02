@@ -238,6 +238,22 @@ def manage_content(path):
     request=json.loads(path.read_text(encoding="utf-8"))
     content_type=request.get("type","article")
     action=request.get("action","publish")
+    if action=="publish_chamestan_brand":
+        name=request["brand_name"]
+        matches=tool("query_alo_graph",{"type":"brand","query":name,"limit":25})["entities"]["brands"]
+        exact=[b for b in matches if b["name"].strip()==name]
+        if len(exact)!=1:
+            raise ValueError("Brand identity unresolved: "+name)
+        fields=dict(request["fields"])
+        if "description" in fields:
+            fields["des"]=fields.pop("description")
+        fields["brand_id"]=int(exact[0]["id"])
+        existing=tool("find_content",{"type":"brand_article","slug":fields["slug"]})["record"]
+        item=existing or tool("create_content",{"type":"brand_article","fields":fields,**media_args(request)})["record"]
+        if int(item.get("status") or 0)!=1:
+            item=tool("set_content_published",{"type":"brand_article","id":int(item["id"]),"published":True,"confirm":True})["record"]
+        print("CHAMESTAN_BRAND_PUBLISHED",name,item["id"])
+        return
     if action=="inspect_chamestan_brands":
         result=tool("list_content",{"type":"brand","limit":50})
         print("CHAMESTAN_BRANDS",json.dumps(result,ensure_ascii=False))
