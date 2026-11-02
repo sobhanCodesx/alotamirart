@@ -253,7 +253,7 @@ def manage_content(path):
         fields["brand_id"]=int(exact[0]["id"])
         existing=tool("find_content",{"type":"brand_article","slug":fields["slug"]})["record"]
         if existing:
-            item=tool("update_content",{"type":"brand_article","id":int(existing["id"]),"fields":fields,"confirm_public":True})["record"]
+            item=tool("update_content",{"type":"brand_article","id":int(existing["id"]),"fields":fields,"confirm_public":True,**media_args(request)})["record"]
         else:
             item=tool("create_content",{"type":"brand_article","fields":fields,**media_args(request)})["record"]
         if int(item.get("status") or 0)!=1:
