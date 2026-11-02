@@ -1,0 +1,27 @@
+name: Chamestan 15 Refrigerator Brand Articles
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-chamestan-15-brand-publish-20261102.yml'
+permissions:
+  contents: read
+concurrency:
+  group: alotamiratchi-content-publishing
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install optimized photo renderer
+        run: python3 -m pip install --quiet pillow
+      - name: Check PHP workflow python syntax
+        run: python3 -m py_compile scripts/chamestan_15_brand_publish_20261102.py
+      - name: Publish brand-category articles, never general articles
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: python3 -u scripts/chamestan_15_brand_publish_20261102.py
