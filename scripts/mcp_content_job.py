@@ -252,7 +252,10 @@ def manage_content(path):
             fields["des"]=fields.pop("description")
         fields["brand_id"]=int(exact[0]["id"])
         existing=tool("find_content",{"type":"brand_article","slug":fields["slug"]})["record"]
-        item=existing or tool("create_content",{"type":"brand_article","fields":fields,**media_args(request)})["record"]
+        if existing:
+            item=tool("update_content",{"type":"brand_article","id":int(existing["id"]),"fields":fields})["record"]
+        else:
+            item=tool("create_content",{"type":"brand_article","fields":fields,**media_args(request)})["record"]
         if int(item.get("status") or 0)!=1:
             item=tool("set_content_published",{"type":"brand_article","id":int(item["id"]),"published":True,"confirm":True})["record"]
         print("CHAMESTAN_BRAND_PUBLISHED",name,item["id"])
