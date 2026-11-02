@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/alo-chamestan-15-brand-publish-20261102.yml'
+      - 'scripts/chamestan_15_brand_publish_20261102.py'
 permissions:
   contents: read
 concurrency:
