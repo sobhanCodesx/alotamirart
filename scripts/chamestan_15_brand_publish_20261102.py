@@ -35,9 +35,24 @@ BRIEFS={
 "pars":("خاموش و روشن شدن دوره‌ای کمپرسور معمولاً بخشی از تنظیم دماست؛ مشکل زمانی مطرح است که دمای واقعی خارج از محدوده باقی بماند.","تنظیم ترموستات، آب‌بندی در و تهویه اطراف را پیش از تعویض قطعات کنترل کنید.","آزمون ترموستات و قطعات راه‌اندازی باید ایمن انجام شود؛ اتصال مستقیم سیم‌ها برای کاربر خطرناک است.")
 }
 def branded_image(spec,key,name):
-    b64,_=make_banner(spec)
-    with Image.open(BytesIO(base64.b64decode(b64))) as img:
-        im=img.convert("RGB")
+    # Prefer original public-domain documentary photographs over diagrams.
+    from urllib.request import Request,urlopen
+    photographs=(
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Inside_domestic_refrigerator.JPG?width=800",
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Fridgeinterior.jpg?width=800",
+    )
+    try:
+        request=Request(photographs[sum(key.encode())%2],headers={"User-Agent":"AloTamiratchi-Editorial/1.0 (article photo optimization)"})
+        with urlopen(request,timeout=20) as resp: source=resp.read(5*1024*1024+1)
+        if len(source)>5*1024*1024:raise ValueError("Photo too large")
+        base=Image.open(BytesIO(source)).convert("RGB")
+        im=base.resize((740,490),Image.Resampling.LANCZOS)
+        print("PUBLIC_DOMAIN_PHOTO_USED",key,flush=True)
+    except Exception as photo_error:
+        print("PHOTO_SOURCE_UNAVAILABLE",key,type(photo_error).__name__,flush=True)
+        b64,_=make_banner(spec)
+        im=Image.open(BytesIO(base64.b64decode(b64))).convert("RGB")
+    if True:
         d=ImageDraw.Draw(im)
         font_path="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
         font=ImageFont.truetype(font_path,20)
