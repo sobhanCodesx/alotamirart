@@ -106,7 +106,7 @@ for key,name,suffix in NAMES:
             )
             # Bring in the source brief's brand-specific troubleshooting passage,
             # rather than padding each article with repeated generic text.
-            specialty=re.search(r'<h2>بررسی تخصصی[^<]*</h2>\\s*(<p>.*?</p>)',str(fields.get("content") or ""),re.S)
+            specialty=re.search(r'<h2>بررسی تخصصی[^<]*</h2>\s*(<p>.*?</p>)',str(fields.get("content") or ""),re.S)
             if specialty:
                 content=content.replace("<h2>هزینه تعمیر چگونه تعیین می‌شود؟</h2>",
                     "<h2>نکته فنی ویژه برای این مدل</h2>"+specialty.group(1)+
