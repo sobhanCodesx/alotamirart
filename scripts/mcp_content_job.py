@@ -239,7 +239,7 @@ def manage_content(path):
     content_type=request.get("type","article")
     action=request.get("action","publish")
     if action=="inspect_chamestan_brands":
-        result=tool("list_content",{"type":"brand","limit":100})
+        result=tool("list_content",{"type":"brand","limit":50})
         print("CHAMESTAN_BRANDS",json.dumps(result,ensure_ascii=False))
         return
     if action=="inspect_dishwasher_categories_20261030":
