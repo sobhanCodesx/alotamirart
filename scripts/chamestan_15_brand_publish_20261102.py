@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Verified idempotent publication into the refrigerator BRAND section, not general posts."""
-import base64, json, re, sys
+import base64, json, re, sys, html
 from io import BytesIO
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
