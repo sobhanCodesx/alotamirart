@@ -1,0 +1,25 @@
+name: Chamestan 15 Unique Full Rewrite
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-chamestan-unique-rewrite-20261102.yml'
+permissions:
+  contents: read
+concurrency:
+  group: alotamiratchi-content-publishing
+  cancel-in-progress: false
+jobs:
+  rewrite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify rewrite script syntax
+        run: python3 -m py_compile scripts/chamestan_15_distinct_rewrite_20261102.py
+      - name: Rewrite existing 15 live brand articles preserving images and status
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: python3 -u scripts/chamestan_15_distinct_rewrite_20261102.py
