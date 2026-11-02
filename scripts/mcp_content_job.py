@@ -268,6 +268,21 @@ def manage_content(path):
               "changed_brand_articles",counts.get("changed_brand_articles"),
               "fields_changed",counts.get("fields_changed"))
         return
+    if action == "bulk_north_13_contact":
+        cities=["آمل","قائمشهر","بابل","بابلسر","سرخرود","ایزدشهر","نور","رویان","متل قو","چالوس","نوشهر","فریدونکنار","محمودآباد"]
+        if (request.get("phone")!="09351211661" or request.get("cities")!=cities or
+            request.get("excluded")!=["اجاق گاز","تلویزیون","بخاری","آبگرمکن"] or request.get("confirm") is not True):
+            raise ValueError("Exact approved city list, excluded services, phone and confirmation required")
+        dry=request.get("dry_run",False)
+        if not isinstance(dry,bool):
+            raise ValueError("dry_run must be boolean")
+        response=tool("set_north_cities_operator_contact",{"phone":"09351211661","confirm":True,"dry_run":dry})
+        if response.get("phone")!="09351211661" or response.get("transaction_completed") != (not dry):
+            raise RuntimeError("Unexpected server confirmation")
+        if sum(response.get("matched",{}).values()) < 1:
+            raise RuntimeError("No matched city article records")
+        print("NORTH_13_CONTACT_RESULT",json.dumps(response,ensure_ascii=False))
+        return
     if action == "bulk_three_city_contacts":
         from mcp_three_city_contacts import update_three_city_contacts
         update_three_city_contacts(tool,request)
