@@ -192,6 +192,11 @@ def make_refrigerator_topic_banner(spec):
               "fridge-noise": ((27, 38, 76), (255, 177, 69)),
               "washing-suds": ((24, 56, 84), (103, 222, 225))}
     bg, accent = colors[topic]
+    brand = spec.get("brand")
+    if brand:
+        import hashlib
+        palette = [((12, 48, 88), (255, 164, 65)), ((16, 70, 82), (245, 191, 78)), ((41, 45, 94), (109, 221, 232)), ((55, 48, 79), (250, 156, 95)), ((22, 66, 70), (147, 220, 165))]
+        bg, accent = palette[int(hashlib.sha256(brand.encode("utf-8")).hexdigest()[:4], 16) % len(palette)]
     im = Image.new("RGB", (1120, 588), bg)
     d = ImageDraw.Draw(im)
     fbase = ROOT / "public/src/fonts"
@@ -216,7 +221,9 @@ def make_refrigerator_topic_banner(spec):
         "fridge-noise": ("صدای تق‌تق", "یا وزوز یخچال؟", "تشخیص صدای طبیعی و خرابی"),
         "washing-suds": ("کف زیاد لباسشویی", "آبکشی ناقص؟", "۹ علت علمی و راهکار")
     }[topic]
-    rtl(lines[0], 740, 145, 68, (255,255,255))
+    if brand:
+        lines = ("تعمیر یخچال " + brand, "در چمستان", spec.get("subtitle", "راهنمای عیب‌یابی تخصصی"))
+    rtl(lines[0], 740, 145, 58 if brand else 68, (255,255,255))
     rtl(lines[1], 740, 242, 65, accent)
     rtl(lines[2], 740, 363, 34, (224,239,248))
     d.rounded_rectangle((35, 493, 741, 558), radius=15, fill=(237,246,252))
