@@ -242,8 +242,11 @@ def manage_content(path):
         name=request["brand_name"]
         matches=tool("query_alo_graph",{"type":"brand","query":name,"limit":25})["entities"]["brands"]
         exact=[b for b in matches if b["name"].strip()==name]
+        if not exact:
+            created=tool("create_content",{"type":"brand","fields":{"name":name},"confirm_public":True})["record"]
+            exact=[created]
         if len(exact)!=1:
-            raise ValueError("Brand identity unresolved: "+name)
+            raise ValueError("Brand identity ambiguous: "+name)
         fields=dict(request["fields"])
         if "description" in fields:
             fields["des"]=fields.pop("description")
