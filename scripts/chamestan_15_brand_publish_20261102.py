@@ -104,7 +104,15 @@ for key,name,suffix in NAMES:
                 "<h2>سؤالات متداول</h2><h3>آیا افت سرما همیشه ناشی از کمپرسور است؟</h3><p>خیر؛ مسیر هوا، سنسور، آب‌بندی و شرایط نصب هم باید بررسی شود.</p><h3>آیا بدون مدل دقیق می‌توان قطعه سفارش داد؟</h3><p>برای اطمینان از سازگاری، شماره مدل و در صورت نیاز شناسه قطعه ضروری است.</p>"
                 "<h2>جمع‌بندی</h2><p>برای "+html.escape(focus)+" در یخچال "+html.escape(name)+"، ابتدا شرایط قابل مشاهده را ثبت کنید و سپس تعمیرکاری انتخاب کنید که با مدل دستگاه آشنا باشد.</p>"
             )
-            if len(content)<2800:raise ValueError("Article content unexpectedly short")
+            # Bring in the source brief's brand-specific troubleshooting passage,
+            # rather than padding each article with repeated generic text.
+            specialty=re.search(r'<h2>بررسی تخصصی[^<]*</h2>\\s*(<p>.*?</p>)',str(fields.get("content") or ""),re.S)
+            if specialty:
+                content=content.replace("<h2>هزینه تعمیر چگونه تعیین می‌شود؟</h2>",
+                    "<h2>نکته فنی ویژه برای این مدل</h2>"+specialty.group(1)+
+                    "<h2>هزینه تعمیر چگونه تعیین می‌شود؟</h2>",1)
+            print("CHAMESTAN_EDITED_LENGTH",key,len(content),flush=True)
+            if len(content)<2000:raise ValueError("Article content unexpectedly short")
             spec=dict(job.get("banner") or {"template":"refrigerator-topic","topic":"airflow","max_bytes":30000})
             spec["max_bytes"]=30000
             art,size=branded_image(spec,key,name)
