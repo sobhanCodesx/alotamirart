@@ -1,0 +1,25 @@
+name: Chamestan 15 Brand Contextual Internal Links
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-chamestan-15-brand-links-20261102.yml'
+permissions:
+  contents: read
+concurrency:
+  group: alotamiratchi-content-publishing
+  cancel-in-progress: false
+jobs:
+  link:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Ensure crosslink code compiles
+        run: python3 -m py_compile scripts/chamestan_15_brand_contextual_links_20261102.py
+      - name: Connect related Chamestan brand guides and verify SEO media
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: python3 -u scripts/chamestan_15_brand_contextual_links_20261102.py
