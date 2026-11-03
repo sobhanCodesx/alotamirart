@@ -59,6 +59,11 @@ jobs:
           fi
           for request in "${NEW_REQUESTS[@]}"; do
             case "$request" in
+              content-requests/izadshahr-batch-20261103.json)
+                for brand_request in content-requests/izadshahr-*-brand-publish-20261103.json; do
+                  python3 scripts/mcp_content_job.py "$brand_request"
+                done
+                ;;
               content-requests/*.json)
                 python3 scripts/mcp_content_job.py "$request"
                 ;;
