@@ -1,0 +1,93 @@
+name: Alo chronological content inventory
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/alo-content-inventory.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Extract all published article titles and dates
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import concurrent.futures as cf,csv,html,json,os,re,time,urllib.request as R,urllib.parse as U,xml.etree.ElementTree as E,pathlib
+          base='https://alotamiratchi.ir/'
+          token=os.getenv('MCP_API_TOKEN','')
+          out=pathlib.Path('inventory');out.mkdir(exist_ok=True)
+          def read(url,payload=None):
+            req=R.Request(url, data=payload,method='POST' if payload else 'GET', headers={'User-Agent':'AloReadOnlyInventory/1.0','Cache-Control':'no-cache',**({'Authorization':'Bearer '+token,'Content-Type':'application/json'} if payload else {})})
+            with R.urlopen(req,timeout=27) as f:return f.read()
+          def sitemap(path,kind):
+            x=E.fromstring(read(base+path))
+            namespace={'s':'http://www.sitemaps.org/schemas/sitemap/0.9'}
+            rows=[]
+            for entry in x.findall('s:url',namespace):
+              url=entry.findtext('s:loc','',namespace)
+              ID=U.urlsplit(url).path.rstrip('/').rsplit('/',1)[-1]
+              if ID.isdecimal():
+                rows.append({'type':kind,'id':int(ID),'url':url,'lastmod':entry.findtext('s:lastmod','',namespace)})
+            return rows
+          def get_mcp(row):
+            if len(token)<32:return {}
+            p={'jsonrpc':'2.0','id':1,'method':'tools/call','params':{'name':'get_content','arguments':{'type':row['type'],'id':row['id']}}}
+            x=json.loads(read(base+'api/mcp/',json.dumps(p).encode('utf-8')))
+            result=x.get('result') or {}
+            if x.get('error') or result.get('isError'):return {}
+            return (result.get('structuredContent') or json.loads(result['content'][0]['text'])).get('record') or {}
+          def inspect(row):
+            row=dict(row);row['created_at']='';row['title']='';row['source']=''
+            for attempt in range(2):
+              try:
+                page=read(row['url']).decode('utf-8','replace')
+                dates=re.findall(r'"datePublished"\s*:\s*"([^"]+)"',page,re.I)
+                if dates:row['created_at']=dates[0];row['source']='article_json_ld'
+                match=re.search(r'<h1\b[^>]*>(.*?)</h1>',page,re.I|re.S)
+                if match:row['title']=' '.join(html.unescape(re.sub(r'<[^>]*>',' ',match.group(1))).split())
+                break
+              except Exception as e:
+                row['page_error']=str(e)[:130];time.sleep(.7)
+            if not row['created_at'] or not row['title']:
+              try:
+                db=get_mcp(row)
+                if not row['created_at']:
+                  row['created_at']=str(db.get('created_at') or '')
+                  if row['created_at']:row['source']='db_created_at'
+                if not row['title']:row['title']=str(db.get('title') or '')
+              except Exception as e:row['mcp_error']=str(e)[:130]
+            return row
+          posts=sitemap('post/sitemap','article')
+          brands=sitemap('brand/sitemap','brand_article')
+          rows=posts+brands
+          print('INVENTORY_COUNTS',len(posts),len(brands),'total',len(rows),flush=True)
+          if not rows:raise RuntimeError('Sitemaps empty')
+          start=time.time();result=[]
+          with cf.ThreadPoolExecutor(max_workers=5) as pool:
+            futures=[pool.submit(inspect,row) for row in rows]
+            for i,f in enumerate(cf.as_completed(futures),1):
+              result.append(f.result())
+              if i%100==0:print('INVENTORY_PROGRESS',i,'of',len(rows),flush=True)
+          result.sort(key=lambda x:(not bool(x['created_at']),x['created_at'],x['type'],x['id']))
+          for i,r in enumerate(result,1):r['order']=i
+          fields=['order','created_at','type','id','title','url','source','lastmod','page_error','mcp_error']
+          with (out/'all-content-oldest-first.csv').open('w',encoding='utf-8-sig',newline='') as f:
+            w=csv.DictWriter(f,fieldnames=fields,extrasaction='ignore');w.writeheader();w.writerows(result)
+          (out/'all-content-oldest-first.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('INVENTORY_SUMMARY',json.dumps({'total':len(result),'articles':len(posts),'brand_articles':len(brands),'dated':sum(bool(r['created_at']) for r in result),'missing_title':sum(not r['title'] for r in result),'seconds':round(time.time()-start)},ensure_ascii=False),flush=True)
+          for r in result[:45]:print('INVENTORY_OLD',json.dumps({k:r[k] for k in ['order','created_at','type','title','url']},ensure_ascii=False),flush=True)
+          for r in result[-15:]:print('INVENTORY_NEW',json.dumps({k:r[k] for k in ['order','created_at','type','title','url']},ensure_ascii=False),flush=True)
+          PY
+      - name: Attach full dated inventory CSV
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo-all-content-by-date
+          path: inventory/
+          if-no-files-found: warn
+          retention-days: 30
