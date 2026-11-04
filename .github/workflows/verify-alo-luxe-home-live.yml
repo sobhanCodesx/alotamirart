@@ -1,0 +1,64 @@
+name: Verify Alo premium category homepage live
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-alo-luxe-home-live.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify production HTML, CSS, layout and optimized images
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import urllib.request
+          import urllib.error
+          import time
+          base = "https://alotamiratchi.ir/"
+          photos = (
+              "refrigerator","washer","television","support","boiler",
+              "air-conditioner","website","expert","advertising","education",
+              "science","news","city-skyline","city-technician",
+          )
+          def fetch(path):
+              request = urllib.request.Request(base + path, headers={
+                  "User-Agent": "Mozilla/5.0 (compatible; AloHomeLuxeLiveQA/1.0)",
+                  "Cache-Control": "no-cache",
+                  "Accept": "text/html, text/css, image/webp, */*",
+              })
+              with urllib.request.urlopen(request, timeout=25) as response:
+                  status = response.status
+                  content = response.read()
+              if status != 200:
+                  raise RuntimeError(f"LIVE_BAD_STATUS {path} {status}")
+              return content
+          for attempt in range(4):
+              home = fetch("?alo_luxe_check=20261104")
+              if b"alo-luxe-grid" in home and b"alo-luxe-city" in home:
+                  break
+              if attempt == 3:
+                  raise RuntimeError("LIVE_PREMIUM_CATEGORY_MARKERS_MISSING")
+              time.sleep(4)
+          html = home.decode("utf-8")
+          for marker in ("alo-luxe-home", "alo-luxe-card__picture", "alo-home-luxe.css", "brands/categories/", "alo-luxe-city__primary"):
+              if marker not in html:
+                  raise RuntimeError("LIVE_HOMEPAGE_MARKER_MISSING " + marker)
+          css = fetch("public/src/css/alo-home-luxe.css?alo_luxe_check=20261104").decode("utf-8")
+          for marker in ("object-fit: contain", "grid-template-columns:repeat(2,minmax(0,1fr))", "@media (max-width: 1060px)"):
+              if marker not in css:
+                  raise RuntimeError("LIVE_CSS_MARKER_MISSING " + marker)
+          print("LIVE_ALO_LUXE_HOMEPAGE_VERIFIED", len(home), len(css))
+          for name in photos:
+              photo=fetch("public/src/img/home-premium/" + name + ".webp")
+              if photo[:4] != b"RIFF" or photo[8:12] != b"WEBP" or len(photo) > 30000:
+                  raise RuntimeError("LIVE_PREMIUM_IMAGE_INVALID " + name)
+              print("LIVE_ALO_LUXE_IMAGE_VERIFIED", name, len(photo))
+          PY
