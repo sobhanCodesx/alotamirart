@@ -24,7 +24,7 @@ function aloProfileVisiblePages(int $current, int $total): array
 
 function aloProfileDigits(int $number): string
 {
-    return strtr((string)$number, '0123456789', '۰۱۲۳۴۵۶۷۸۹');
+    return strtr((string)$number, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
 }
 
 function aloProfilePageHref(string $base, int $postsPage, int $brandsPage, string $section): string
