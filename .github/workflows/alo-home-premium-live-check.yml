@@ -1,0 +1,48 @@
+name: Verify Alo premium homepage live
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-home-premium-live-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Inspect public homepage and cropped WebP assets
+        run: |
+          python3 - <<'PY'
+          import urllib.request
+          import urllib.error
+
+          root = 'https://alotamiratchi.ir/'
+          def fetch(url):
+              req = urllib.request.Request(url, headers={
+                  'User-Agent': 'Mozilla/5.0 (compatible; AloHomepageLiveQA/1.0)',
+                  'Cache-Control': 'no-cache',
+                  'Accept': '*/*',
+              })
+              with urllib.request.urlopen(req, timeout=25) as response:
+                  return response.status, response.read()
+
+          code, data = fetch(root)
+          page = data.decode('utf-8')
+          for needle in ('alo-home-premium', 'alo-brand-grid', 'alo-brand-card',
+                         'alo-cta-panel', 'مرور همه دسته‌ها'):
+              if needle not in page:
+                  raise RuntimeError('LIVE_HOMEPAGE_MISSING_MARKER: ' + needle)
+          if page.count('alo-brand-card__title') < 10:
+              raise RuntimeError('LIVE_HOMEPAGE_MISSING_CATEGORY_CARDS')
+          print('LIVE_PREMIUM_HOMEPAGE_VERIFIED', code, len(data))
+
+          for name in ('refrigerator','washer','television','support','air-conditioner','city-technician'):
+              status, photo = fetch(root + 'public/src/img/home-premium/' + name + '.webp')
+              if status != 200 or photo[:4] != b'RIFF' or photo[8:12] != b'WEBP' or len(photo) > 30000:
+                  raise RuntimeError('LIVE_IMAGE_INVALID: ' + name)
+              print('LIVE_IMAGE_VERIFIED', name, len(photo))
+          PY
