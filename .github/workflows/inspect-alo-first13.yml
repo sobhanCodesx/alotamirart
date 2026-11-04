@@ -1,0 +1,75 @@
+name: Inspect first thirteen archived Alo articles and Tekanino URLs
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/inspect-alo-first13.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Fetch exact existing content via read-only MCP
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import concurrent.futures as cf, json, os, pathlib, re, urllib.request as ur
+          rows=[
+          ('brand_article',2),('brand_article',5),('brand_article',6),('brand_article',7),
+          ('brand_article',8),('brand_article',9),('brand_article',10),
+          ('article',9),('article',10),('article',15),
+          ('brand_article',17),('brand_article',18),('brand_article',19)]
+          path=pathlib.Path('first13-original.json')
+          def one(row):
+            typ,id=row
+            body=json.dumps({'jsonrpc':'2.0','id':1,'method':'tools/call','params':{'name':'get_content','arguments':{'type':typ,'id':id}}}).encode('utf-8')
+            req=ur.Request('https://alotamiratchi.ir/api/mcp/',data=body,method='POST',headers={'Content-Type':'application/json','Authorization':'Bearer '+os.environ['MCP_API_TOKEN']})
+            with ur.urlopen(req,timeout=38) as f:result=json.load(f)
+            if result.get('error'):raise RuntimeError(str(result['error']))
+            ans=result['result']
+            if ans.get('isError'):raise RuntimeError(str(ans.get('content'))[:220])
+            return ans.get('structuredContent') or json.loads(ans['content'][0]['text'])
+          data=[]
+          with cf.ThreadPoolExecutor(max_workers=4) as pool:
+            for (kind,id),res in zip(rows,pool.map(one,rows)):
+              record=res.get('record') or {}
+              if not record:raise RuntimeError('Record missing '+kind+' '+str(id))
+              data.append({'order':len(data)+1,'type':kind,'id':id,'record':record})
+              preview=re.sub('<[^>]+>',' ',str(record.get('content') or ''))
+              print('ORIGINAL',len(data),kind,id,'title=',record.get('title'),'words=',len(preview.split()),'date=',record.get('created_at'),'image=',record.get('img'),flush=True)
+          path.write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('INSPECT_FIRST13_COMPLETE',len(data))
+          PY
+      - name: Search published Tekanino pages without guessing URLs
+        run: |
+          python3 - <<'PY'
+          import urllib.request as ur, urllib.parse as up, re, json, xml.etree.ElementTree as ET, pathlib
+          base='https://tekanino.ir/'
+          info={'checked':[],'candidates':[],'errors':[]}
+          for path in ('','robots.txt','sitemap.xml','post/sitemap','sitemap_index.xml'):
+            try:
+              req=ur.Request(up.urljoin(base,path),headers={'User-Agent':'Mozilla/5.0 (AloEditorialLinkChecker/1.0)'})
+              with ur.urlopen(req,timeout=16) as f: b=f.read(350000)
+              txt=b.decode('utf-8','replace')
+              info['checked'].append({'url':up.urljoin(base,path),'bytes':len(b),'status':200})
+              urls=re.findall('https?://[^<>\"\\s]+',txt)
+              for u in urls:
+                if 'tekanino.ir' in u and any(t in up.unquote(u) for t in ('آمل','قائم','بابل','اهواز','آبادان','خرمشهر','یخچال','اجاق','تلویزیون')):
+                  info['candidates'].append(u[:350])
+            except Exception as e:
+              info['errors'].append({'url':up.urljoin(base,path),'error':str(e)[:130]})
+          info['candidates']=list(dict.fromkeys(info['candidates']))[:150]
+          pathlib.Path('tekanino-link-discovery.json').write_text(json.dumps(info,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('TEKANINO_LINK_DISCOVERY',json.dumps(info,ensure_ascii=False)[:4000])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: first13-sources-and-tekanino-link-discovery
+          path: |
+            first13-original.json
+            tekanino-link-discovery.json
+          retention-days: 14
