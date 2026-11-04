@@ -13,7 +13,7 @@ resumeCheck(str_contains($template,'alo-article-author.css'), 'article-only styl
 resumeCheck(str_contains($template,'مشاهده رزومه و مقالات'), 'resume CTA is missing');
 resumeCheck(str_contains($template,'$authorProfile !=='), 'hide resume button if author profile is missing');
 resumeCheck(str_contains($template,"assets('profile/'."), 'resume link is derived from the real author profile route');
-resumeCheck(str_contains($template,"htmlspecialchars($authorProfile, ENT_QUOTES, 'UTF-8')"),'author profile URLs must be escaped');
+resumeCheck(str_contains($template,"htmlspecialchars(" . '$authorProfile' . ", ENT_QUOTES, 'UTF-8')"),'author profile URLs must be escaped');
 resumeCheck(str_contains($router,"uri('profile/{name}/{id}'"), 'profile route not registered');
 resumeCheck(str_contains($controller,"WHERE user_name = ? AND id = ?"), 'profile page must verify username and ID');
 resumeCheck(str_contains($template,'$authorRole'), 'author role should use profile data');
