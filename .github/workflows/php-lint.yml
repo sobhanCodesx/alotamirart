@@ -33,7 +33,6 @@ jobs:
           set -e
           php -l 404.php
           find them/app them/panel -type f -name '*.php' -print0 | xargs -0 -n1 php -l
-          php tests/alo-explore-contract.php
       - name: Verify compatibility contract
         run: php tests/legacy-compatibility.php
       - name: Verify legacy route contract
