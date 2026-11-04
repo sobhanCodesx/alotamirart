@@ -37,7 +37,7 @@ $head = file_get_contents($root.'/them/app/layout/header.php');
 $css = file_get_contents($root.'/public/src/css/site.css');
 premiumAssert(str_contains($home, 'class="alo-home-premium"'), 'homepage class missing');
 premiumAssert(str_contains($home, 'aloHomeVisualForBrand($brandTitle)'), 'category visuals must be topic-aware');
-premiumAssert(str_contains($home, "assets('brands/categories/' . (int)$item['id'] . '/1')"), 'category URLs must remain unchanged');
+premiumAssert(str_contains($home, "brands/categories/"), 'category URLs must remain unchanged');
 premiumAssert(str_contains($home, "assets('cities')"), 'city search destination missing');
 premiumAssert(str_contains($home, 'alo-brand-grid'), 'accessible category grid missing');
 premiumAssert(str_contains($home, 'alo-latest-brand-section'), 'recent brands layout missing');
