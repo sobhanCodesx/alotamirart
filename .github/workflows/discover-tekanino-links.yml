@@ -1,0 +1,49 @@
+name: Discover Tekanino matching live pages for legacy SEO updates
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/discover-tekanino-links.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Scan Tekanino sitemap and search HTML titles
+        run: |
+          python3 - <<'PY'
+          import urllib.request as R, urllib.parse as U, re, xml.etree.ElementTree as ET, pathlib, json, html, concurrent.futures as cf
+          root='https://tekanino.ir/'
+          def get(u):
+            req=R.Request(u,headers={'User-Agent':'Mozilla/5.0 (AloOutboundLinkVerification/1.0)'})
+            with R.urlopen(req,timeout=20) as f:return f.read(250000).decode('utf-8','replace')
+          x=get(root+'sitemap.xml')
+          t=ET.fromstring(x)
+          urls=[e.text for e in t.iter() if e.tag.endswith('loc') and e.text]
+          print('TEKANINO_SITEMAP_URL_COUNT',len(urls),flush=True)
+          print('TEKANINO_FIRST20',json.dumps(urls[:20],ensure_ascii=False),flush=True)
+          keywords=['آمل','بابل','قائمشهر','قائم‌شهر','آبادان','خرمشهر','اهواز','یخچال','اجاق','تلویزیون']
+          direct=[u for u in urls if any(k in U.unquote(u) for k in keywords)]
+          def inspect(u):
+            try:
+              page=get(u)
+              title=re.search(r'<title[^>]*>(.*?)</title>',page,re.S|re.I)
+              h1=re.search(r'<h1[^>]*>(.*?)</h1>',page,re.S|re.I)
+              clean=lambda m:html.unescape(re.sub('<[^>]*>',' ',m.group(1))).strip() if m else ''
+              return {'url':u,'title':clean(title),'h1':clean(h1)}
+            except Exception as e:return {'url':u,'error':str(e)[:150]}
+          sample=direct[:250] if direct else urls[:140]
+          with cf.ThreadPoolExecutor(max_workers=6) as ex:result=list(ex.map(inspect,sample))
+          ranked=[r for r in result if any(k in (r.get('title','')+' '+r.get('h1','')) for k in keywords)]
+          output={'sitemap_count':len(urls),'direct_matches':len(direct),'checked':len(sample),'top':ranked,'samples':result[:20]}
+          pathlib.Path('tekanino-matching-pages.json').write_text(json.dumps(output,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('TEKANINO_RELEVANT_FOUND',len(ranked),flush=True)
+          for r in ranked[:90]:print('TEKANINO_CANDIDATE',json.dumps(r,ensure_ascii=False),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tekanino-verified-outbound-links
+          path: tekanino-matching-pages.json
+          retention-days: 14
