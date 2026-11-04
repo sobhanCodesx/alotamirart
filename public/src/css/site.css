@@ -1470,3 +1470,21 @@ button{cursor:pointer}
 .email-contact-action{background:none;color:inherit;border:0;padding:0;text-align:inherit;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .email-contact-action:hover,.email-contact-action:focus-visible{color:var(--pn-accent)}
 @media(max-width:620px){.content-card__title{font-size:1rem;line-height:1.65;margin-bottom:7px}}
+
+/* ALO ARTICLE COVER DISPLAY FIX 20261104: preserve full photo, no body overlap. */
+.detail-page--article .detail-cover-wrap{overflow:visible;background:#fff}
+.detail-page--article .detail-cover-wrap .detail-cover{
+  width:100%;height:auto!important;max-height:none;max-width:100%;
+  aspect-ratio:auto!important;object-fit:contain!important;
+  object-position:center;display:block;margin:0;padding:0;transform:none!important
+}
+.detail-page--article .detail-cover-wrap::after{display:none}
+@media(max-width:620px){
+  .detail-page--article .detail-body{
+    margin-top:0!important;border-radius:0;
+    padding:25px 18px 34px;border-top:1px solid #edf1f7
+  }
+  .detail-page--article.detail-page--has-contact{
+    padding-bottom:calc(100px + env(safe-area-inset-bottom))
+  }
+}
