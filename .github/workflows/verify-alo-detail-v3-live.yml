@@ -1,0 +1,53 @@
+name: Verify new article and brand design on live AloTamiratchi
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/verify-alo-detail-v3-live.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check deployed articles, actual resume links, full-photo covers and CSS
+        run: |
+          python3 - <<'PY'
+          import re,html,urllib.parse as u,urllib.request as r
+          root='https://alotamiratchi.ir/'
+          def fetch(url):
+            req=r.Request(url,headers={'User-Agent':'Mozilla/5.0 (compatible; AloDetailV3QA/1.0)','Cache-Control':'no-cache'})
+            with r.urlopen(req,timeout=28) as response:
+              if response.status!=200:raise RuntimeError(str(response.status)+' '+url)
+              return response.read()
+          css=fetch(root+'public/src/css/alo-detail-v3.css?verification=20261105').decode('utf-8')
+          js=fetch(root+'public/src/js/alo-detail-v3.js?verification=20261105').decode('utf-8')
+          assert '.detail-page .detail-cover-wrap .detail-cover' in css and 'alo-author-visible' in css
+          assert 'aspect-ratio:auto!important' in css and 'margin-top:0!important' in css
+          assert 'IntersectionObserver' in js
+          sites=[
+            ('brand',root+'Engineer-Salem-Navasir_Abadan/2','img04f9491fe184dcae63dc8815574e25e6.webp'),
+            ('article',root+'post/10','img-f968f206810bc03110d37594f0de91f6.webp')
+          ]
+          for kind,url,cover in sites:
+            page=fetch(url).decode('utf-8')
+            for key in ('alo-author-showcase','alo-mobile-resume','alo-mobile-call','alo-detail-v3.css','alo-detail-v3.js','مشاهده رزومه و مقالات'):
+              if key not in page:raise RuntimeError(kind+' missing HTML marker '+key)
+            if cover not in page:raise RuntimeError(kind+' new cover missing '+cover)
+            m=re.search(r'<a class="alo-author-showcase__resume"\s+href="([^"]+)"',page)
+            if not m:raise RuntimeError(kind+' missing real resume anchor')
+            profile=u.urljoin(root,html.unescape(m.group(1)))
+            if not profile.startswith(root+'profile/'):raise RuntimeError(kind+' bad profile '+profile)
+            profile_html=fetch(profile).decode('utf-8')
+            if 'profile' not in profile_html.lower() and 'پروفایل' not in profile_html:
+              raise RuntimeError(kind+' resume profile destination not showing profile')
+            image=fetch(root+'them/admin/dist/img/'+cover)
+            if len(image)>30000 or image[:4]!=b'RIFF' or image[8:12]!=b'WEBP':
+              raise RuntimeError(kind+' cover is not 30KB WebP')
+            print('ALO_DETAIL_V3_LIVE_VERIFIED',kind,len(page),len(image),profile,flush=True)
+          print('ALO_DETAIL_V3_ALL_LIVE_SUCCESS',len(sites))
+          PY
