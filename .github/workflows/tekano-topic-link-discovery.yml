@@ -1,0 +1,25 @@
+name: Discover exact Tekanino stove and television links
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/tekano-topic-link-discovery.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read sitemap URL targets
+        run: |
+          python3 - <<'PY'
+          import urllib.request as ur,xml.etree.ElementTree as ET,urllib.parse as up
+          req=ur.Request('https://tekanino.ir/sitemap.xml',headers={'User-Agent':'Mozilla/5.0'})
+          with ur.urlopen(req,timeout=20) as f:doc=ET.fromstring(f.read())
+          urls=[x.text for x in doc.iter() if x.tag.endswith('loc') and x.text]
+          for url in urls:
+            u=up.unquote(url.lower())
+            if any(x in u for x in ('stove','gas','oven','cooker','tv','television','qaem','babol','ahvaz','abadan','khorramshahr','amol')):
+              print('VERIFIED_SITE_SITEMAP_LINK',url,flush=True)
+          print('VERIFIED_SITE_SITEMAP_TOTAL',len(urls),flush=True)
+          PY
