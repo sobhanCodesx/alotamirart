@@ -1,0 +1,53 @@
+name: Verify Alo article author resume live
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-alo-author-resume-live.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Check real article resume CTA, profile destination and mobile styles
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import html, re, time, urllib.parse, urllib.request
+          root = 'https://alotamiratchi.ir/'
+          def get(url):
+              req=urllib.request.Request(url, headers={
+                  'User-Agent': 'Mozilla/5.0 (compatible; AloResumeLiveQA/1.0)',
+                  'Cache-Control': 'no-cache',
+                  'Accept': 'text/html,text/css,*/*',
+              })
+              with urllib.request.urlopen(req, timeout=24) as response:
+                  assert response.status == 200, (url,response.status)
+                  return response.read().decode('utf-8',errors='replace')
+          for attempt in range(15):
+              page=get(root+'post/522/free-appliance-repair-for-families-in-need')
+              if 'alo-author-showcase' in page and 'alo-mobile-resume' in page:
+                  break
+              if attempt == 14:
+                  raise RuntimeError('LIVE_AUTHOR_RESUME_MARKUP_NOT_PUBLISHED')
+              time.sleep(8)
+          css=get(root+'public/src/css/alo-article-author.css?livecheck=20261104')
+          assert '.detail-page--article .alo-author-showcase' in css, 'Article CSS missing'
+          assert 'alo-article-contact' in page, 'Contact card missing'
+          assert '09351211661' in page, 'Original article-specific phone lost'
+          match=re.search(r'<a\s+class="alo-author-showcase__resume"\s+href="([^"]+)"',page)
+          if not match:
+              raise RuntimeError('LIVE_RESUME_LINK_MISSING_FOR_ARTICLE_522')
+          profile=urllib.parse.urljoin(root,html.unescape(match.group(1)))
+          assert urllib.parse.urlparse(profile).netloc == 'alotamiratchi.ir', profile
+          assert '/profile/' in profile, profile
+          profile_html=get(profile)
+          assert 'profile-hero' in profile_html and 'پروفایل' in profile_html, 'Resume target does not render a profile'
+          print('LIVE_AUTHOR_RESUME_PROFILE_VERIFIED',profile,len(page),len(css),len(profile_html))
+          PY
