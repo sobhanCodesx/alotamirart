@@ -100,13 +100,30 @@ class Hom
             return;
         }
 
+        // Keep article and brand listings independent; each page has six records.
+        $profilePerPage = 6;
+        $postsCount = (int)$this->db->select(
+            'SELECT COUNT(id) FROM posts WHERE user_id = ? AND status = 1',
+            [$id]
+        )->fetchColumn();
+        $brandsCount = (int)$this->db->select(
+            'SELECT COUNT(id) FROM post_brand WHERE user_id = ? AND status = 1',
+            [$id]
+        )->fetchColumn();
+        $postsPages = max(1, (int)ceil($postsCount / $profilePerPage));
+        $brandsPages = max(1, (int)ceil($brandsCount / $profilePerPage));
+        $postsPage = min($postsPages, max(1, (int)($_GET['page'] ?? 1)));
+        $brandsPage = min($brandsPages, max(1, (int)($_GET['brand_page'] ?? 1)));
+        $postsOffset = ($postsPage - 1) * $profilePerPage;
+        $brandsOffset = ($brandsPage - 1) * $profilePerPage;
+
         $posts = $this->db->select(
-            'SELECT id,title,user_id,description,content,img FROM posts WHERE user_id = ? AND status = 1 ORDER BY created_at DESC LIMIT 0,6',
+            "SELECT id,title,user_id,description,content,img FROM posts WHERE user_id = ? AND status = 1 ORDER BY created_at DESC, id DESC LIMIT {$postsOffset},{$profilePerPage}",
             [$id]
         )->fetchAll();
 
         $brand = $this->db->select(
-            'SELECT id,title,content,brand_id,des,img,slug FROM post_brand WHERE user_id = ? AND status = 1 ORDER BY created_at DESC LIMIT 0,6',
+            "SELECT id,title,content,brand_id,des,img,slug FROM post_brand WHERE user_id = ? AND status = 1 ORDER BY created_at DESC, id DESC LIMIT {$brandsOffset},{$profilePerPage}",
             [$id]
         )->fetchAll();
 
@@ -128,6 +145,7 @@ class Hom
             $user['img'] = 'them/admin/dist/img/avatar.png';
         }
 
+        require_once BASE_PATH . '/app/Support/profile-pagination.php';
         require BASE_PATH . '/them/app/profile/index.php';
     }
 }

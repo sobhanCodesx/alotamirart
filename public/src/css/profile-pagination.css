@@ -1,0 +1,16 @@
+/* Responsive numbered pagination for profile author posts and brand content. */
+.profile-list-section{min-width:0;scroll-margin-top:95px}
+.profile-pager{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;margin:22px 0 4px;direction:rtl}
+.profile-pager a,.profile-pager span{min-width:43px;height:43px;padding:0 11px;border-radius:13px}
+.profile-pager a{color:#182f60;background:#fff;border:1px solid #dce4f0;box-shadow:0 3px 12px rgba(13,40,80,.04)}
+.profile-pager a:hover{background:#fff2df;border-color:#f7bd64;color:#ac5807}
+.profile-pager .is-active{color:#fff;background:linear-gradient(135deg,#193b80,#0e2457);border-color:#193b80;box-shadow:0 6px 16px rgba(20,54,113,.17)}
+.profile-pager .profile-pager__edge{min-width:66px;font-size:.78rem;font-weight:900}
+.profile-pager .profile-pager__dots{min-width:24px;padding:0 2px;background:transparent;border:0;color:#7f8ba1}
+.profile-pager .is-disabled{opacity:.42;pointer-events:none}
+.profile-pager a:focus-visible{outline:3px solid #ffa82c;outline-offset:2px}
+@media(max-width:620px){
+  .profile-pager{gap:5px;margin-top:17px}
+  .profile-pager a,.profile-pager span{min-width:37px;height:40px;border-radius:11px;padding:0 8px;font-size:.78rem}
+  .profile-pager .profile-pager__edge{min-width:54px;font-size:.72rem}
+}

@@ -91,6 +91,10 @@ jobs:
           php -l api/deployment-agent/index.php
           php -l them/app/posts/article-contact-helper.php
           php tests/article-contact-contract.php
+          php -l classes/app/Hom.php
+          php -l them/app/profile/index.php
+          php -l app/Support/profile-pagination.php
+          php tests/profile-pagination-contract.php
           php tests/article-author-resume-contract.php
           php tests/article-cover-layout-contract.php
           php tests/alo-site-graph-contract.php
