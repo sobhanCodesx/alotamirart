@@ -1,0 +1,52 @@
+name: Verify Alo Explore Live
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-alo-explore-live.yml'
+      - 'public/src/css/alo-explore.css'
+      - 'public/src/js/alo-explore.js'
+      - 'them/app/layout/heading.php'
+      - 'them/app/layout/js.php'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Verify live Explore assets and homepage integration
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import urllib.request
+          root = 'https://alotamiratchi.ir/'
+          def get(path):
+              request = urllib.request.Request(root + path, headers={
+                  'User-Agent': 'Mozilla/5.0 (compatible; AloExploreLiveQA/1.0)',
+                  'Cache-Control': 'no-cache',
+              })
+              with urllib.request.urlopen(request, timeout=22) as response:
+                  status = response.status
+                  payload = response.read()
+              if status != 200:
+                  raise RuntimeError(f'LIVE_ASSET_BAD_STATUS {path}: {status}')
+              return payload.decode('utf-8', errors='replace')
+          home = get('')
+          css = get('public/src/css/alo-explore.css')
+          js = get('public/src/js/alo-explore.js')
+          for required in ('alo-explore.css', 'alo-explore.js', 'alo-brand-grid', 'alo-brand-card'):
+              if required not in home:
+                  raise RuntimeError('LIVE_HOMEPAGE_MISSING: ' + required)
+          for required in ('object-fit:contain !important', '.alo-explore__image', '.alo-home-premium .alo-brand-card__media img'):
+              if required not in css:
+                  raise RuntimeError('LIVE_CSS_MISSING: ' + required)
+          for required in ('createElement("dialog")', 'popup.showModal()', 'data-explore-open', 'event.preventDefault()'):
+              if required not in js:
+                  raise RuntimeError('LIVE_JS_MISSING: ' + required)
+          print('LIVE_ALO_EXPLORE_VERIFIED', len(home), len(css), len(js))
+          PY
