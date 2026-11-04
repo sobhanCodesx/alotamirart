@@ -23,4 +23,9 @@ foreach (['upload/chunk','upload/complete','/verify','/apply','/status','health'
 foreach (['512 * 1024','multipart/form-data','deployment-manifest.sig','source_sha','/verify','/apply','health','PLAYNEXUS_STYLE_DEPLOY_VERIFIED_OK'] as $token) {
     if (strpos($client,$token)===false) {fwrite(STDERR,"Staged deployment client missing $token\n");exit(1);}
 }
+if (strpos($workflow, 'ALO_DEPLOY_AGENT_URL: https://alotamiratchi.ir/api/deployment-agent/') === false
+    || strpos($client, 'https://alotamiratchi.ir/api/deployment-agent/') === false) {
+    fwrite(STDERR, "Deployment endpoint must use canonical HTTPS host without www\\n");
+    exit(1);
+}
 echo "Deploy static contract passed\n";

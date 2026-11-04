@@ -27,7 +27,7 @@ import zipfile
 
 
 ROOT = Path(os.getenv("ALO_SOURCE_ROOT", Path(__file__).resolve().parents[1])).resolve()
-API = os.getenv("ALO_DEPLOY_AGENT_URL", "https://www.alotamiratchi.ir/api/deployment-agent/").rstrip("/") + "/"
+API = os.getenv("ALO_DEPLOY_AGENT_URL", "https://alotamiratchi.ir/api/deployment-agent/").rstrip("/") + "/"
 TOKEN = os.getenv("MCP_API_TOKEN", "")
 SHA = os.getenv("GITHUB_SHA", "").lower()
 REF = os.getenv("GITHUB_REF", "")

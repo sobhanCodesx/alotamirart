@@ -136,7 +136,7 @@ jobs:
       - name: Deploy using the signed multipart HTTPS receiver after manual bootstrap
         env:
           MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
-          ALO_DEPLOY_AGENT_URL: https://www.alotamiratchi.ir/api/deployment-agent/
+          ALO_DEPLOY_AGENT_URL: https://alotamiratchi.ir/api/deployment-agent/
           BEFORE_SHA: ${{ github.event.before }}
           GITHUB_REF: ${{ github.ref }}
           GITHUB_SHA: ${{ github.sha }}
