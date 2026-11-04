@@ -39,6 +39,7 @@ $userAvatar = !empty($_SESSION['img']) ? (string)$_SESSION['img'] : 'them/admin/
   <div class="site-container site-header__inner">
     <a class="site-logo" href="<?= assets('/') ?>" aria-label="<?= htmlspecialchars($siteTitle, ENT_QUOTES, 'UTF-8') ?>">
       <img src="<?= assets($logo) ?>" alt="<?= htmlspecialchars($siteTitle, ENT_QUOTES, 'UTF-8') ?>" width="150" height="50" decoding="async" fetchpriority="high">
+      <span class="alo-site-wordmark"><strong>الو <em>تعمیراتچی</em></strong><small>مرجع آموزش و خدمات لوازم خانگی</small></span>
     </a>
 
     <nav class="site-nav" id="mobile-site-nav" data-site-nav aria-label="منوی اصلی">
