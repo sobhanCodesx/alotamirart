@@ -40,7 +40,7 @@ $homeSchema = [
   <script type="application/ld+json"><?= json_encode($homeSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
   <?php require BASE_PATH . '/them/app/layout/heading.php'; ?>
 </head>
-<body class="alo-home-premium">
+<body>
 <?php require BASE_PATH . '/them/app/layout/header.php'; ?>
 <main id="main-content">
   <section class="hero"<?= $heroRaw !== '' ? ' style="background-image:url(\'' . htmlspecialchars($heroUrl, ENT_QUOTES, 'UTF-8') . '\')"' : '' ?>>
@@ -68,7 +68,7 @@ $homeSchema = [
     <div class="trust-item"><div class="trust-item__icon">☎</div><div><strong>ارتباط آسان</strong><span>مسیر تماس روشن و بدون پیچیدگی</span></div></div>
   </div></div></section>
 
-  <section class="site-section alo-latest-articles-section"><div class="site-container">
+  <section class="site-section"><div class="site-container">
     <div class="section-head"><div><span class="site-eyebrow">مجله تعمیرات</span><h2 class="site-title">آخرین مقالات</h2><div class="site-subtitle">راهنماها، نکات نگهداری و پاسخ به سوالات رایج درباره لوازم خانگی.</div></div></div>
     <?php if (!empty($post) && is_array($post)): ?><div class="content-grid">
       <?php foreach ($post as $item): ?><article class="content-card" data-reveal>
@@ -100,70 +100,19 @@ $homeSchema = [
     <?php endforeach; ?></div>
   </div></section>
 
-  <section class="site-section site-section--dark alo-latest-brand-section"><div class="site-container">
+  <section class="site-section site-section--dark"><div class="site-container">
     <div class="section-head"><div><span class="site-eyebrow">برندها و نمایندگی‌ها</span><h2 class="site-title">تازه‌ترین مطالب برندها</h2><div class="site-subtitle">محتوای مرتبط با برندها، خدمات و راهنمای انتخاب مرکز مناسب.</div></div></div>
     <?php if (!empty($brands) && is_array($brands)): ?><div class="content-grid"><?php foreach ($brands as $item): ?><?php $url=assets((isset($item['slug'])?$item['slug']:'').'/'.(int)$item['id']); ?>
       <article class="content-card" data-reveal><a class="content-card__link" href="<?= $url ?>"><div class="content-card__media"><img src="<?= assets($item['img']) ?>" alt="<?= htmlspecialchars('تصویر مطلب برند: ' . clean_display_text((string)($item['title'] ?? 'تعمیر لوازم خانگی')), ENT_QUOTES, 'UTF-8') ?>" width="640" height="400" loading="lazy" decoding="async" fetchpriority="low"></div><div class="content-card__body"><span class="content-card__meta">مطلب برند</span><strong class="content-card__title"><?= htmlspecialchars(clean_display_text(isset($item['title'])?$item['title']:''),ENT_QUOTES,'UTF-8') ?></strong><span class="content-card__summary"><?= htmlspecialchars(excerpt_text(isset($item['content'])?$item['content']:'',25),ENT_QUOTES,'UTF-8') ?></span><span class="content-card__action" aria-hidden="true">مشاهده مطلب ←</span></div></a></article>
     <?php endforeach; ?></div><?php endif; ?>
   </div></section>
 
-  <?php require_once BASE_PATH . '/app/Support/home-premium-visuals.php'; ?>
-  <section class="site-section alo-quick-section" aria-labelledby="alo-brand-heading">
-    <div class="site-container">
-      <div class="alo-quick-intro">
-        <div class="alo-quick-intro__heading">
-          <span class="alo-quick-intro__icon" aria-hidden="true">◇</span>
-          <div><span class="site-eyebrow">برندها و خدمات تحت پوشش</span>
-            <h2 id="alo-brand-heading" class="site-title">دسترسی سریع به برندها</h2>
-            <p class="site-subtitle">دسترسی ساده به برندها، آموزش‌های تعمیر و راهنمای خدمات تخصصی.</p>
-          </div>
-        </div>
-        <a class="alo-outline-button" href="#alo-brand-grid">مرور همه دسته‌ها <span aria-hidden="true">←</span></a>
-      </div>
-      <?php if (!empty($brand) && is_array($brand)): ?>
-      <div class="alo-brand-grid" id="alo-brand-grid">
-        <?php foreach ($brand as $item): ?>
-          <?php
-          $brandTitle = trim(clean_display_text((string)($item['name'] ?? '')));
-          if ($brandTitle === '') $brandTitle = 'خدمات تخصصی';
-          $visual = aloHomeVisualForBrand($brandTitle);
-          $imageSource = $visual['image'];
-          $description = $visual['description'];
-          ?>
-          <a class="alo-brand-card" href="<?= assets('brands/categories/' . (int)$item['id'] . '/1') ?>"
-             aria-label="<?= htmlspecialchars('مشاهده ' . $brandTitle, ENT_QUOTES, 'UTF-8') ?>">
-            <span class="alo-brand-card__media">
-              <img src="<?= assets($imageSource) ?>" alt="<?= htmlspecialchars('تصویر مرتبط با ' . $brandTitle, ENT_QUOTES, 'UTF-8') ?>"
-                   width="600" height="320" loading="lazy" decoding="async">
-              <span class="alo-brand-card__icon" aria-hidden="true"><?= htmlspecialchars($visual['icon'], ENT_QUOTES, 'UTF-8') ?></span>
-            </span>
-            <strong class="alo-brand-card__title"><?= htmlspecialchars($brandTitle, ENT_QUOTES, 'UTF-8') ?></strong>
-            <span class="alo-brand-card__description"><?= htmlspecialchars($description, ENT_QUOTES, 'UTF-8') ?></span>
-            <span class="alo-brand-card__action">مشاهده خدمات <span aria-hidden="true">←</span></span>
-          </a>
-        <?php endforeach; ?>
-      </div>
-      <?php endif; ?>
-    </div>
-  </section>
+  <section class="site-section"><div class="site-container">
+    <div class="section-head"><div><span class="site-eyebrow">برندهای تحت پوشش</span><h2 class="site-title">دسترسی سریع به برندها</h2></div></div>
+    <?php if (!empty($brand) && is_array($brand)): ?><div class="brand-grid"><?php foreach ($brand as $item): ?><a class="brand-card" href="<?= assets('brands/categories/'.(int)$item['id'].'/1') ?>"><img src="<?= assets($item['img']) ?>" alt="<?= htmlspecialchars(clean_display_text(isset($item['name'])?$item['name']:''),ENT_QUOTES,'UTF-8') ?>" width="320" height="240" loading="lazy" decoding="async" fetchpriority="low"><strong><?= htmlspecialchars(clean_display_text(isset($item['name'])?$item['name']:''),ENT_QUOTES,'UTF-8') ?></strong><span><?= htmlspecialchars(excerpt_text(isset($item['des'])?$item['des']:'',10),ENT_QUOTES,'UTF-8') ?></span></a><?php endforeach; ?></div><?php endif; ?>
+  </div></section>
 
-  <section class="site-section--compact alo-city-section" aria-labelledby="alo-city-heading">
-    <div class="site-container">
-      <div class="cta-panel alo-cta-panel">
-        <div class="alo-cta-panel__copy">
-          <span class="alo-cta-panel__eyebrow">⌖ شهرهای تحت پوشش</span>
-          <h2 id="alo-city-heading">خدمات شهر خودتان را پیدا کنید</h2>
-          <p>شهر خودتان را انتخاب کنید و به خدمات و متخصصان مرتبط دسترسی پیدا کنید.</p>
-          <div class="cta-panel__actions">
-            <a class="btn-site btn-site--accent" href="<?= assets('cities') ?>">انتخاب شهر و جست‌وجوی خدمات <span aria-hidden="true">←</span></a>
-            <?php if($phone!==''): ?><a class="btn-site btn-site--light" href="tel:<?= htmlspecialchars($phoneHref,ENT_QUOTES,'UTF-8') ?>">تماس: <?= htmlspecialchars($phone,ENT_QUOTES,'UTF-8') ?></a><?php endif; ?>
-          </div>
-        </div>
-        <img class="alo-cta-panel__technician" src="<?= assets('public/src/img/home-premium/city-technician.webp') ?>"
-             alt="تکنسین خدمات لوازم خانگی" width="600" height="442" loading="lazy" decoding="async">
-      </div>
-    </div>
-  </section>
+  <section class="site-section--compact"><div class="site-container"><div class="cta-panel"><div><h2>خدمات شهر خودتان را پیدا کنید</h2><div>با انتخاب شهر، مستقیماً به خدمات و مسیرهای مرتبط دسترسی پیدا کنید.</div></div><div class="cta-panel__actions"><a class="btn-site btn-site--accent" href="<?= assets('cities') ?>">مشاهده شهرها</a><?php if($phone!==''): ?><a class="btn-site btn-site--light" href="tel:<?= htmlspecialchars($phoneHref,ENT_QUOTES,'UTF-8') ?>">تماس: <?= htmlspecialchars($phone,ENT_QUOTES,'UTF-8') ?></a><?php endif; ?></div></div></div></section>
 </main>
 <?php require BASE_PATH . '/them/app/layout/footer.php'; ?>
 <?php require BASE_PATH . '/them/app/layout/js.php'; ?>
