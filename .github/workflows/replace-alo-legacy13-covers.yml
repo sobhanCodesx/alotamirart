@@ -1,0 +1,117 @@
+name: Replace 13 legacy article covers with full-frame photographic WebP
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/replace-alo-legacy13-covers.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alo-legacy13-cover-improvement
+  cancel-in-progress: false
+
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Pillow
+        run: python3 -m pip install --quiet pillow
+      - name: Rebuild 13 cover photos without colored side-bars and update actual existing records via MCP
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os,io,re,json,base64,pathlib,hashlib,urllib.request as ur
+          from PIL import Image,ImageOps,ImageFilter,ImageDraw
+          root=pathlib.Path('.')
+          endpoint='https://alotamiratchi.ir/api/mcp/'
+          targets=[
+            ('brand_article',2,'Engineer-Salem-Navasir_Abadan'),
+            ('brand_article',5,'Samsung-refrigerator-repair-agency-Ahvaz'),
+            ('brand_article',6,'Representation-Refrigerator-Himalaya-Abadan'),
+            ('brand_article',7,'Representation-Refrigerator-Electro-steel-Abadan'),
+            ('brand_article',8,'Representation-Refrigerator-Hitachi-Abadan'),
+            ('brand_article',9,'Representation-Refrigerator-Dipoint-Abadan'),
+            ('brand_article',10,'Representation-Refrigerator-Emersan-Abadan'),
+            ('article',9,None),('article',10,None),('article',15,None),
+            ('brand_article',17,'LG-home-appliance-repair-agency-abadan'),
+            ('brand_article',18,'Samsung-TV-repair-agency-Abadan'),
+            ('brand_article',19,'LG-refrigerator-repair-agency-Ahvaz')
+          ]
+          def mcp(name,args):
+            payload=json.dumps({'jsonrpc':'2.0','id':1,'method':'tools/call','params':{'name':name,'arguments':args}},ensure_ascii=False).encode()
+            request=ur.Request(endpoint,data=payload,method='POST',headers={
+              'Authorization':'Bearer '+os.environ['MCP_API_TOKEN'],
+              'Content-Type':'application/json; charset=utf-8','User-Agent':'AloPremiumCoverRefresh/1.0'
+            })
+            with ur.urlopen(request,timeout=50) as h:doc=json.load(h)
+            if doc.get('error'):raise RuntimeError('MCP response '+str(doc['error'])[:250])
+            resp=doc.get('result') or {}
+            if resp.get('isError'):raise RuntimeError('MCP operation failed '+str(resp.get('content'))[:250])
+            return resp.get('structuredContent') or json.loads(resp['content'][0]['text'])
+          def make_photo(source_path):
+            with Image.open(source_path) as img:
+              source=img.convert('RGB')
+              original_width, original_height=source.size
+              # Legacy thumbnails contain flat brand-color borders; isolate the photographic center.
+              photo=source.crop((round(original_width*.185),6,round(original_width*.815),original_height-6))
+              canvas_width,canvas_height=960,600
+              background=ImageOps.fit(photo,(canvas_width,canvas_height),method=Image.Resampling.LANCZOS)
+              background=background.filter(ImageFilter.GaussianBlur(28))
+              background=Image.blend(background,Image.new('RGB',background.size,'#0c2448'),.08)
+              foreground=ImageOps.contain(photo,(750,590),Image.Resampling.LANCZOS)
+              mask=Image.new('L',foreground.size,255)
+              draw=ImageDraw.Draw(mask)
+              edge=70
+              for x in range(edge):
+                a=round(255*x/edge)
+                draw.line([(x,0),(x,foreground.height)],fill=a)
+                draw.line([(foreground.width-1-x,0),(foreground.width-1-x,foreground.height)],fill=a)
+              pos=((canvas_width-foreground.width)//2,(canvas_height-foreground.height)//2)
+              background.paste(foreground,pos,mask)
+              for quality in (78,68,60,50,42,34,26,18,12):
+                buf=io.BytesIO()
+                background.save(buf,format='WEBP',quality=quality,method=6)
+                if 24<len(buf.getvalue())<=30000:
+                  return buf.getvalue()
+              raise RuntimeError('Unable to encode photo under 30 KB '+str(source_path))
+          pathlib.Path('report').mkdir(exist_ok=True)
+          results=[]
+          for i,(kind,id,slug) in enumerate(targets,1):
+            original=mcp('get_content',{'type':kind,'id':id})['record']
+            if int(original.get('status',0))!=1:raise RuntimeError('Article not published '+str(id))
+            if slug and original.get('slug')!=slug:raise RuntimeError('Legacy slug changed for '+str(id))
+            image=make_photo(root/f'public/src/img/legacy-seo-2026/legacy{i:02d}-cover.webp')
+            before_text_hash=hashlib.sha256((original.get('content') or '').encode()).hexdigest()
+            keep_title=original['title']
+            fields={'title':keep_title}
+            if kind=='article':
+              original_slug=original.get('slug')
+              if not original_slug:raise RuntimeError('Original article slug missing '+str(id))
+              fields['slug']=original_slug
+            changed=mcp('update_content',{'type':kind,'id':id,'fields':fields,'image_base64':base64.b64encode(image).decode(),'confirm_public':True})['record']
+            fresh=mcp('get_content',{'type':kind,'id':id})['record']
+            if fresh['title']!=keep_title or fresh.get('slug')!=original.get('slug'):
+              raise RuntimeError('Title or URL changed for '+str(id))
+            if hashlib.sha256((fresh.get('content') or '').encode()).hexdigest()!=before_text_hash:
+              raise RuntimeError('Content changed during image-only update for '+str(id))
+            if fresh.get('img')==original.get('img') or int(fresh.get('status',0))!=1:
+              raise RuntimeError('New cover not confirmed for '+str(id))
+            print('ALOLIVE_COVER_REPLACED',i,kind,id,len(image),fresh['img'],flush=True)
+            results.append({'order':i,'type':kind,'id':id,'title':fresh['title'],'image':fresh['img'],'bytes':len(image),'slug_unchanged':True})
+          pathlib.Path('report/legacy13-covers.json').write_text(json.dumps(results,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('ALOLIVE_13_COVERS_SUCCESS',len(results),flush=True)
+          PY
+      - name: Archive cover verification report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alo-legacy13-full-bleed-cover-results
+          path: report/
+          if-no-files-found: warn
