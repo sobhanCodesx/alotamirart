@@ -73,6 +73,7 @@ jobs:
           php -l app/Support/refrigerator-brand-hub.php
           php tests/refrigerator-brand-hub-contract.php
           php -l them/app/index.php
+          php -l them/app/posts/post.php
           php -l them/app/layout/heading.php
           php tests/seo-homepage-contract.php
           php tests/alo-luxe-homepage-contract.php
