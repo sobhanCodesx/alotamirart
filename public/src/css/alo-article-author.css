@@ -1,0 +1,162 @@
+/* AloTamiratchi article author, resume and contact card — isolated from homepage & brands */
+.detail-page--article .alo-author-showcase{
+  position:relative;
+  isolation:isolate;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  padding:clamp(19px,3vw,31px);
+  margin:26px 0 24px;
+  color:#fff;
+  background:
+    radial-gradient(circle at 0% 110%, rgba(247,151,32,.22),transparent 41%),
+    linear-gradient(135deg,#102f69 0%,#102755 49%,#0c1b3e 100%);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:27px;
+  box-shadow:0 18px 40px rgba(18,45,94,.18);
+  overflow:hidden;
+}
+.detail-page--article .alo-author-showcase::before{
+  content:"";position:absolute;left:-62px;top:-74px;width:205px;height:205px;
+  border:1px solid rgba(255,255,255,.1);border-radius:50%;
+  box-shadow:0 0 0 36px rgba(255,255,255,.025),0 0 0 72px rgba(255,255,255,.02);
+  pointer-events:none;z-index:-1;
+}
+.detail-page--article .alo-author-showcase__accent{
+  position:absolute;right:0;top:18px;bottom:18px;width:4px;
+  border-radius:4px 0 0 4px;background:linear-gradient(#ffcb69,#f38b17,transparent);
+}
+.detail-page--article .alo-author-showcase__intro{
+  display:flex;align-items:center;gap:17px;min-width:0;
+}
+.detail-page--article .alo-author-showcase__avatar{
+  display:block;flex:0 0 84px;width:84px;height:84px;
+  padding:4px;border:2px solid #ffc063;border-radius:25px;
+  background:#ecf1fd;box-shadow:0 10px 24px rgba(0,0,0,.16);overflow:hidden;
+}
+.detail-page--article .alo-author-showcase__avatar img{
+  display:block;width:100%;height:100%;border-radius:19px;
+  object-fit:cover;object-position:center;
+}
+.detail-page--article .alo-author-showcase__identity{min-width:0}
+.detail-page--article .alo-author-showcase__eyebrow{
+  display:inline-flex;align-items:center;gap:7px;
+  color:#ffcf86;font-size:.78rem;font-weight:900;line-height:1.8;
+}
+.detail-page--article .alo-author-showcase__identity h2{
+  color:#fff !important;
+  font-size:clamp(1.18rem,2.5vw,1.58rem);font-weight:900;
+  line-height:1.6;margin:4px 0 3px;overflow-wrap:anywhere;
+}
+.detail-page--article .alo-author-showcase__identity p{
+  color:#c6d9f5;font-size:.81rem;line-height:1.7;margin:0;
+}
+.detail-page--article .alo-author-showcase__bio{
+  margin:0;padding:13px 17px;border:1px solid rgba(255,255,255,.11);
+  background:rgba(255,255,255,.055);border-radius:16px;
+  color:#dbe7fa;font-size:.86rem;line-height:1.9;overflow-wrap:anywhere;
+}
+.detail-page--article .alo-author-showcase__footer{
+  display:flex;flex-direction:column;gap:17px;
+  padding-top:16px;border-top:1px solid rgba(255,255,255,.15);
+}
+.detail-page--article .alo-author-showcase__stats{
+  display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+}
+.detail-page--article .alo-author-showcase__stats>span{
+  display:inline-flex;gap:7px;align-items:center;
+  padding:5px 12px;border:1px solid rgba(255,255,255,.16);
+  border-radius:999px;background:rgba(255,255,255,.085);
+  color:#e2ecfa;font-size:.74rem;line-height:1.65;
+}
+.detail-page--article .alo-author-showcase__stats>span span{color:#ffc16c}
+.detail-page--article .alo-author-showcase__actions{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.detail-page--article .alo-author-showcase__resume,
+.detail-page--article .alo-author-showcase__contact{
+  display:inline-flex;justify-content:center;align-items:center;gap:9px;
+  border-radius:15px;min-height:47px;padding:9px 16px;
+  font-weight:900;font-size:.85rem;text-decoration:none;transition:transform .18s,filter .18s;
+}
+.detail-page--article .alo-author-showcase__resume{
+  color:#252032;background:linear-gradient(115deg,#ffd16c,#f99b20);
+  box-shadow:0 8px 25px rgba(239,140,24,.22);
+}
+.detail-page--article .alo-author-showcase__contact{
+  color:#f5f8ff;background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.23);
+}
+.detail-page--article .alo-author-showcase__actions a:hover{transform:translateY(-2px);filter:brightness(1.03)}
+.detail-page--article .alo-author-showcase__actions a:focus-visible,
+.detail-page--article .alo-author-showcase__avatar:focus-visible{
+  outline:3px solid #ffbc46;outline-offset:3px;
+}
+.detail-page--article .alo-article-contact{
+  scroll-margin-top:105px;
+  padding:20px 22px;
+  border-radius:21px;
+  background:linear-gradient(125deg,#f6f8fe,#e9eefb);
+  border:1px solid #dce4f3;
+  box-shadow:0 10px 28px rgba(16,50,111,.055);
+}
+.detail-page--article .alo-article-contact .detail-contact-inline__icon{
+  color:#fff;background:linear-gradient(145deg,#ffad37,#e77c0d);
+}
+.detail-page--article .alo-article-contact>a{
+  padding:9px 15px;background:#fff;border:1px solid #e1e8f6;
+  border-radius:13px;text-decoration:none;
+}
+.detail-page--article .alo-article-contact>a:focus-visible{
+  outline:3px solid #f3a42c;outline-offset:2px;
+}
+@media(max-width:900px){
+  .detail-page--article .alo-author-showcase{gap:15px;}
+}
+@media(max-width:620px){
+  .detail-page--article .alo-author-showcase{
+    padding:20px 17px 19px;margin:22px 0;border-radius:23px;
+  }
+  .detail-page--article .alo-author-showcase__intro{gap:13px;align-items:center}
+  .detail-page--article .alo-author-showcase__avatar{
+    flex-basis:69px;width:69px;height:69px;border-radius:19px;
+  }
+  .detail-page--article .alo-author-showcase__avatar img{border-radius:13px}
+  .detail-page--article .alo-author-showcase__identity h2{font-size:1.18rem}
+  .detail-page--article .alo-author-showcase__eyebrow{font-size:.67rem}
+  .detail-page--article .alo-author-showcase__identity p{font-size:.71rem}
+  .detail-page--article .alo-author-showcase__stats>span{font-size:.67rem}
+  .detail-page--article .alo-author-showcase__actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .detail-page--article .alo-author-showcase__resume,
+  .detail-page--article .alo-author-showcase__contact{padding:8px 9px;min-height:45px;font-size:.71rem}
+  .detail-page--article .alo-author-showcase__actions>a:only-child{grid-column:1/-1}
+  .detail-page--article .alo-article-contact{padding:16px 15px;border-radius:19px}
+  .detail-page--article .mobile-contact-bar{
+    min-height:67px;gap:7px;padding-inline:8px;
+  }
+  .detail-page--article .mobile-contact-bar__owner{gap:7px;flex:1 1 auto}
+  .detail-page--article .mobile-contact-bar__owner img{
+    width:37px;height:37px;flex-basis:37px;
+  }
+  .detail-page--article .mobile-contact-bar__owner strong{max-width:120px}
+  .detail-page--article .mobile-contact-bar>a.alo-mobile-resume{
+    flex:0 0 auto;min-width:0;min-height:42px;
+    font-size:.72rem;padding:0 11px;
+    color:#f8fbff;background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.24);box-shadow:none;
+  }
+  .detail-page--article .mobile-contact-bar>a.alo-mobile-call{
+    flex:0 0 auto;min-width:88px;min-height:44px;
+    font-size:.83rem;padding:0 11px;
+    background:linear-gradient(135deg,#ffc159,#f4a013);
+  }
+}
+@media(max-width:390px){
+  .detail-page--article .mobile-contact-bar__owner strong{max-width:78px;font-size:.7rem}
+  .detail-page--article .mobile-contact-bar>a.alo-mobile-resume{padding:0 8px;min-height:40px}
+  .detail-page--article .mobile-contact-bar>a.alo-mobile-call{min-width:72px;padding:0 9px}
+}
+@media(prefers-reduced-motion:reduce){
+  .detail-page--article .alo-author-showcase__actions a{transition:none}
+  .detail-page--article .alo-author-showcase__actions a:hover{transform:none}
+}

@@ -12,6 +12,11 @@ $authorAvatar = !empty($user['img']) ? $user['img'] : 'them/admin/dist/img/avata
 $authorProfile = !empty($user['id']) && !empty($user['user_name'])
     ? assets('profile/'.$user['user_name'].'/'.(int)$user['id'])
     : '';
+$authorRole = !empty($user['title']) ? clean_display_text((string)$user['title']) : '';
+$authorBio = !empty($user['bio']) ? clean_display_text((string)$user['bio']) : '';
+if ($authorBio !== '' && mb_strlen($authorBio, 'UTF-8') > 160) {
+    $authorBio = mb_substr($authorBio, 0, 157, 'UTF-8') . '…';
+}
 ?>
 <!doctype html>
 <html lang="fa" dir="rtl">
@@ -53,6 +58,8 @@ if (!empty($post['created_at']) && strtotime((string)$post['created_at']) !== fa
 <?php require BASE_PATH.'/them/app/layout/heading.php'; ?>
 <link rel="stylesheet" href="<?= assets('assets/css/lalezar-articles.css') ?>?v=1">
 <link rel="stylesheet" href="<?= assets('assets/css/article-heading-colors.css') ?>?v=1">
+<?php $aloAuthorCssVersion = @filemtime(BASE_PATH . '/public/src/css/alo-article-author.css') ?: '1'; ?>
+<link rel="stylesheet" href="<?= assets('public/src/css/alo-article-author.css') ?>?v=<?= urlencode((string)$aloAuthorCssVersion) ?>">
 </head>
 <body class="detail-page detail-page--article<?= $contactPhone!==''?' detail-page--has-contact':'' ?>">
 <?php require BASE_PATH.'/them/app/layout/header.php'; ?>
@@ -70,18 +77,50 @@ if (!empty($post['created_at']) && strtotime((string)$post['created_at']) !== fa
 
       <div class="detail-body">
         <div class="breadcrumbs detail-breadcrumbs"><a href="<?= assets('/') ?>">خانه</a> / مقاله</div>
-        <?php if(isset($_SESSION['role'])&&(int)$_SESSION['role']===1): ?><a class="admin-edit" target="_blank" rel="noopener" href="<?= assets('admin/posts/update/'.(int)$post['id']) ?>">ویرایش این مقاله در پنل ادمین ↗</a><?php endif; ?>
-
-        <span class="detail-kicker">مقاله آموزشی</span>
-        <h1 class="detail-title"><?= htmlspecialchars($title,ENT_QUOTES,'UTF-8') ?></h1>
-
-        <div class="detail-owner">
-          <?php if($authorProfile!==''): ?><a class="detail-owner__avatar" href="<?= $authorProfile ?>"><?php else: ?><span class="detail-owner__avatar"><?php endif; ?>
-            <img src="<?= assets($authorAvatar) ?>" alt="<?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?>" width="52" height="52">
-          <?php if($authorProfile!==''): ?></a><?php else: ?></span><?php endif; ?>
-          <div class="detail-owner__info">
-            <span>نویسنده</span>
-            <?php if($authorProfile!==''): ?><a href="<?= $authorProfile ?>"><?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?></a><?php else: ?><strong><?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?></strong><?php endif; ?>
+        <?php if(isset($_SESSION['role'])&&(int)$_SESSION['role']===1): ?><a class="a        <section class="alo-author-showcase" aria-labelledby="alo-author-heading">
+          <div class="alo-author-showcase__accent" aria-hidden="true"></div>
+          <div class="alo-author-showcase__intro">
+            <?php if ($authorProfile !== ''): ?>
+              <a class="alo-author-showcase__avatar" href="<?= htmlspecialchars($authorProfile, ENT_QUOTES, 'UTF-8') ?>"
+                 aria-label="<?= htmlspecialchars('مشاهده رزومه ' . $authorName, ENT_QUOTES, 'UTF-8') ?>">
+                <img src="<?= assets($authorAvatar) ?>" alt="<?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?>"
+                     width="96" height="96" loading="lazy" decoding="async">
+              </a>
+            <?php else: ?>
+              <span class="alo-author-showcase__avatar">
+                <img src="<?= assets($authorAvatar) ?>" alt="<?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?>"
+                     width="96" height="96" loading="lazy" decoding="async">
+              </span>
+            <?php endif; ?>
+            <div class="alo-author-showcase__identity">
+              <span class="alo-author-showcase__eyebrow"><span aria-hidden="true">✦</span> معرفی نویسنده این مقاله</span>
+              <h2 id="alo-author-heading"><?= htmlspecialchars($authorName, ENT_QUOTES, 'UTF-8') ?></h2>
+              <p><?= htmlspecialchars($authorRole !== '' ? $authorRole : 'نویسنده و منتشرکننده محتوا در الو تعمیراتچی', ENT_QUOTES, 'UTF-8') ?></p>
+            </div>
+          </div>
+          <?php if ($authorBio !== ''): ?>
+            <p class="alo-author-showcase__bio"><?= htmlspecialchars($authorBio, ENT_QUOTES, 'UTF-8') ?></p>
+          <?php endif; ?>
+          <div class="alo-author-showcase__footer">
+            <div class="alo-author-showcase__stats" aria-label="اطلاعات مقاله">
+              <span><span aria-hidden="true">◉</span> <?= (int)$view ?> بازدید</span>
+              <?php if (!empty($post['created_at'])): ?>
+                <span><span aria-hidden="true">▦</span> <time><?= htmlspecialchars((string)$post['created_at'], ENT_QUOTES, 'UTF-8') ?></time></span>
+              <?php endif; ?>
+            </div>
+            <div class="alo-author-showcase__actions">
+              <?php if ($authorProfile !== ''): ?>
+                <a class="alo-author-showcase__resume" href="<?= htmlspecialchars($authorProfile, ENT_QUOTES, 'UTF-8') ?>">
+                  <span aria-hidden="true">▤</span> مشاهده رزومه و مقالات <span aria-hidden="true">←</span>
+                </a>
+              <?php endif; ?>
+              <?php if ($contactPhone !== ''): ?>
+                <a class="alo-author-showcase__contact" href="#alo-article-contact">راه‌های تماس <span aria-hidden="true">↓</span></a>
+              <?php endif; ?>
+            </div>
+          </div>
+        </section>
+if; ?>
           </div>
           <div class="detail-meta-chips">
             <span><?= (int)$view ?> بازدید</span>
@@ -90,7 +129,7 @@ if (!empty($post['created_at']) && strtotime((string)$post['created_at']) !== fa
         </div>
 
         <?php if($contactPhone!==''): ?>
-          <div class="detail-contact-inline">
+          <div id="alo-article-contact" class="detail-contact-inline alo-article-contact">
             <div class="detail-contact-inline__identity">
               <span class="detail-contact-inline__icon">☎</span>
               <div><strong><?php if($contactIsCustom): ?>تماس مستقیم این مقاله<?php else: ?>ارتباط مستقیم با <?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?><?php endif; ?></strong><small>برای تماس، شماره زیر را لمس کنید</small></div>
@@ -112,7 +151,7 @@ if (!empty($post['created_at']) && strtotime((string)$post['created_at']) !== fa
         </div>
         <p><?= $contactIsCustom ? "برای ارتباط با شماره تماس اختصاصی این مقاله، از دکمه زیر استفاده کنید." : "برای ارتباط سریع با صاحب این مطلب، مستقیماً تماس بگیرید." ?></p>
         <a class="detail-call-button" href="tel:<?= htmlspecialchars($contactPhoneHref,ENT_QUOTES,'UTF-8') ?>"><span>☎</span><strong><?= htmlspecialchars($contactPhone,ENT_QUOTES,'UTF-8') ?></strong></a>
-        <?php if($authorProfile!==''): ?><a class="detail-profile-link" href="<?= $authorProfile ?>">مشاهده پروفایل ←</a><?php endif; ?>
+        <?php if($authorProfile!==''): ?><a class="detail-profile-link" href="<?= htmlspecialchars($authorProfile, ENT_QUOTES, 'UTF-8') ?>">مشاهده رزومه و مقالات ←</a><?php endif; ?>
       </div>
       <?php endif; ?>
       <?php require BASE_PATH.'/them/app/layout/sidbar.php'; ?>
@@ -130,7 +169,10 @@ if (!empty($post['created_at']) && strtotime((string)$post['created_at']) !== fa
     <img src="<?= assets($authorAvatar) ?>" alt="" width="42" height="42">
     <div><span><?= $contactIsCustom ? "تماس مقاله" : "تماس با" ?></span><strong><?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?></strong></div>
   </div>
-  <a href="tel:<?= htmlspecialchars($contactPhoneHref,ENT_QUOTES,'UTF-8') ?>"><span aria-hidden="true">☎</span> تماس</a>
+  <?php if ($authorProfile !== ''): ?>
+    <a class="alo-mobile-resume" href="<?= htmlspecialchars($authorProfile, ENT_QUOTES, 'UTF-8') ?>">رزومه <span aria-hidden="true">↗</span></a>
+  <?php endif; ?>
+  <a class="alo-mobile-call" href="tel:<?= htmlspecialchars($contactPhoneHref,ENT_QUOTES,'UTF-8') ?>"><span aria-hidden="true">☎</span> تماس</a>
 </div>
 <?php endif; ?>
 
