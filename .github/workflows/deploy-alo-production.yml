@@ -84,6 +84,8 @@ jobs:
           php -l them/app/layout/header.php
           php -l them/app/layout/footer.php
           node --check public/src/js/site.js
+          node --check public/src/js/alo-explore.js
+          php tests/alo-explore-contract.php
           php tests/article-title-lookup-contract.php
           php -l api/refrigerator-links.php
           php tests/refrigerator-link-contract.php
