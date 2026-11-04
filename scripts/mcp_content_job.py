@@ -233,6 +233,20 @@ def publish(path):
     print("PUBLISH_VERIFIED_OK")
 
 
+def preserve_fields_for_image_update(content_type, item_id, fields, media):
+    """Preserve existing identity when the legacy MCP requires non-empty fields."""
+    if fields or not media:
+        return fields
+    if content_type not in ("article", "brand_article", "brand"):
+        raise ValueError("Images are not supported for this content type")
+    identity_key = "name" if content_type == "brand" else "title"
+    existing = tool("get_content", {"type": content_type, "id": item_id})["record"]
+    identity = existing.get(identity_key)
+    if not isinstance(identity, str) or not identity.strip():
+        raise RuntimeError("Cannot verify existing content identity before image-only update")
+    return {identity_key: identity}
+
+
 def manage_content(path):
     """Handle typed CRUD publication jobs; changes always use MCP allowlists."""
     request=json.loads(path.read_text(encoding="utf-8"))
@@ -575,8 +589,9 @@ def manage_content(path):
             return
         if not isinstance(fields,dict) or not fields and not media:
             raise ValueError("Update requires fields or an image")
+        update_fields=preserve_fields_for_image_update(content_type,item_id,fields,media)
         item=tool("update_content",{
-            "type":content_type,"id":item_id,"fields":fields or {},
+            "type":content_type,"id":item_id,"fields":update_fields,
             "confirm_public":True,**media
         })["record"]
         print("UPDATED",content_type,item["id"])
