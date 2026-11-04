@@ -1,0 +1,38 @@
+name: Inspect Published Legacy 13 Before Exact Title Restore
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inspect-alo-legacy13-live.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read live titles, slugs, content lengths, images and status
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import urllib.request as ur, json, os, concurrent.futures as cf
+          items=[('brand_article',2),('brand_article',5),('brand_article',6),('brand_article',7),
+            ('brand_article',8),('brand_article',9),('brand_article',10),('article',9),('article',10),
+            ('article',15),('brand_article',17),('brand_article',18),('brand_article',19)]
+          def fetch(x):
+            typ,id=x
+            body=json.dumps({'jsonrpc':'2.0','id':1,'method':'tools/call','params':{'name':'get_content','arguments':{'type':typ,'id':id}}}).encode()
+            req=ur.Request('https://alotamiratchi.ir/api/mcp/',data=body,method='POST',headers={'Authorization':'Bearer '+os.environ['MCP_API_TOKEN'],'Content-Type':'application/json'})
+            with ur.urlopen(req,timeout=35) as r: resp=json.load(r)
+            obj=resp.get('result',{})
+            if obj.get('isError') or resp.get('error'):raise RuntimeError((typ,id,resp))
+            data=obj.get('structuredContent') or json.loads(obj['content'][0]['text'])
+            rec=data['record']
+            return {'type':typ,'id':id,'title':rec.get('title'),'slug':rec.get('slug'),'status':rec.get('status'),'img':rec.get('img'),'content_length':len(rec.get('content',''))}
+          with cf.ThreadPoolExecutor(max_workers=4) as pool:
+            rows=list(pool.map(fetch,items))
+          for row in rows:print('LEGACY_CURRENT',json.dumps(row,ensure_ascii=False),flush=True)
+          print('LEGACY_CURRENT_COUNT',len(rows))
+          PY
