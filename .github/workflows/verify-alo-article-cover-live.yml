@@ -1,0 +1,38 @@
+name: Verify full article cover on live website
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-alo-article-cover-live.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Confirm live article markup, cover photo and image layout CSS
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import urllib.request,re,urllib.parse
+          root='https://alotamiratchi.ir/'
+          def get(path):
+              req=urllib.request.Request(urllib.parse.urljoin(root,path),headers={'User-Agent':'Mozilla/5.0 (compatible; AloArticleImageQA/1.0)','Cache-Control':'no-cache'})
+              with urllib.request.urlopen(req,timeout=25) as response:
+                  if response.status!=200: raise RuntimeError('HTTP '+str(response.status)+' for '+path)
+                  return response.read()
+          article=get('post/522/free-appliance-repair-for-families-in-need').decode('utf-8')
+          css=get('public/src/css/site.css?verify=article-cover-20261104').decode('utf-8')
+          assert 'detail-page--article' in article and 'detail-cover-wrap' in article
+          assert 'detail-body' in article
+          assert 'ALO ARTICLE COVER DISPLAY FIX 20261104' in css
+          assert 'aspect-ratio:auto!important' in css and 'object-fit:contain!important' in css
+          assert 'margin-top:0!important' in css
+          match=re.search(r'<img[^>]*class="detail-cover"[^>]*src="([^"]+)"',article)
+          assert match,'Article featured image tag missing'
+          image=get(urllib.parse.urljoin(root,match.group(1)))
+          assert len(image)>100 and image[:4] in (b'RIFF',b'\xff\xd8\xff\xe0',b'\xff\xd8\xff\xe1')
+          print('LIVE_ARTICLE_COVER_LAYOUT_VERIFIED',len(article),len(css),len(image))
+          PY
