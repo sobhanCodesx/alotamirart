@@ -14,16 +14,42 @@ class Brands
         $dataHeader = $db->getLastInsert('header');
         $dataFooter = $db->getLastInsert('footer');
         $menu = $db->select('SELECT * FROM menu WHERE NOT id = 5 ORDER BY sort')->fetchAll();
-        $prepage = 8;
-        $start = ($page > 1) ? ($page * $prepage) - $prepage : 0;
-        $brands = $db->select("SELECT * FROM post_brand WHERE brand_id = ? AND status = 1 ORDER BY updated_at DESC LIMIT {$start},{$prepage}", $id)->fetchAll();
-        
-        // ===== ✅ اصلاح: دریافت تعداد کل با نام ستون =====
-        $countResult = $db->select("SELECT COUNT(`id`) as total FROM post_brand WHERE brand_id = ? AND status = 1", $id)->fetch();
-        $totalPosts = isset($countResult['total']) ? $countResult['total'] : 0;
-        $pages = ($totalPosts > 0) ? ceil($totalPosts / $prepage) : 1;
-        
+
+        $id = (int)$id;
+        $page = max(1, (int)$page);
         $item = $db->new_select('*', 'items_brands', 'id', $id);
+        if (!$item) {
+            http_response_code(404);
+            require BASE_PATH . '/404.php';
+            return;
+        }
+
+        require_once BASE_PATH . '/app/Support/refrigerator-brand-hub.php';
+        $isRefrigeratorHub = aloIsRefrigeratorBrandHub($item);
+        $criteria = aloBrandFeedCriteria($id, $isRefrigeratorHub);
+        $prepage = 8;
+        $start = ($page - 1) * $prepage;
+        // The refrigerator hub must include recent refrigerator articles that are
+        // filed under separate manufacturer brands (LG, Kenwood, etc.).
+        // Keep their original brand_id and canonical article URLs unchanged.
+        $order = $isRefrigeratorHub
+            ? 'pb.created_at DESC, pb.id DESC'
+            : 'pb.updated_at DESC, pb.id DESC';
+        $listSql = "SELECT pb.*, ib.name AS linked_brand_name
+                    FROM post_brand AS pb
+                    LEFT JOIN items_brands AS ib ON ib.id = pb.brand_id
+                    WHERE {$criteria['where']}
+                    ORDER BY {$order} LIMIT {$start},{$prepage}";
+        $listStmt = $db->select($listSql, $criteria['values']);
+        $brands = $listStmt ? $listStmt->fetchAll() : [];
+
+        $countStmt = $db->select(
+            "SELECT COUNT(pb.id) AS total FROM post_brand AS pb WHERE {$criteria['where']}",
+            $criteria['values']
+        );
+        $countResult = $countStmt ? $countStmt->fetch() : false;
+        $totalPosts = isset($countResult['total']) ? (int)$countResult['total'] : 0;
+        $pages = max(1, (int)ceil($totalPosts / $prepage));
         require_once BASE_PATH . '/them/app/brands/categories.php';
     }
 
