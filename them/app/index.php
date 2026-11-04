@@ -39,8 +39,10 @@ $homeSchema = [
   <meta name="twitter:card" content="summary">
   <script type="application/ld+json"><?= json_encode($homeSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
   <?php require BASE_PATH . '/them/app/layout/heading.php'; ?>
+  <?php $aloLuxeCssVersion = @filemtime(BASE_PATH . '/public/src/css/alo-home-luxe.css') ?: '1'; ?>
+  <link rel="stylesheet" href="<?= assets('public/src/css/alo-home-luxe.css') ?>?v=<?= urlencode((string)$aloLuxeCssVersion) ?>">
 </head>
-<body>
+<body class="alo-luxe-home">
 <?php require BASE_PATH . '/them/app/layout/header.php'; ?>
 <main id="main-content">
   <section class="hero"<?= $heroRaw !== '' ? ' style="background-image:url(\'' . htmlspecialchars($heroUrl, ENT_QUOTES, 'UTF-8') . '\')"' : '' ?>>
@@ -107,12 +109,77 @@ $homeSchema = [
     <?php endforeach; ?></div><?php endif; ?>
   </div></section>
 
-  <section class="site-section"><div class="site-container">
-    <div class="section-head"><div><span class="site-eyebrow">برندهای تحت پوشش</span><h2 class="site-title">دسترسی سریع به برندها</h2></div></div>
-    <?php if (!empty($brand) && is_array($brand)): ?><div class="brand-grid"><?php foreach ($brand as $item): ?><a class="brand-card" href="<?= assets('brands/categories/'.(int)$item['id'].'/1') ?>"><img src="<?= assets($item['img']) ?>" alt="<?= htmlspecialchars(clean_display_text(isset($item['name'])?$item['name']:''),ENT_QUOTES,'UTF-8') ?>" width="320" height="240" loading="lazy" decoding="async" fetchpriority="low"><strong><?= htmlspecialchars(clean_display_text(isset($item['name'])?$item['name']:''),ENT_QUOTES,'UTF-8') ?></strong><span><?= htmlspecialchars(excerpt_text(isset($item['des'])?$item['des']:'',10),ENT_QUOTES,'UTF-8') ?></span></a><?php endforeach; ?></div><?php endif; ?>
-  </div></section>
 
-  <section class="site-section--compact"><div class="site-container"><div class="cta-panel"><div><h2>خدمات شهر خودتان را پیدا کنید</h2><div>با انتخاب شهر، مستقیماً به خدمات و مسیرهای مرتبط دسترسی پیدا کنید.</div></div><div class="cta-panel__actions"><a class="btn-site btn-site--accent" href="<?= assets('cities') ?>">مشاهده شهرها</a><?php if($phone!==''): ?><a class="btn-site btn-site--light" href="tel:<?= htmlspecialchars($phoneHref,ENT_QUOTES,'UTF-8') ?>">تماس: <?= htmlspecialchars($phone,ENT_QUOTES,'UTF-8') ?></a><?php endif; ?></div></div></div></section>
+  <?php require_once BASE_PATH . '/app/Support/home-premium-visuals.php'; ?>
+  <section class="alo-luxe-services" aria-labelledby="alo-luxe-heading">
+    <div class="site-container">
+      <div class="alo-luxe-heading">
+        <div class="alo-luxe-heading__copy">
+          <span class="alo-luxe-eyebrow"><span aria-hidden="true">✦</span> مرجع خدمات و آموزش تعمیرات</span>
+          <h2 id="alo-luxe-heading">دسترسی سریع به <span>برندها و خدمات</span></h2>
+          <p>از تعمیر یخچال و لباسشویی تا آموزش و مشاوره؛ خدمات موردنظرت را با یک لمس پیدا کن.</p>
+        </div>
+        <div class="alo-luxe-count" aria-label="دسته‌های در دسترس">
+          <strong><?= number_format(is_array($brand ?? null) ? count($brand) : 0, 0, '.', ',') ?></strong>
+          <span>دسته برای کشف</span>
+        </div>
+      </div>
+      <?php if (!empty($brand) && is_array($brand)): ?>
+      <div class="alo-luxe-grid" id="alo-services-categories">
+        <?php foreach ($brand as $cardIndex => $item): ?>
+          <?php
+          $cardTitle = trim(clean_display_text((string)($item['name'] ?? '')));
+          if ($cardTitle === '') $cardTitle = 'خدمات تخصصی';
+          $cardVisual = aloHomeVisualForBrand($cardTitle);
+          ?>
+          <a class="alo-luxe-card" href="<?= assets('brands/categories/' . (int)$item['id'] . '/1') ?>"
+             aria-label="<?= htmlspecialchars('مشاهده خدمات ' . $cardTitle, ENT_QUOTES, 'UTF-8') ?>">
+            <span class="alo-luxe-card__picture">
+              <img src="<?= assets($cardVisual['image']) ?>"
+                   alt="<?= htmlspecialchars('تصویر خدمات ' . $cardTitle, ENT_QUOTES, 'UTF-8') ?>"
+                   width="600" height="320" loading="lazy" decoding="async">
+              <span class="alo-luxe-card__icon" aria-hidden="true"><?= htmlspecialchars($cardVisual['icon'], ENT_QUOTES, 'UTF-8') ?></span>
+              <span class="alo-luxe-card__number" aria-hidden="true"><?= str_pad((string)($cardIndex + 1), 2, '0', STR_PAD_LEFT) ?></span>
+            </span>
+            <span class="alo-luxe-card__info">
+              <strong class="alo-luxe-card__title"><?= htmlspecialchars($cardTitle, ENT_QUOTES, 'UTF-8') ?></strong>
+              <span class="alo-luxe-card__description"><?= htmlspecialchars($cardVisual['description'], ENT_QUOTES, 'UTF-8') ?></span>
+              <span class="alo-luxe-card__bottom"><span>مشاهده خدمات</span><span class="alo-luxe-card__arrow" aria-hidden="true">←</span></span>
+            </span>
+          </a>
+        <?php endforeach; ?>
+      </div>
+      <?php endif; ?>
+      <p class="alo-luxe-note"><span aria-hidden="true">✧</span> روی هر کارت بزن تا وارد صفحه همان برند یا دسته شوی.</p>
+    </div>
+  </section>
+
+  <section class="alo-luxe-city-section" aria-labelledby="alo-luxe-city-title">
+    <div class="site-container">
+      <div class="alo-luxe-city">
+        <span class="alo-luxe-city__glow" aria-hidden="true"></span>
+        <div class="alo-luxe-city__content">
+          <span class="alo-luxe-city__kicker"><span aria-hidden="true">⌖</span> خدمات نزدیک شما</span>
+          <h2 id="alo-luxe-city-title">تعمیرکار شهر خودت رو <span>راحت پیدا کن!</span></h2>
+          <p>شهر موردنظرت را انتخاب کن و به راهنماها، برندها و خدمات تعمیراتی همان منطقه دسترسی پیدا کن.</p>
+          <div class="alo-luxe-city__actions">
+            <a class="alo-luxe-city__primary" href="<?= assets('cities') ?>">مشاهده شهرهای تحت پوشش <span aria-hidden="true">←</span></a>
+            <?php if ($phone !== ''): ?>
+            <a class="alo-luxe-city__phone" href="tel:<?= htmlspecialchars($phoneHref, ENT_QUOTES, 'UTF-8') ?>">
+              <span aria-hidden="true">☎</span>
+              <span dir="ltr"><?= htmlspecialchars($phone, ENT_QUOTES, 'UTF-8') ?></span>
+            </a>
+            <?php endif; ?>
+          </div>
+        </div>
+        <div class="alo-luxe-city__portrait" aria-hidden="true">
+          <img src="<?= assets('public/src/img/home-premium/city-technician.webp') ?>" alt="تکنسین خدمات لوازم خانگی"
+               width="600" height="442" loading="lazy" decoding="async">
+        </div>
+      </div>
+    </div>
+  </section>
+
 </main>
 <?php require BASE_PATH . '/them/app/layout/footer.php'; ?>
 <?php require BASE_PATH . '/them/app/layout/js.php'; ?>

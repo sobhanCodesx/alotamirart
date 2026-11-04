@@ -1,0 +1,240 @@
+/* AloTamiratchi 2026 — Premium category gallery, homepage only */
+.alo-luxe-home{
+  background:#f4f7fd;
+}
+.alo-luxe-home .alo-luxe-services,
+.alo-luxe-home .alo-luxe-city-section{direction:rtl}
+.alo-luxe-home .alo-luxe-services{
+  position:relative;isolation:isolate;overflow:hidden;
+  padding:80px 0 64px;
+  background:
+    radial-gradient(circle at 91% 8%,rgba(255,159,57,.16),transparent 24%),
+    radial-gradient(circle at 7% 78%,rgba(36,81,169,.13),transparent 32%),
+    linear-gradient(155deg,#f5f8fd 8%,#ecf2fb 78%,#f7f9fe 100%);
+}
+.alo-luxe-home .alo-luxe-services::before{
+  content:"";position:absolute;right:-140px;top:18%;width:360px;height:360px;
+  border:1px solid rgba(23,57,121,.065);border-radius:50%;box-shadow:0 0 0 42px rgba(23,57,121,.025);
+  pointer-events:none;z-index:-1;
+}
+.alo-luxe-home .alo-luxe-heading{
+  display:flex;align-items:center;justify-content:space-between;gap:26px;
+  padding:30px 34px;margin-bottom:30px;position:relative;overflow:hidden;
+  border:1px solid rgba(205,217,239,.95);border-radius:28px;
+  background:linear-gradient(125deg,#fff,#f2f7ff);
+  box-shadow:0 15px 42px rgba(24,55,112,.065);
+}
+.alo-luxe-home .alo-luxe-heading::after{
+  content:"";position:absolute;inset:auto 32px 0 32px;height:4px;
+  background:linear-gradient(90deg,transparent,#ff9414,transparent);border-radius:99px;
+}
+.alo-luxe-home .alo-luxe-heading__copy{position:relative;z-index:1;min-width:0}
+.alo-luxe-home .alo-luxe-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;font-size:.82rem;font-weight:900;
+  color:#e67d0d;background:#fff4e2;border:1px solid #ffdab1;
+  padding:5px 13px;border-radius:99px;
+}
+.alo-luxe-home .alo-luxe-heading h2{
+  font-weight:900;color:#0c2551;line-height:1.5;
+  font-size:clamp(1.7rem,3vw,2.75rem);margin:12px 0 6px;
+  letter-spacing:-.04em;
+}
+.alo-luxe-home .alo-luxe-heading h2 span{color:#ef8312}
+.alo-luxe-home .alo-luxe-heading p{margin:0;color:#586b83;font-size:clamp(.86rem,1vw,1rem);line-height:2}
+.alo-luxe-home .alo-luxe-count{
+  flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-width:136px;min-height:136px;border-radius:30px;transform:rotate(-3deg);
+  background:linear-gradient(145deg,#163a7b,#0c2250);color:#fff;
+  border:1px solid rgba(255,255,255,.15);
+  box-shadow:0 12px 32px rgba(16,47,109,.18),inset 0 1px 0 rgba(255,255,255,.19);
+}
+.alo-luxe-home .alo-luxe-count strong{
+  font-size:clamp(2rem,3vw,3rem);font-weight:900;line-height:1.2;
+  color:#ffb447;font-variant-numeric:tabular-nums
+}
+.alo-luxe-home .alo-luxe-count span{font-size:.75rem;font-weight:900;color:#e4edfd}
+.alo-luxe-home .alo-luxe-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;
+}
+.alo-luxe-home .alo-luxe-card{
+  display:flex;flex-direction:column;min-width:0;min-height:370px;
+  padding:11px;border-radius:27px;overflow:hidden;
+  background:linear-gradient(165deg,#fff,#fff 75%,#f6f9ff);
+  border:1px solid #e0e8f4;
+  box-shadow:0 13px 36px rgba(16,37,80,.075),0 1px 2px rgba(10,33,83,.04);
+  transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+  color:#0b2851;
+}
+.alo-luxe-home .alo-luxe-card:hover{
+  transform:translateY(-7px);border-color:#ffbe78;
+  box-shadow:0 24px 55px rgba(16,37,80,.16),0 0 0 1px rgba(255,167,68,.16);
+}
+.alo-luxe-home .alo-luxe-card:focus-visible{
+  outline:3px solid #f3911b;outline-offset:3px;
+}
+.alo-luxe-home .alo-luxe-card__picture{
+  position:relative;display:grid;place-items:center;isolation:isolate;
+  width:100%;aspect-ratio:16/10;min-height:165px;flex:0 0 auto;
+  overflow:hidden;border-radius:20px;
+  background:linear-gradient(155deg,#e6effc,#f0f5fc 60%,#dae6f8);
+}
+.alo-luxe-home .alo-luxe-card__picture::before{
+  content:"";position:absolute;inset:0;
+  border:1px solid rgba(255,255,255,.75);border-radius:inherit;pointer-events:none;z-index:2;
+}
+.alo-luxe-home .alo-luxe-card__picture img{
+  display:block;width:100%;height:100%;max-width:100%;
+  object-fit:contain;object-position:center;padding:3px;
+  border-radius:16px;transform:none!important;
+}
+.alo-luxe-home .alo-luxe-card__number{
+  position:absolute;top:13px;left:13px;display:grid;place-items:center;
+  min-width:34px;height:28px;padding:0 7px;border-radius:10px;
+  color:#fff;font-size:.75rem;font-weight:900;font-variant-numeric:tabular-nums;
+  background:rgba(8,26,59,.76);backdrop-filter:blur(7px);
+  border:1px solid rgba(255,255,255,.2);
+}
+.alo-luxe-home .alo-luxe-card__icon{
+  position:absolute;right:14px;bottom:11px;display:grid;place-items:center;
+  width:46px;height:46px;border-radius:16px;font-size:1.38rem;line-height:1;
+  background:linear-gradient(145deg,#ffad32,#e67b06);color:#fff;
+  border:3px solid #fff;box-shadow:0 7px 20px rgba(158,86,0,.25);z-index:2;
+}
+.alo-luxe-home .alo-luxe-card__info{
+  display:flex;flex:1;flex-direction:column;min-width:0;padding:17px 10px 6px;
+}
+.alo-luxe-home .alo-luxe-card__title{
+  color:#102d58;font-size:clamp(1.08rem,1.45vw,1.35rem);
+  line-height:1.65;font-weight:900;text-align:right;
+  overflow-wrap:anywhere;
+}
+.alo-luxe-home .alo-luxe-card__description{
+  display:block;color:#66768f;line-height:1.8;font-size:clamp(.84rem,1vw,.95rem);
+  margin:7px 0 15px;overflow-wrap:anywhere;
+}
+.alo-luxe-home .alo-luxe-card__bottom{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin-top:auto;padding-top:14px;border-top:1px solid #eaf0fa;
+  color:#cb6c04;font-size:.86rem;font-weight:900;
+}
+.alo-luxe-home .alo-luxe-card__arrow{
+  display:grid;place-items:center;width:37px;height:37px;border-radius:13px;
+  background:#fff0d9;color:#d97706;font-size:1.16rem;transition:background .2s,transform .2s;
+}
+.alo-luxe-home .alo-luxe-card:hover .alo-luxe-card__arrow{
+  background:#f69a20;color:#fff;transform:translateX(-3px);
+}
+.alo-luxe-home .alo-luxe-note{
+  display:flex;align-items:center;gap:8px;color:#6c7f9a;
+  font-size:.84rem;margin:20px 8px 0;line-height:1.8;
+}
+.alo-luxe-home .alo-luxe-note span{color:#ff9d24;font-size:1.5rem}
+.alo-luxe-home .alo-luxe-city-section{
+  padding:24px 0 100px;
+  background:linear-gradient(180deg,#f6f9fe,#eaf1fb);
+}
+.alo-luxe-home .alo-luxe-city{
+  position:relative;isolation:isolate;display:flex;align-items:center;min-height:355px;
+  padding:45px 52px 45px 280px;overflow:hidden;
+  border-radius:36px;border:1px solid rgba(255,255,255,.25);
+  color:#fff;
+  background:
+   linear-gradient(105deg,rgba(9,29,68,.93),rgba(16,55,118,.92)),
+   url('../img/home-premium/city-skyline.webp') left 45% / cover no-repeat,
+   #0c2a62;
+  box-shadow:0 28px 62px rgba(10,34,82,.23);
+}
+.alo-luxe-home .alo-luxe-city::after{
+  content:"";position:absolute;bottom:-3px;left:-2px;right:-2px;height:9px;
+  background:linear-gradient(90deg,#ffb03a,#ed7e0b,#ffbf62);transform:skewY(-1deg);z-index:3;
+}
+.alo-luxe-home .alo-luxe-city__glow{
+  position:absolute;left:-190px;top:-180px;width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,rgba(246,146,28,.33),transparent 60%);pointer-events:none;
+}
+.alo-luxe-home .alo-luxe-city__content{position:relative;z-index:2;max-width:680px}
+.alo-luxe-home .alo-luxe-city__kicker{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:.82rem;font-weight:900;color:#ffd38a;
+}
+.alo-luxe-home .alo-luxe-city h2{
+  font-size:clamp(1.6rem,3vw,2.7rem);font-weight:900;line-height:1.55;
+  margin:10px 0 12px;color:#fff;
+}
+.alo-luxe-home .alo-luxe-city h2 span{color:#ffae3b}
+.alo-luxe-home .alo-luxe-city p{
+  max-width:540px;color:#d6e3f7;font-size:.97rem;line-height:2;margin:0 0 21px;
+}
+.alo-luxe-home .alo-luxe-city__actions{display:flex;flex-wrap:wrap;align-items:center;gap:11px}
+.alo-luxe-home .alo-luxe-city__primary,
+.alo-luxe-home .alo-luxe-city__phone{
+  display:inline-flex;align-items:center;justify-content:center;gap:11px;min-height:50px;
+  padding:9px 19px;border-radius:15px;font-weight:900;font-size:.89rem;
+  transition:filter .2s,transform .2s;
+}
+.alo-luxe-home .alo-luxe-city__primary{
+  background:linear-gradient(125deg,#ffbd58,#f48d19);color:#14203b;
+  box-shadow:0 10px 24px rgba(221,113,17,.23);
+}
+.alo-luxe-home .alo-luxe-city__phone{
+  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.30);color:#fff;
+}
+.alo-luxe-home .alo-luxe-city__primary:hover,
+.alo-luxe-home .alo-luxe-city__phone:hover{filter:brightness(1.05);transform:translateY(-2px)}
+.alo-luxe-home .alo-luxe-city__primary:focus-visible,
+.alo-luxe-home .alo-luxe-city__phone:focus-visible{outline:3px solid #ffbb47;outline-offset:3px}
+.alo-luxe-home .alo-luxe-city__portrait{
+  position:absolute;left:29px;bottom:22px;width:215px;height:270px;
+  display:grid;place-items:center;overflow:hidden;border-radius:25px;
+  border:1px solid rgba(255,255,255,.26);box-shadow:0 17px 38px rgba(0,0,0,.18);
+  background:linear-gradient(165deg,rgba(255,255,255,.14),rgba(255,173,57,.12));z-index:1;
+}
+.alo-luxe-home .alo-luxe-city__portrait img{
+  width:100%;height:100%;object-fit:contain;object-position:center;
+}
+.alo-luxe-home .site-footer{background:#0d1d3d;border-top:3px solid #f0a03f}
+@media (max-width: 1060px){
+  .alo-luxe-home .alo-luxe-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+  .alo-luxe-home .alo-luxe-card{min-height:340px}
+  .alo-luxe-home .alo-luxe-city{padding:36px 32px 36px 225px;min-height:325px}
+  .alo-luxe-home .alo-luxe-city__portrait{width:172px;height:218px;left:24px}
+}
+@media (max-width: 630px){
+  .alo-luxe-home .alo-luxe-services{padding:43px 0 34px}
+  .alo-luxe-home .alo-luxe-heading{padding:22px 20px;border-radius:23px;gap:9px;align-items:flex-start}
+  .alo-luxe-home .alo-luxe-heading h2{font-size:1.6rem}
+  .alo-luxe-home .alo-luxe-heading p{font-size:.78rem}
+  .alo-luxe-home .alo-luxe-count{
+    min-width:67px;min-height:70px;border-radius:19px;padding:5px;
+    transform:rotate(-4deg);
+  }
+  .alo-luxe-home .alo-luxe-count strong{font-size:1.5rem}
+  .alo-luxe-home .alo-luxe-count span{font-size:.54rem}
+  .alo-luxe-home .alo-luxe-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+  .alo-luxe-home .alo-luxe-card{padding:6px;border-radius:21px;min-height:310px}
+  .alo-luxe-home .alo-luxe-card__picture{aspect-ratio:6/5;min-height:126px;border-radius:16px}
+  .alo-luxe-home .alo-luxe-card__icon{width:34px;height:34px;border-radius:12px;font-size:1rem;right:7px;bottom:7px}
+  .alo-luxe-home .alo-luxe-card__number{font-size:.65rem;min-width:27px;height:23px;top:7px;left:7px}
+  .alo-luxe-home .alo-luxe-card__info{padding:13px 9px 5px}
+  .alo-luxe-home .alo-luxe-card__title{font-size:.95rem;line-height:1.55}
+  .alo-luxe-home .alo-luxe-card__description{font-size:.76rem;line-height:1.7;margin:7px 0 13px}
+  .alo-luxe-home .alo-luxe-card__bottom{font-size:.73rem;padding-top:9px}
+  .alo-luxe-home .alo-luxe-card__arrow{width:28px;height:28px;border-radius:10px}
+  .alo-luxe-home .alo-luxe-city-section{padding:7px 0 64px}
+  .alo-luxe-home .alo-luxe-city{min-height:355px;padding:30px 22px 141px;border-radius:25px}
+  .alo-luxe-home .alo-luxe-city h2{font-size:1.65rem;line-height:1.6}
+  .alo-luxe-home .alo-luxe-city p{font-size:.82rem;line-height:1.9;margin-bottom:15px}
+  .alo-luxe-home .alo-luxe-city__actions{gap:8px}
+  .alo-luxe-home .alo-luxe-city__primary,.alo-luxe-home .alo-luxe-city__phone{min-height:43px;font-size:.72rem;padding:7px 10px}
+  .alo-luxe-home .alo-luxe-city__portrait{width:112px;height:107px;left:14px;bottom:13px;border-radius:18px}
+}
+@media (max-width: 340px){
+  .alo-luxe-home .alo-luxe-grid{grid-template-columns:1fr}
+  .alo-luxe-home .alo-luxe-card{min-height:0}
+  .alo-luxe-home .alo-luxe-card__picture{aspect-ratio:16/10}
+}
+@media (prefers-reduced-motion: reduce){
+  .alo-luxe-home .alo-luxe-card,.alo-luxe-home .alo-luxe-card__arrow,
+  .alo-luxe-home .alo-luxe-city__primary,.alo-luxe-home .alo-luxe-city__phone{transition:none!important}
+  .alo-luxe-home .alo-luxe-card:hover{transform:none}
+}
