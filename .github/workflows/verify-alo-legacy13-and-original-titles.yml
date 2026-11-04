@@ -1,0 +1,123 @@
+name: Verify legacy thirteen SEO refresh and restore unchanged original titles
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/verify-alo-legacy13-and-original-titles.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alotamiratchi-content-publishing
+  cancel-in-progress: false
+
+jobs:
+  verify-and-restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Audit existing published rewrites, restore original titles, verify image URLs
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,os,html,re,hashlib,urllib.request as ur,urllib.parse as up,urllib.error as ue,pathlib
+          from html.parser import HTMLParser
+          root='https://alotamiratchi.ir/'
+          targets=[
+            ('brand_article',2,'سالم نواصر - آبادان - خرمشهر - اهواز','Engineer-Salem-Navasir_Abadan'),
+            ('brand_article',5,'نمایندگی تعمیر یخچال سامسونگ در اهواز','Samsung-refrigerator-repair-agency-Ahvaz'),
+            ('brand_article',6,'نمایندگی تعمیرات یخچال هیمالیا در آبادان - خرمشهر','Representation-Refrigerator-Himalaya-Abadan'),
+            ('brand_article',7,'نمایندگی تعمیرات یخچال الکترو استیل در آبادان - خرمشهر','Representation-Refrigerator-Electro-steel-Abadan'),
+            ('brand_article',8,'نمایندگی تعمیرات یخچال هیتاچی در آبادان - خرمشهر','Representation-Refrigerator-Hitachi-Abadan'),
+            ('brand_article',9,'نمایندگی تعمیرات یخچال دیپوینت در آبادان - خرمشهر','Representation-Refrigerator-Dipoint-Abadan'),
+            ('brand_article',10,'نمایندگی تعمیرات یخچال امرسان در آبادان - خرمشهر','Representation-Refrigerator-Emersan-Abadan'),
+            ('article',9,'نمایندگی تعمیر اجاق گاز در قائمشهر',None),
+            ('article',10,'نمایندگی تعمیر اجاق گاز در بابل',None),
+            ('article',15,'نمایندگی تعمیر یخچال در آمل - شبانه روزی',None),
+            ('brand_article',17,'نمایندگی تعمیر یخچال ال جی در آبادان','LG-home-appliance-repair-agency-abadan'),
+            ('brand_article',18,'نمایندگی ایکس ویژن در آبادان,تعمیرات و خدمات پس از فروش','Samsung-TV-repair-agency-Abadan'),
+            ('brand_article',19,'نمایندگی تعمیرات یخچال ال جی در اهواز','LG-refrigerator-repair-agency-Ahvaz'),
+          ]
+          assert len(targets)==13
+          def tool(name, args):
+            data=json.dumps({'jsonrpc':'2.0','id':1,'method':'tools/call','params':{'name':name,'arguments':args}},ensure_ascii=False).encode('utf-8')
+            req=ur.Request(root+'api/mcp/',data=data,method='POST',headers={'Authorization':'Bearer '+os.environ['MCP_API_TOKEN'],'Content-Type':'application/json; charset=utf-8','User-Agent':'AloLegacySEOAudit/1.0'})
+            with ur.urlopen(req,timeout=50) as f:out=json.load(f)
+            if out.get('error'):raise RuntimeError(str(out['error']))
+            result=out.get('result') or {}
+            if result.get('isError'):raise RuntimeError(str(result.get('content'))[:500])
+            content=result.get('structuredContent') or json.loads(result['content'][0]['text'])
+            return content
+          class HTMLAudit(HTMLParser):
+            def __init__(self):super().__init__();self.links=[];self.images=[];self.parts=[];self.in_script=False
+            def handle_starttag(self,t,attrs):
+              a=dict(attrs)
+              if t in ('script','style'):self.in_script=True
+              if t=='a' and a.get('href'):self.links.append(a['href'])
+              if t=='img' and a.get('src'):self.images.append(a['src'])
+            def handle_endtag(self,t):
+              if t in ('script','style'):self.in_script=False
+            def handle_data(self,d):
+              if not self.in_script:self.parts.append(d)
+          def check_webp(url):
+            req=ur.Request(url,headers={'User-Agent':'AloLegacySEOImageVerifier/1.0','Cache-Control':'no-cache'})
+            with ur.urlopen(req,timeout=20) as f:
+              status=f.status
+              image=f.read(30002)
+            if status!=200:raise RuntimeError('Image HTTP '+str(status)+' '+url)
+            if len(image)<24 or len(image)>30000 or image[:4]!=b'RIFF' or image[8:12]!=b'WEBP':
+              raise RuntimeError('Invalid or over-30KB WebP at '+url+' bytes '+str(len(image)))
+            return len(image)
+          report=[]
+          for n,(kind,id,original,orig_slug) in enumerate(targets,1):
+            old=tool('get_content',{'type':kind,'id':id})['record']
+            if not old or int(old['status'])!=1:raise RuntimeError('Record not public: '+kind+' '+str(id))
+            if orig_slug is not None and old.get('slug')!=orig_slug:raise RuntimeError('Original brand slug changed: '+str(id))
+            orig_content=old.get('content') or ''
+            orig_img=old.get('img') or ''
+            before_hash=hashlib.sha256(orig_content.encode('utf-8')).hexdigest()
+            if old['title'].strip()!=original.strip():
+              fields={'title':original}
+              if kind=='article' and old.get('slug'):
+                fields['slug']=old['slug']
+              changed=tool('update_content',{'type':kind,'id':id,'fields':fields,'confirm_public':True})['record']
+              print('TITLE_RESTORED',kind,id,flush=True)
+            fresh=tool('get_content',{'type':kind,'id':id})['record']
+            if fresh['title'].strip()!=original.strip():raise RuntimeError('Title differs from ORIGINAL for '+str(id))
+            if hashlib.sha256((fresh.get('content') or '').encode('utf-8')).hexdigest()!=before_hash:
+              raise RuntimeError('Accidental content modification '+str(id))
+            if fresh.get('img')!=orig_img:raise RuntimeError('Accidental cover modification '+str(id))
+            if int(fresh['status'])!=1:raise RuntimeError('Unpublished record '+str(id))
+            audit=HTMLAudit();audit.feed(orig_content)
+            count=len(' '.join(audit.parts).split())
+            internal=[u for u in audit.links if 'alotamiratchi.ir' in u]
+            external=[u for u in audit.links if 'tekanino.ir' in u]
+            if count<1000:raise RuntimeError('Less than 1000 words '+str(id)+' got '+str(count))
+            if len(internal)!=3 or len(external)!=1:raise RuntimeError('SEO link count mismatch '+str(id)+' int='+str(len(internal))+' ext='+str(len(external)))
+            wanted='legacy'+str(n).zfill(2)+'-inside.webp'
+            inline=[u for u in audit.images if wanted in u]
+            if len(inline)!=1:raise RuntimeError('Inline image not found: '+wanted)
+            cover_url=up.urljoin(root,orig_img.lstrip('/'))
+            inside_url=up.urljoin(root,inline[0])
+            cover_len=check_webp(cover_url)
+            inline_len=check_webp(inside_url)
+            url=root+('post/'+str(id) if kind=='article' else (fresh['slug']+'/'+str(id)))
+            entry={'order':n,'type':kind,'id':id,'title':fresh['title'],'url':url,'words':count,
+                   'internal_links':len(internal),'external_links':external,'image_cover_bytes':cover_len,
+                   'image_inside_bytes':inline_len,'image_inside_url':inside_url,
+                   'published':True,'title_matches_original':True}
+            report.append(entry)
+            print('LEGACY13_VERIFIED',json.dumps(entry,ensure_ascii=False),flush=True)
+          pathlib.Path('legacy13-verified-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('LEGACY13_ALL_13_VERIFIED',len(report),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: alo-legacy13-verified-report
+          path: legacy13-verified-report.json
+          retention-days: 30
