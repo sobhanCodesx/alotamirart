@@ -23,6 +23,6 @@ exploreAssert(str_contains($js,'event.key==="ArrowLeft"')&&str_contains($js,'tou
 exploreAssert(str_contains($js,'url.origin!==window.location.origin'),'external links are not hijacked');
 exploreAssert(str_contains($js,'textContent=item.title'),'untrusted article text is not injected as HTML');
 exploreAssert(str_contains($js,'[data-explore-open]')&&str_contains($js,'item.url'),'full-page link remains usable');
-exploreAssert(str_contains($home,"assets('post/' . (int)$item['id'])"),'canonical article links preserved');
-exploreAssert(str_contains($home,"assets('brands/categories/' . (int)$item['id'] . '/1')"),'canonical brand links preserved');
+exploreAssert(str_contains($home,"assets('post/' . (int)\$item['id'])"),'canonical article links preserved');
+exploreAssert(str_contains($home,"assets('brands/categories/' . (int)\$item['id'] . '/1')"),'canonical brand links preserved');
 echo "Explore preview and uncropped card contract passed\n";
