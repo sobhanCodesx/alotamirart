@@ -77,7 +77,12 @@ if (!empty($post['created_at']) && strtotime((string)$post['created_at']) !== fa
 
       <div class="detail-body">
         <div class="breadcrumbs detail-breadcrumbs"><a href="<?= assets('/') ?>">خانه</a> / مقاله</div>
-        <?php if(isset($_SESSION['role'])&&(int)$_SESSION['role']===1): ?><a class="a        <section class="alo-author-showcase" aria-labelledby="alo-author-heading">
+        <?php if(isset($_SESSION['role'])&&(int)$_SESSION['role']===1): ?><a class="admin-edit" target="_blank" rel="noopener" href="<?= assets('admin/posts/update/'.(int)$post['id']) ?>">ویرایش این مقاله در پنل ادمین ↗</a><?php endif; ?>
+
+        <span class="detail-kicker">مقاله آموزشی</span>
+        <h1 class="detail-title"><?= htmlspecialchars($title,ENT_QUOTES,'UTF-8') ?></h1>
+
+        <section class="alo-author-showcase" aria-labelledby="alo-author-heading">
           <div class="alo-author-showcase__accent" aria-hidden="true"></div>
           <div class="alo-author-showcase__intro">
             <?php if ($authorProfile !== ''): ?>
@@ -120,13 +125,6 @@ if (!empty($post['created_at']) && strtotime((string)$post['created_at']) !== fa
             </div>
           </div>
         </section>
-if; ?>
-          </div>
-          <div class="detail-meta-chips">
-            <span><?= (int)$view ?> بازدید</span>
-            <?php if(!empty($post['created_at'])): ?><span><?= htmlspecialchars((string)$post['created_at'],ENT_QUOTES,'UTF-8') ?></span><?php endif; ?>
-          </div>
-        </div>
 
         <?php if($contactPhone!==''): ?>
           <div id="alo-article-contact" class="detail-contact-inline alo-article-contact">
