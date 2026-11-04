@@ -8,6 +8,7 @@ $authorAvatar = !empty($user['img']) ? $user['img'] : 'them/admin/dist/img/avata
 $authorProfile = !empty($user['id']) && !empty($user['user_name'])
     ? assets('profile/'.$user['user_name'].'/'.(int)$user['id'])
     : '';
+$authorRole = !empty($user['title']) ? clean_display_text((string)$user['title']) : '';
 
 $contact = '';
 $contactLabel = '';
@@ -45,6 +46,11 @@ $description = mb_substr($plainContent !== '' ? $plainContent : $title . ' | ا�
 <?php if(!empty($post['img'])): ?><meta property="og:image" content="<?= htmlspecialchars(assets($post['img']),ENT_QUOTES,'UTF-8') ?>"><?php endif; ?>
 <?php endif; ?>
 <?php require BASE_PATH.'/them/app/layout/heading.php'; ?>
+<?php $aloAuthorCssVersion = @filemtime(BASE_PATH . '/public/src/css/alo-article-author.css') ?: '1'; ?>
+<link rel="stylesheet" href="<?= assets('public/src/css/alo-article-author.css') ?>?v=<?= urlencode((string)$aloAuthorCssVersion) ?>">
+<?php $aloV3CssVersion = @filemtime(BASE_PATH . '/public/src/css/alo-detail-v3.css') ?: '1'; ?>
+<link rel="stylesheet" href="<?= assets('public/src/css/alo-detail-v3.css') ?>?v=<?= urlencode((string)$aloV3CssVersion) ?>">
+
 </head>
 <body class="detail-page detail-page--brand<?= $contact!==''?' detail-page--has-contact':'' ?>">
 <?php require BASE_PATH.'/them/app/layout/header.php'; ?>
@@ -68,22 +74,35 @@ $description = mb_substr($plainContent !== '' ? $plainContent : $title . ' | ا�
         <span class="detail-kicker detail-kicker--brand">مطلب برند · <?= htmlspecialchars($brandName,ENT_QUOTES,'UTF-8') ?></span>
         <h1 class="detail-title"><?= htmlspecialchars($title,ENT_QUOTES,'UTF-8') ?></h1>
 
-        <div class="detail-owner">
-          <?php if($authorProfile!==''): ?><a class="detail-owner__avatar" href="<?= $authorProfile ?>"><?php else: ?><span class="detail-owner__avatar"><?php endif; ?>
-            <img src="<?= assets($authorAvatar) ?>" alt="<?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?>" width="52" height="52">
-          <?php if($authorProfile!==''): ?></a><?php else: ?></span><?php endif; ?>
-          <div class="detail-owner__info">
-            <span>منتشرکننده</span>
-            <?php if($authorProfile!==''): ?><a href="<?= $authorProfile ?>"><?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?></a><?php else: ?><strong><?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?></strong><?php endif; ?>
+        <section class="alo-author-showcase alo-detail-v3-author" aria-labelledby="alo-brand-author-heading">
+          <div class="alo-author-showcase__accent" aria-hidden="true"></div>
+          <div class="alo-author-showcase__intro">
+            <?php if($authorProfile!==''): ?><a class="alo-author-showcase__avatar" href="<?= htmlspecialchars($authorProfile,ENT_QUOTES,'UTF-8') ?>" aria-label="مشاهده رزومه منتشرکننده">
+            <?php else: ?><span class="alo-author-showcase__avatar"><?php endif; ?>
+              <img src="<?= assets($authorAvatar) ?>" alt="<?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?>" width="96" height="96" loading="lazy" decoding="async">
+            <?php if($authorProfile!==''): ?></a><?php else: ?></span><?php endif; ?>
+            <div class="alo-author-showcase__identity">
+              <span class="alo-author-showcase__eyebrow">✦ آشنایی با منتشرکننده</span>
+              <h2 id="alo-brand-author-heading"><?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?></h2>
+              <p><?= htmlspecialchars($authorRole!==''?$authorRole:'انتشار مطالب تخصصی در الو تعمیراتچی',ENT_QUOTES,'UTF-8') ?></p>
+            </div>
           </div>
-          <div class="detail-meta-chips">
-            <span><?= htmlspecialchars($brandName,ENT_QUOTES,'UTF-8') ?></span>
-            <span><?= (int)$view ?> بازدید</span>
+          <div class="alo-author-showcase__footer">
+            <div class="alo-author-showcase__stats">
+              <span>◉ <?= (int)$view ?> بازدید</span>
+              <span>✦ <?= htmlspecialchars($brandName,ENT_QUOTES,'UTF-8') ?></span>
+            </div>
+            <div class="alo-author-showcase__actions">
+              <?php if($authorProfile!==''): ?>
+                <a class="alo-author-showcase__resume" href="<?= htmlspecialchars($authorProfile,ENT_QUOTES,'UTF-8') ?>">مشاهده رزومه و مقالات <span aria-hidden="true">←</span></a>
+              <?php endif; ?>
+              <?php if($contact!==''): ?><a class="alo-author-showcase__contact" href="#alo-brand-contact">راه‌های تماس <span aria-hidden="true">↓</span></a><?php endif; ?>
+            </div>
           </div>
-        </div>
+        </section>
 
         <?php if($contact!==''): ?>
-          <div class="detail-contact-inline detail-contact-inline--brand">
+          <div id="alo-brand-contact" class="detail-contact-inline detail-contact-inline--brand">
             <div class="detail-contact-inline__identity">
               <span class="detail-contact-inline__icon">☎</span>
               <div><strong><?= htmlspecialchars($contactLabel,ENT_QUOTES,'UTF-8') ?></strong><small>برای ارتباط سریع، شماره را لمس کنید</small></div>
@@ -105,7 +124,7 @@ $description = mb_substr($plainContent !== '' ? $plainContent : $title . ' | ا�
         </div>
         <p><?= htmlspecialchars($contactLabel,ENT_QUOTES,'UTF-8') ?>؛ برای ارتباط سریع همین حالا تماس بگیرید.</p>
         <a class="detail-call-button" href="tel:<?= htmlspecialchars($contactHref,ENT_QUOTES,'UTF-8') ?>"><span>☎</span><strong><?= htmlspecialchars($contact,ENT_QUOTES,'UTF-8') ?></strong></a>
-        <?php if($authorProfile!==''): ?><a class="detail-profile-link" href="<?= $authorProfile ?>">مشاهده پروفایل منتشرکننده ←</a><?php endif; ?>
+        <?php if($authorProfile!==''): ?><a class="detail-profile-link" href="<?= $authorProfile ?>">مشاهده رزومه و مقالات ←</a><?php endif; ?>
       </div>
       <?php endif; ?>
       <?php require BASE_PATH.'/them/app/layout/sidbar.php'; ?>
@@ -123,11 +142,15 @@ $description = mb_substr($plainContent !== '' ? $plainContent : $title . ' | ا�
     <img src="<?= assets($authorAvatar) ?>" alt="" width="42" height="42">
     <div><span><?= htmlspecialchars($brandName,ENT_QUOTES,'UTF-8') ?></span><strong><?= htmlspecialchars($authorName,ENT_QUOTES,'UTF-8') ?></strong></div>
   </div>
-  <a href="tel:<?= htmlspecialchars($contactHref,ENT_QUOTES,'UTF-8') ?>"><span aria-hidden="true">☎</span> تماس</a>
+  <?php if ($authorProfile !== ''): ?>
+    <a class="alo-mobile-resume" href="<?= htmlspecialchars($authorProfile,ENT_QUOTES,'UTF-8') ?>">رزومه ↗</a>
+  <?php endif; ?>
+  <a class="alo-mobile-call" href="tel:<?= htmlspecialchars($contactHref,ENT_QUOTES,'UTF-8') ?>"><span aria-hidden="true">☎</span> تماس</a>
 </div>
 <?php endif; ?>
 
 <?php require BASE_PATH.'/them/app/layout/footer.php'; ?>
 <?php require BASE_PATH.'/them/app/layout/js.php'; ?>
+<script src="<?= assets('public/src/js/alo-detail-v3.js') ?>" defer></script>
 </body>
 </html>

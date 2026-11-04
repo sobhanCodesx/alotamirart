@@ -60,6 +60,8 @@ if (!empty($post['created_at']) && strtotime((string)$post['created_at']) !== fa
 <link rel="stylesheet" href="<?= assets('assets/css/article-heading-colors.css') ?>?v=1">
 <?php $aloAuthorCssVersion = @filemtime(BASE_PATH . '/public/src/css/alo-article-author.css') ?: '1'; ?>
 <link rel="stylesheet" href="<?= assets('public/src/css/alo-article-author.css') ?>?v=<?= urlencode((string)$aloAuthorCssVersion) ?>">
+<?php $aloV3CssVersion = @filemtime(BASE_PATH . '/public/src/css/alo-detail-v3.css') ?: '1'; ?>
+<link rel="stylesheet" href="<?= assets('public/src/css/alo-detail-v3.css') ?>?v=<?= urlencode((string)$aloV3CssVersion) ?>">
 </head>
 <body class="detail-page detail-page--article<?= $contactPhone!==''?' detail-page--has-contact':'' ?>">
 <?php require BASE_PATH.'/them/app/layout/header.php'; ?>
@@ -103,9 +105,6 @@ if (!empty($post['created_at']) && strtotime((string)$post['created_at']) !== fa
               <p><?= htmlspecialchars($authorRole !== '' ? $authorRole : 'نویسنده و منتشرکننده محتوا در الو تعمیراتچی', ENT_QUOTES, 'UTF-8') ?></p>
             </div>
           </div>
-          <?php if ($authorBio !== ''): ?>
-            <p class="alo-author-showcase__bio"><?= htmlspecialchars($authorBio, ENT_QUOTES, 'UTF-8') ?></p>
-          <?php endif; ?>
           <div class="alo-author-showcase__footer">
             <div class="alo-author-showcase__stats" aria-label="اطلاعات مقاله">
               <span><span aria-hidden="true">◉</span> <?= (int)$view ?> بازدید</span>
@@ -176,5 +175,6 @@ if (!empty($post['created_at']) && strtotime((string)$post['created_at']) !== fa
 
 <?php require BASE_PATH.'/them/app/layout/footer.php'; ?>
 <?php require BASE_PATH.'/them/app/layout/js.php'; ?>
+<script src="<?= assets('public/src/js/alo-detail-v3.js') ?>" defer></script>
 </body>
 </html>

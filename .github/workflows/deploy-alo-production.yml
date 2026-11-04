@@ -96,6 +96,9 @@ jobs:
           php -l app/Support/profile-pagination.php
           php tests/profile-pagination-contract.php
           php tests/article-author-resume-contract.php
+          php -l them/app/brands/post.php
+          php tests/alo-detail-v3-contract.php
+          node --check public/src/js/alo-detail-v3.js
           php tests/article-cover-layout-contract.php
           php tests/alo-site-graph-contract.php
           php tests/playnexus-mcp-architecture.php

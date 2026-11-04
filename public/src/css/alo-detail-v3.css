@@ -1,0 +1,148 @@
+/* AloTamiratchi Detail V3 — mobile-first immersive image and consistent author/resume cards */
+.detail-page .detail-card{overflow:visible}
+.detail-page .detail-cover-wrap,
+.detail-page .detail-cover-wrap--brand{
+  position:relative;overflow:hidden;background:#eff3fa;
+  border-radius:24px 24px 0 0;
+}
+.detail-page .detail-cover-wrap .detail-cover{
+  display:block;width:100%;height:auto;max-width:100%;max-height:none;
+  aspect-ratio:auto!important;object-fit:cover!important;object-position:center;
+  padding:0!important;margin:0!important;transform:none!important;
+}
+.detail-page .detail-cover-wrap::after{display:none!important}
+.detail-page .detail-main .detail-body{
+  position:relative;margin-top:0!important;
+  border-radius:0 0 24px 24px;z-index:1;
+}
+.detail-page .detail-title{
+  font-weight:900;line-height:1.5;
+  overflow-wrap:anywhere;
+}
+.detail-page .detail-kicker{background:#fff2db;color:#9a5507}
+.detail-page .alo-author-showcase{
+  position:relative;isolation:isolate;display:flex;flex-direction:column;gap:17px;
+  padding:clamp(20px,3vw,30px);margin:23px 0 30px;
+  color:#fff;border-radius:27px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.18);
+  background:
+    radial-gradient(circle at 0 100%,rgba(252,154,35,.26),transparent 42%),
+    linear-gradient(120deg,#0e2455 0%,#163b7f 55%,#0b214e 100%);
+  box-shadow:0 18px 42px rgba(13,40,90,.20);
+}
+.detail-page .alo-author-showcase::before{
+  content:"";position:absolute;left:-85px;top:-92px;width:260px;height:260px;
+  border-radius:50%;box-shadow:0 0 0 38px rgba(255,255,255,.035),0 0 0 79px rgba(255,255,255,.02);
+  border:1px solid rgba(255,255,255,.12);pointer-events:none;z-index:-1;
+}
+.detail-page .alo-author-showcase__accent{
+  position:absolute;right:0;top:16px;bottom:16px;width:5px;
+  background:linear-gradient(#ffc977,#f58a12,transparent);border-radius:5px 0 0 5px;
+}
+.detail-page .alo-author-showcase__intro{display:flex;align-items:center;gap:17px;min-width:0}
+.detail-page .alo-author-showcase__avatar{
+  flex:0 0 88px;width:88px;height:88px;display:block;
+  padding:4px;overflow:hidden;border-radius:26px;
+  border:2px solid #ffc46b;background:#eff3fd;
+  box-shadow:0 10px 24px rgba(0,0,0,.18);
+}
+.detail-page .alo-author-showcase__avatar img{
+  display:block;width:100%;height:100%;object-fit:cover;border-radius:20px;
+}
+.detail-page .alo-author-showcase__identity{flex:1;min-width:0}
+.detail-page .alo-author-showcase__eyebrow{
+  display:inline-flex;gap:6px;align-items:center;
+  color:#ffd28a;font-size:.78rem;font-weight:900;
+}
+.detail-page .alo-author-showcase__identity h2{
+  color:#fff!important;font-weight:900;font-size:clamp(1.2rem,2.5vw,1.7rem);
+  line-height:1.5;margin:7px 0 4px;overflow-wrap:anywhere;
+}
+.detail-page .alo-author-showcase__identity p{
+  margin:0;color:#dce9fd;font-size:.84rem;line-height:1.8;
+}
+.detail-page .alo-author-showcase__footer{
+  display:flex;flex-direction:column;gap:15px;
+  border-top:1px solid rgba(255,255,255,.17);padding-top:15px;
+}
+.detail-page .alo-author-showcase__stats{display:flex;gap:8px;flex-wrap:wrap}
+.detail-page .alo-author-showcase__stats span{
+  color:#e4efff;font-size:.75rem;padding:6px 11px;
+  border:1px solid rgba(255,255,255,.16);border-radius:99px;
+  background:rgba(255,255,255,.08);line-height:1.6;
+}
+.detail-page .alo-author-showcase__actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.detail-page .alo-author-showcase__actions a{
+  display:flex;justify-content:center;align-items:center;gap:7px;
+  min-height:47px;padding:10px 13px;border-radius:15px;font-size:.84rem;
+  font-weight:900;text-align:center;transition:transform .18s,background .18s;
+}
+.detail-page .alo-author-showcase__resume{
+  color:#13254b;background:linear-gradient(120deg,#ffdc89,#f9a42c);
+  box-shadow:0 10px 22px rgba(243,141,33,.20);
+}
+.detail-page .alo-author-showcase__contact{color:#fff;border:1px solid rgba(255,255,255,.27);background:rgba(255,255,255,.1)}
+.detail-page .alo-author-showcase__actions a:only-child{grid-column:1/-1}
+.detail-page .alo-author-showcase__actions a:hover{transform:translateY(-2px)}
+.detail-page .alo-author-showcase a:focus-visible{outline:3px solid #ffc477;outline-offset:3px}
+.detail-page .detail-contact-inline{scroll-margin-top:100px;border-radius:20px}
+.detail-page .detail-contact-inline--brand{background:linear-gradient(120deg,#f4f7ff,#fff8e8);border-color:#e3e9f2}
+.detail-page .detail-contact-inline__identity .detail-contact-inline__icon{
+  background:#fff0d8;color:#a85b04;
+}
+.detail-page .detail-contact-inline>a{
+  color:#12356e;background:#fff;padding:10px 13px;border-radius:12px;
+}
+.detail-page .detail-profile-link{color:#fff4db;text-decoration:underline;text-underline-offset:4px}
+@media(max-width:900px){
+  .detail-page .detail-main>.site-container{width:100%;max-width:100%}
+  .detail-page .detail-layout{display:block}
+  .detail-page .detail-card{border:0;box-shadow:none;border-radius:0}
+  .detail-page .detail-cover-wrap,.detail-page .detail-cover-wrap--brand{border-radius:0}
+  .detail-page .detail-main .detail-body{margin-top:0!important;padding:26px 22px 40px;border-radius:0}
+}
+@media(max-width:620px){
+  .detail-page--has-contact{padding-bottom:calc(120px + env(safe-area-inset-bottom))!important}
+  .detail-page .detail-cover-wrap .detail-cover{max-height:none!important;height:auto!important}
+  .detail-page .detail-body{margin-top:0!important}
+  .detail-page .alo-author-showcase{margin:24px 0 30px;padding:20px 17px;border-radius:24px}
+  .detail-page .alo-author-showcase__intro{gap:12px;align-items:center}
+  .detail-page .alo-author-showcase__avatar{width:74px;height:74px;flex-basis:74px;border-radius:22px}
+  .detail-page .alo-author-showcase__avatar img{border-radius:16px}
+  .detail-page .alo-author-showcase__identity h2{font-size:1.17rem}
+  .detail-page .alo-author-showcase__eyebrow{font-size:.7rem}
+  .detail-page .alo-author-showcase__identity p{font-size:.74rem}
+  .detail-page .alo-author-showcase__stats span{font-size:.69rem}
+  .detail-page .alo-author-showcase__actions{gap:8px}
+  .detail-page .alo-author-showcase__actions a{font-size:.77rem;padding:9px 8px;min-height:48px}
+  .detail-page .mobile-contact-bar{
+    display:flex;min-height:58px;bottom:calc(8px + env(safe-area-inset-bottom));
+    padding:7px 9px;border-radius:18px;gap:7px;
+    transition:opacity .2s,transform .2s;
+  }
+  .detail-page .mobile-contact-bar__owner{min-width:0;gap:7px;flex:1 1 auto}
+  .detail-page .mobile-contact-bar__owner img{
+    width:36px;height:36px;flex-basis:36px;border-radius:11px;
+  }
+  .detail-page .mobile-contact-bar__owner strong{max-width:95px;font-size:.72rem}
+  .detail-page .mobile-contact-bar__owner span{font-size:.57rem}
+  .detail-page .mobile-contact-bar>a{min-width:0;min-height:41px;padding:0 11px;border-radius:12px;box-shadow:none;font-size:.77rem}
+  .detail-page .mobile-contact-bar>a.alo-mobile-resume{
+    color:#fff;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.26);
+  }
+  .detail-page .mobile-contact-bar>a.alo-mobile-call{
+    color:#152c52;background:linear-gradient(135deg,#ffd47e,#f3a52f);
+  }
+  .detail-page.alo-author-visible .mobile-contact-bar{
+    opacity:0!important;pointer-events:none!important;transform:translateY(120%)!important;
+  }
+  .detail-page .detail-main .detail-body{padding:27px 18px 40px}
+}
+@media(max-width:370px){
+  .detail-page .mobile-contact-bar__owner strong{max-width:66px}
+  .detail-page .mobile-contact-bar>a{padding:0 8px;font-size:.7rem}
+}
+@media(prefers-reduced-motion:reduce){
+  .detail-page .mobile-contact-bar,.detail-page .alo-author-showcase__actions a{transition:none}
+  .detail-page .alo-author-showcase__actions a:hover{transform:none}
+}
