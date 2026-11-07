@@ -5,7 +5,7 @@ if (!function_exists('alo_chalus_nowshahr_heat_contact')) {
     {
         $normalized = str_replace(['ي', 'ك', '‌'], ['ی', 'ک', ' '], $title);
         $city = preg_match('/(?<![\p{L}\p{N}])(?:چالوس|نوشهر)(?![\p{L}\p{N}])/u', $normalized);
-        $service = preg_match('/(?:پکیج|اجاق\s*گاز|گاز\s*رومیزی)/u', $normalized);
+        $service = preg_match('/(?:پکیج|پکیچ|اجاق\s*گاز|گاز\s*رومیزی)/u', $normalized);
         return $city === 1 && $service === 1;
     }
 }
