@@ -1,4 +1,4 @@
-name: Inspect two-city appliance articles
+name: Inspect two-city appliance articles exact missing records
 on:
   push:
     branches: [main]
