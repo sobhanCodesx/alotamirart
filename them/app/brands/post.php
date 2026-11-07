@@ -22,6 +22,11 @@ if($found && !empty($post['contact_number'])) {
     $contact = clean_display_text($dataFooter['phon']);
     $contactLabel = 'تماس با پشتیبانی';
 }
+require_once BASE_PATH . '/them/app/posts/article-contact-helper.php';
+if ($found && alo_chalus_nowshahr_heat_contact((string)($post['title'] ?? ''))) {
+    $contact = '09901068051';
+    $contactLabel = 'تماس مستقیم این مطلب';
+}
 $contactHref = $contact !== '' ? preg_replace('/[^\d+]/','',$contact) : '';
 $canonicalBrandSlug = $found ? trim((string)($post['slug'] ?? ''), '/') : '';
 ?>
