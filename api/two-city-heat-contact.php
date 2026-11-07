@@ -3,7 +3,7 @@ declare(strict_types=1);
 function aloTwoCityHeatMatch(string $title): bool {
     $title=str_replace(['ي','ك','‌'],['ی','ک',' '],$title);
     return (str_contains($title,'چالوس') || str_contains($title,'نوشهر'))
-        && (str_contains($title,'پکیج') || preg_match('/اجاق\s*گاز/u',$title)===1 || preg_match('/گاز\s*رومیزی/u',$title)===1);
+        && ((str_contains($title,'پکیج') || str_contains($title,'پکیچ')) || preg_match('/اجاق\s*گاز/u',$title)===1 || preg_match('/گاز\s*رومیزی/u',$title)===1);
 }
 function aloTwoCityHeatTool():array {
     return ['name'=>'set_two_city_heat_contact','description'=>'Update only Chalus and Nowshahr package and gas stove article contact numbers',
