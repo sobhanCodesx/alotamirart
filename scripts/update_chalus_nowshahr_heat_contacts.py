@@ -8,6 +8,9 @@ args={"phone":"09901068051","confirm":False,"dry_run":True}
 for attempt in range(12):
     try:
         preview=tool("set_two_city_heat_contact",args)
+        target_ids={x["id"] for x in preview.get("sample",[]) if x["type"]=="brand_article"}
+        if not {97,98}.issubset(target_ids):
+            raise RuntimeError("Deployed code has not picked up two legacy پکیچ records")
         break
     except Exception as exc:
         print("MCP_SCOPED_TOOL_NOT_READY",attempt+1,type(exc).__name__,str(exc)[:220],flush=True)
