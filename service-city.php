@@ -28,6 +28,12 @@ $serviceSlug = !empty($serviceSlug) ? $serviceSlug : (isset($_GET['service']) ? 
 $citySlug = !empty($city['slug']) ? $city['slug'] : (isset($_GET['city']) ? $_GET['city'] : 'tehran');
 $aloThreeCityContact = in_array((string)$citySlug, ['hashtgerd','nazarabad','abyek','abik'], true) ? '09371141762' : '09933493049';
 $aloThreeCitySchemaContact = in_array((string)$citySlug, ['hashtgerd','nazarabad','abyek','abik'], true) ? '+989371141762' : '+989123456789';
+// Regional heat appliance contact; unrelated cities and services stay unchanged.
+if (in_array((string)$citySlug, ['chalus', 'nowshahr'], true)
+    && in_array((string)$serviceSlug, ['package', 'boiler', 'oven', 'gas', 'gaz'], true)) {
+    $aloThreeCityContact = '09901068051';
+    $aloThreeCitySchemaContact = '+989901068051';
+}
 
 // ===== دریافت اطلاعات شهر =====
 if (empty($city) && !empty($citySlug)) {
@@ -1154,7 +1160,7 @@ $ogImage = "https://alotamiratchi.ir/assets/images/logo.png";
             }
         ],
         "sameAs": [
-            "<?= $aloThreeCityContact === '09371141762' ? 'https://wa.me/989371141762' : 'https://wa.me/989123456789' ?>",
+            "<?= 'https://wa.me/98' . ltrim($aloThreeCityContact, '0') ?>",
             "https://www.instagram.com/alotamiratchi"
         ],
         "image": "<?= $ogImage ?>"
@@ -1222,7 +1228,7 @@ $ogImage = "https://alotamiratchi.ir/assets/images/logo.png";
                 "name": "چگونه درخواست تعمیرات <?= $serviceName ?> در <?= htmlspecialchars($city['name']) ?> ثبت کنم؟",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "برای ثبت درخواست تعمیرات <?= $serviceName ?> در <?= htmlspecialchars($city['name']) ?>، با شماره <?= $aloThreeCityContact === '09371141762' ? '۰۹۳۷۱۱۴۱۷۶۲' : '۰۹۱۲-۳۴۵-۶۷۸۹' ?> تماس بگیرید یا از طریق واتساپ پیام دهید."
+                    "text": "برای ثبت درخواست تعمیرات <?= $serviceName ?> در <?= htmlspecialchars($city['name']) ?>، با شماره <?= htmlspecialchars($aloThreeCityContact, ENT_QUOTES, 'UTF-8') ?> تماس بگیرید یا از طریق واتساپ پیام دهید."
                 }
             }
         ]
@@ -1414,7 +1420,7 @@ $ogImage = "https://alotamiratchi.ir/assets/images/logo.png";
                 <a href="tel:<?= htmlspecialchars($aloThreeCityContact, ENT_QUOTES, 'UTF-8') ?>" style="color: #facc15; text-decoration: none; transition: 0.3s;" 
                    onmouseover="this.style.color='#ffffff'" 
                    onmouseout="this.style.color='#facc15'">
-                    <?= $aloThreeCityContact === '09371141762' ? '09371141762' : '0993-349-3049' ?>
+                    <?= htmlspecialchars($aloThreeCityContact, ENT_QUOTES, 'UTF-8') ?>
                 </a>
             </div>
             <div style="font-size: 0.65rem; color: #64748b; margin-top: 2px;">
