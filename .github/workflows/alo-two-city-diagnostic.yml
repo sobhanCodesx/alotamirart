@@ -1,0 +1,19 @@
+name: Inspect two-city appliance articles
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-two-city-diagnostic.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Read live MCP article inventory
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: python3 scripts/inspect_two_city_contacts_20261107.py
