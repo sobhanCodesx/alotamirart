@@ -1,4 +1,4 @@
-name: Update Chalus Nowshahr Package and Gas Stove Contacts
+name: Correct all Chalus Nowshahr Package and Gas Stove Contacts including legacy typos
 on:
   push:
     branches: [main]
