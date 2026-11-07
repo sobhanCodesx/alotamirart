@@ -1,0 +1,20 @@
+name: Update Chalus Nowshahr Package and Gas Stove Contacts
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/alo-two-city-heat-contact.yml'
+permissions:
+  contents: read
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Wait for deployed MCP and update scoped records
+        env:
+          MCP_API_TOKEN: ${{ secrets.MCP_API_TOKEN }}
+        run: python3 scripts/update_chalus_nowshahr_heat_contacts.py
