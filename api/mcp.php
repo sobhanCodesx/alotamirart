@@ -71,6 +71,7 @@ require_once __DIR__ . '/site-graph.php';
 require_once __DIR__ . '/city-contact.php';
 require_once __DIR__ . '/north-cities-contact.php';
 require_once __DIR__ . '/two-city-heat-contact.php';
+require_once __DIR__ . '/eight-gilan-city-contacts.php';
 require_once __DIR__ . '/profile-contact-96.php';
 require_once __DIR__ . '/refrigerator-links.php';
 
@@ -90,9 +91,10 @@ function mcpTools(): array {
         ['name' => 'create_article_draft', 'description' => 'Create an unpublished draft; never publishes immediately.', 'inputSchema' => ['type' => 'object', 'properties' => $fields, 'required' => ['title', 'content', 'post_id']]],
         ['name' => 'update_article_draft', 'description' => 'Edit an existing UNPUBLISHED draft only.', 'inputSchema' => ['type' => 'object', 'properties' => array_merge(['id' => ['type' => 'integer', 'minimum' => 1]], $fields), 'required' => ['id']]],
         ['name' => 'publish_article', 'description' => 'Explicitly publish a draft ONLY after user approval; requires MCP_ALLOW_PUBLISH=1.', 'inputSchema' => ['type' => 'object', 'properties' => ['id' => ['type' => 'integer', 'minimum' => 1], 'confirm' => ['type' => 'boolean', 'const' => true]], 'required' => ['id', 'confirm']]],
-    ], aloContentTools(), aloGraphTools(), [aloCityContactTool(), aloShahrekordContactTool(), aloNorthContactTool(), aloTwoCityHeatTool(), aloRefrigeratorLinkTool(), aloProfilePhoneTool()]);
+    ], aloContentTools(), aloGraphTools(), [aloCityContactTool(), aloShahrekordContactTool(), aloNorthContactTool(), aloTwoCityHeatTool(), aloEightCityTool(), aloRefrigeratorLinkTool(), aloProfilePhoneTool()]);
 }
 function mcpExecute(string $name, array $a): array {
+    if ($name === 'set_eight_gilan_city_contacts') return aloEightCityExecute($a);
     if ($name === 'set_two_city_heat_contact') return aloTwoCityHeatExecute($a);
     if ($name === 'set_north_cities_operator_contact') return aloNorthContactExecute($a);
     if ($name === 'set_shahrekord_contact_numbers') return aloShahrekordContactExecute($a);
