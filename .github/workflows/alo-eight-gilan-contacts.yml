@@ -1,4 +1,4 @@
-name: Apply requested eight-city Gilan contacts
+name: Apply requested eight-city Gilan contacts after deploy
 on:
   push:
     branches: [main]
