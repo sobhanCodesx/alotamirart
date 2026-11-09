@@ -9,7 +9,7 @@ if (!function_exists('alo_chalus_nowshahr_heat_contact')) {
         return $city === 1 && $service === 1;
     }
 }
-require_once BASE_PATH . '/api/eight-gilan-city-contacts.php';
+require_once dirname(__DIR__, 3) . '/api/eight-gilan-city-contacts.php';
 /** Choose a per-article contact number before the article author's profile number. */
 if (!function_exists('alo_article_contact')) {
     function alo_article_contact(array $post, array $user = []): array
