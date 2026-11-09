@@ -9,12 +9,13 @@ if (!function_exists('alo_chalus_nowshahr_heat_contact')) {
         return $city === 1 && $service === 1;
     }
 }
+require_once BASE_PATH . '/api/eight-gilan-city-contacts.php';
 /** Choose a per-article contact number before the article author's profile number. */
 if (!function_exists('alo_article_contact')) {
     function alo_article_contact(array $post, array $user = []): array
     {
-        $custom = alo_chalus_nowshahr_heat_contact((string)($post['title'] ?? ''))
-            ? '09901068051' : trim((string) ($post['contact_number'] ?? ''));
+        $custom = aloEightCityMatch((string)($post['title'] ?? '')) ? '09108731535' : (alo_chalus_nowshahr_heat_contact((string)($post['title'] ?? ''))
+            ? '09901068051' : trim((string) ($post['contact_number'] ?? '')));
         $author = trim((string) ($user['phon'] ?? ''));
         $number = $custom !== '' ? $custom : $author;
         $ascii = strtr($number, [
