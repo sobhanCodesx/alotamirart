@@ -27,6 +27,10 @@ if ($found && alo_chalus_nowshahr_heat_contact((string)($post['title'] ?? ''))) 
     $contact = '09901068051';
     $contactLabel = 'تماس مستقیم این مطلب';
 }
+if ($found && aloEightCityMatch((string)($post['title'] ?? ''))) {
+    $contact = '09108731535';
+    $contactLabel = 'تماس مستقیم این مطلب';
+}
 $contactHref = $contact !== '' ? preg_replace('/[^\d+]/','',$contact) : '';
 $canonicalBrandSlug = $found ? trim((string)($post['slug'] ?? ''), '/') : '';
 ?>
