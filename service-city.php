@@ -28,6 +28,12 @@ $serviceSlug = !empty($serviceSlug) ? $serviceSlug : (isset($_GET['service']) ? 
 $citySlug = !empty($city['slug']) ? $city['slug'] : (isset($_GET['city']) ? $_GET['city'] : 'tehran');
 $aloThreeCityContact = in_array((string)$citySlug, ['hashtgerd','nazarabad','abyek','abik'], true) ? '09371141762' : '09933493049';
 $aloThreeCitySchemaContact = in_array((string)$citySlug, ['hashtgerd','nazarabad','abyek','abik'], true) ? '+989371141762' : '+989123456789';
+$aloGilanCitySlugs = ['chamkhaleh','chamkhale','langarud','langroud','fuman','fouman','sowmehsara','somehsara','somelsara','rasht','lahijan','astaneh-ashrafiyeh','astaneh','amlash'];
+if (in_array((string)$citySlug, $aloGilanCitySlugs, true)) {
+    $aloThreeCityContact = '09108731535';
+    $aloThreeCitySchemaContact = '+989108731535';
+}
+
 // Regional heat appliance contact; unrelated cities and services stay unchanged.
 if (in_array((string)$citySlug, ['chalus', 'nowshahr'], true)
     && in_array((string)$serviceSlug, ['package', 'boiler', 'oven', 'gas', 'gaz'], true)) {
