@@ -18,6 +18,10 @@ RewriteRule ^ https://alotamiratchi.ir%{REQUEST_URI} [R=301,L,NE]
 RewriteCond %{HTTPS} off
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+# Preserve backlinks when article 536 moves to its concise canonical URL.
+# QSD deliberately drops utm and other tracking parameters from the old address.
+RewriteRule ^samsung-refrigerator-repair-kashan/536/?$ https://alotamiratchi.ir/samsung-fridge-kashan/536 [R=301,L,NE,QSD]
+
 # Real files and directories (assets, uploads, robots.txt, etc.) are served directly.
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
