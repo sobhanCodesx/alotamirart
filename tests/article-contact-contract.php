@@ -22,4 +22,9 @@ checkContact(strpos($source, "alo_article_contact(") !== false, 'Article templat
 checkContact(substr_count($source, 'htmlspecialchars($contactPhone,ENT_QUOTES') === 2, 'Inline card and sidebar show the selected phone');
 checkContact(substr_count($source, 'htmlspecialchars($contactPhoneHref,ENT_QUOTES') === 3, 'Inline card, sidebar, mobile call links use the selected phone');
 checkContact(strpos($source, '$authorPhoneHref') === false, 'Never use author-only tel link in article');
+require_once $root . '/app/Support/ramsar-tonekabon-contact.php';
+checkContact(aloRamsarTonekabonPost(['title' => 'تعمیر یخچال در تنکابن']), 'Tonekabon article');
+checkContact(aloRamsarTonekabonPost(['slug' => 'repair-ramsar']), 'Ramsar brand');
+checkContact(!aloRamsarTonekabonPost(['title' => 'تعمیر یخچال در رشت']), 'Other city');
+checkContact(aloRegionalContactText('<a href="tel:09123456789">۰۹۱۲۳۴۵۶۷۸۹</a>') === '<a href="tel:09960274770">09960274770</a>', 'Public number and call link agree');
 echo "Article contact contract passed\n";
