@@ -1,5 +1,7 @@
 <?php
 $cityName=isset($city['name'])?(string)$city['name']:'';$citySlug=isset($city['slug'])?(string)$city['slug']:'';
+require_once BASE_PATH . '/app/Support/ramsar-tonekabon-contact.php';
+if (aloRamsarTonekabonCity($city)) $dataFooter['phon'] = ALO_WEST_MAZANDARAN_PHONE;
 $services=[['slug'=>'refrigerator','icon'=>'🧊','title'=>'تعمیر یخچال','desc'=>'عیب‌یابی و تعمیر انواع یخچال و ساید'],['slug'=>'washing-machine','icon'=>'🧺','title'=>'تعمیر لباسشویی','desc'=>'تعمیر تخصصی ماشین لباسشویی در محل'],['slug'=>'air-conditioner','icon'=>'❄️','title'=>'تعمیر کولر گازی','desc'=>'سرویس و تعمیر سیستم‌های سرمایشی'],['slug'=>'tv','icon'=>'📺','title'=>'تعمیر تلویزیون','desc'=>'بررسی و تعمیر انواع تلویزیون'],['slug'=>'oven','icon'=>'🔥','title'=>'تعمیر اجاق گاز','desc'=>'رفع ایراد اجاق گاز و تجهیزات پخت'],['slug'=>'dishwasher','icon'=>'🍽️','title'=>'تعمیر ظرفشویی','desc'=>'تعمیر و سرویس ماشین ظرفشویی']];
 $phone=isset($dataFooter['phon'])?strip_tags((string)$dataFooter['phon']):'';if(in_array($citySlug,['hashtgerd','nazarabad','abyek','abik'],true))$phone='09371141762';$phoneHref=preg_replace('/[^\d+]/','',$phone);
 ?>

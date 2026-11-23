@@ -1,5 +1,13 @@
 <?php
 $found = isset($err) && $err === true && !empty($post);
+require_once BASE_PATH . '/app/Support/ramsar-tonekabon-contact.php';
+if ($found && aloRamsarTonekabonPost($post)) {
+    $post['contact_number'] = ALO_WEST_MAZANDARAN_PHONE;
+    $dataFooter['phon'] = ALO_WEST_MAZANDARAN_PHONE;
+    foreach (['content', 'description', 'des'] as $field) {
+        if (isset($post[$field])) $post[$field] = aloRegionalContactText((string)$post[$field]);
+    }
+}
 $title = $found && isset($post['title']) ? clean_display_text($post['title']) : 'مطلب یافت نشد';
 $description = $found ? clean_display_text(isset($post['des'])?$post['des']:(isset($post['description'])?$post['description']:'')) : '';
 $brandName = $found && isset($post['namebrand']) ? clean_display_text($post['namebrand']) : 'برند';

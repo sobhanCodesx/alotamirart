@@ -41,6 +41,11 @@ if (in_array((string)$citySlug, ['chalus', 'nowshahr'], true)
     $aloThreeCitySchemaContact = '+989901068051';
 }
 
+require_once BASE_PATH . '/app/Support/ramsar-tonekabon-contact.php';
+if (aloRamsarTonekabonCity($city)) {
+    $aloThreeCityContact = ALO_WEST_MAZANDARAN_PHONE;
+    $aloThreeCitySchemaContact = '+98' . substr($aloThreeCityContact, 1);
+}
 // ===== دریافت اطلاعات شهر =====
 if (empty($city) && !empty($citySlug)) {
     $stmt = $db->prepare("SELECT * FROM cities WHERE slug = ? AND status = 1");
