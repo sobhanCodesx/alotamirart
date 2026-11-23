@@ -5,7 +5,7 @@ const ALO_WEST_MAZANDARAN_PHONE = '09960274770';
 
 function aloRamsarTonekabonCity(array $city): bool
 {
-    return in_array($city['slug'] ?? '', ['ramsar', 'tonekabon'], true)
+    return in_array($city['slug'] ?? '', ['ramsar', 'tonkabon', 'tonekabon'], true)
         || in_array(trim(str_replace('ك', 'ک', (string)($city['name'] ?? ''))), ['رامسر', 'تنکابن'], true);
 }
 
@@ -13,7 +13,7 @@ function aloRamsarTonekabonPost(array $post): bool
 {
     $title = str_replace('ك', 'ک', strip_tags((string)($post['title'] ?? '')));
     return preg_match('/(?<![\p{L}\p{N}])(?:تنکابن|رامسر)(?![\p{L}\p{N}])/u', $title) === 1
-        || preg_match('/(?:^|[-_])(?:ramsar|tonekabon)(?:$|[-_])/i', (string)($post['slug'] ?? '')) === 1;
+        || preg_match('/(?:^|[-_])(?:ramsar|tonkabon|tonekabon)(?:$|[-_])/i', (string)($post['slug'] ?? '')) === 1;
 }
 
 function aloRegionalContactText(string $html): string
